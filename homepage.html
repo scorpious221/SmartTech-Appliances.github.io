@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartTech Appliances</title>
+
+  <style>
+ 
+     /* Centered text on the banner */
+    .banner-content {
+      position: relative;
+      text-align: center;
+      color: white;
+      padding: 30px;
+      z-index: 1;
+    }
+
+    /* Company Name text */
+    .banner-content h1 {
+      font-size: 56px;
+      font-weight: bold;
+      margin: 0;
+      line-height: 1.1;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Tagline below company name */
+    .tagline {
+      font-style: italic;
+      font-size: 18px;
+      color: #f0f0f0;
+      margin-top: 10px;
+    }
+
+    /* About Us  */
+    .about-link {
+      display: inline-block;
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 18px;
+      margin-top: 20px;
+      transition: 0.3s;
+    }
+
+    .about-link:hover {
+      text-decoration: underline;
+    }
+
+    /*  NAVIGATION SECTION (3 clickable boxes below banner) */
+    .navigation {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      background-color: #fff;
+      padding: 40px 0;
+      border-top: 4px solid #ccc;
+      border-bottom: 4px solid #ccc;
+    }
+
+    /* Each navigation item (Company, Products, Services) */
+    .nav-item {
+      font-size: 26px;
+      color: #222;
+      text-decoration: none;
+      text-align: center;
+      line-height: 1.3;
+      border-bottom: 3px solid transparent;
+      transition: 0.3s;
+      font-style: italic;
+      font-weight: bold;
+    }
+
+    .nav-item:hover {
+      border-bottom: 3px solid #555;
+    }
+
+  </style>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    .banner-content h1 {
+        letter-spacing: 2px; 
+                       }
+  </style>
+
+</head>
+
+<body style="background-color:#e6e6e6;">
+
+  <!-- HEADER -->
+  <header>
+   <a href="homepage.html">
+    <img src="logo.jpg" alt="SmartTech Appliances Logo" class="logo">
+    </a>
+  </header>
+
+  <!--  BANNER -->
+  <section class="banner">
+    <div class="banner-content">
+      <h1>SmartTech<br>Appliances</h1>
+      <p class="tagline">"Where Innovation Meets Everyday Living."</p>
+      <a href="aboutus.html" class="about-link">About Us</a>
+    </div>
+  </section>
+
+  <!-- NAVIGATION SECTION (3 clickable boxes)  -->
+  <section class="navigation">
+    <a href="companybg.html" class="nav-item">Company<br>Background</a>
+    <a href="products.html" class="nav-item">Products<br>Sold</a>
+    <a href="#" class="nav-item">Services<br>Offered</a>
+  </section>
+
+  <!--  FOOTER SECTION  -->
+  <footer>
+    © 2025 SmartTech Appliances. All rights reserved.
+  </footer>
+
+</body>
+
+</html>

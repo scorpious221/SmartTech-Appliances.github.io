@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In / Log In</title>
+
+  <style>
+  body { 
+   font-family: Arial, sans-serif;
+   background-color: #f0f8ff; 
+   display: flex; 
+   justify-content: center; 
+   align-items: center;
+    height: 100vh;
+   }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      width: 350px;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 90%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    button {
+      width: 95%;
+      padding: 10px;
+      margin-top: 10px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .switch {
+      color: #007bff;
+      cursor: pointer;
+    }
+
+    #message {
+      margin-top: 10px;
+      color: red;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+<div class="container"> 
+<!-- Sign In Form -->
+  <div id="signInForm">
+  <h2>Sign In</h2>
+ <input type="email" id="gmail" placeholder="Enter Gmail" 
+required><br> 
+<input type="text" id="signInUsername" placeholder="Create
+ Username" required><br>
+ <input type="password" id="signInPassword" placeholder="Create
+ Password" required><br> 
+     <button onclick="signIn()">Sign In</button> 
+     <p>Already have an account? <span class="switch"
+     onclick="showLogin()">Log In</span></p> 
+  </div>
+
+    <!-- Log In Form -->
+    <div id="loginForm" class="hidden">
+      <h2>Log In</h2>
+      <input type="text" id="loginUsername" placeholder="Username" required><br>
+      <input type="password" id="loginPassword" placeholder="Password" required><br>
+      <button onclick="logIn()">Log In</button>
+      <p>Don't have an account? <span class="switch" onclick="showSignIn()">Sign In</span></p>
+    </div>
+
+    <p id="message"></p>
+  </div>
+
+  <script>
+    // ===== SIGN IN FUNCTION (GMAIL ONLY) =====
+    function signIn() {
+      const gmail = document.getElementById("gmail").value.trim();
+      const username = document.getElementById("signInUsername").value.trim();
+      const password = document.getElementById("signInPassword").value.trim();
+
+      // Empty field validation
+      if (!gmail || !username || !password) {
+        alert("Please fill in all fields.");
+        return;
+      }
+
+      // ✅ Gmail must end with "@gmail.com"
+      if (!gmail.endsWith("@gmail.com")) {
+        alert("Please enter a valid Gmail address (must end with @gmail.com).");
+        return;
+      }
+
+      // Check if username already exists
+      if (localStorage.getItem(username)) {
+        document.getElementById("message").innerText = "Username already exists!";
+        return;
+      }
+
+      // Save account in localStorage
+      localStorage.setItem(username, JSON.stringify({ gmail, password }));
+      alert("Account created successfully! You can now log in.");
+      showLogin();
+    }
+
+    // ===== LOG IN FUNCTION =====
+    function logIn() {
+      const username = document.getElementById("loginUsername").value.trim();
+      const password = document.getElementById("loginPassword").value.trim();
+      const storedUser = localStorage.getItem(username);
+
+      if (!storedUser) {
+        document.getElementById("message").innerText = "Username not found.";
+        return;
+      }
+
+      const user = JSON.parse(storedUser);
+      if (user.password === password) {
+        alert(`Welcome back, ${username}!`);
+        // ✅ Redirect to SmartTech homepage
+        window.location.href = "homepage.html";
+      } else {
+        document.getElementById("message").innerText = "Incorrect password.";
+      }
+    }
+
+    // ===== SWITCH FORMS =====
+    function showLogin() {
+      document.getElementById("signInForm").classList.add("hidden");
+      document.getElementById("loginForm").classList.remove("hidden");
+      document.getElementById("message").innerText = "";
+    }
+
+    function showSignIn() {
+      document.getElementById("loginForm").classList.add("hidden");
+      document.getElementById("signInForm").classList.remove("hidden");
+      document.getElementById("message").innerText = "";
+    }
+  </script>
+</body>
+</html>

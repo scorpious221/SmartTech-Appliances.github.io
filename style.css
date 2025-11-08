@@ -1,0 +1,102 @@
+/*  GLOBAL / SHARED STYLES */
+  
+html {
+scroll-behavior:smooth;
+ }
+
+body {
+  background-color: #e6e6e6;
+  font-family: 'Georgia', serif;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  display: flex;
+  align-items: center;     
+  justify-content: space-between;
+  background-color: #999;
+  padding: 10px 30px;
+}
+
+.home-btn {
+  background-color: #444;
+  color: white;
+  font-weight: bold;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.brand {
+  text-align: right;
+}
+
+.brand h2 {
+  margin: 0;
+  font-size: 26px;
+  color: #111;
+}
+
+.brand p {
+  margin: 0;
+  font-style: italic;
+  font-size: 13px;
+  color: #222;
+}
+
+footer {
+  background-color: #999;
+  color: white;
+  text-align: center;
+  padding: 10px 0;
+  font-size: 13px;
+}
+
+/*  BANNER & TITLE SECTIONS */
+.banner, .title {
+  position: relative;
+  background-image: url("https://images.unsplash.com/photo-1615874959474-d609969a20ed?auto=format&fit=crop&w=1400&q=80");
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-top: 8px solid #999;
+  border-bottom: 8px solid #999;
+}
+
+.banner h1, .title h1 {
+  font-size: 56px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+  z-index: 1;
+}
+
+.logo {
+  height: 80px;           
+  width: auto;
+  padding: 6px;            
+  background-color: white; 
+  border-radius: 10px;    
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2); 
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Add hover effect for interactivity */
+.logo:hover {
+  transform: scale(1.08); 
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+@media (max-width: 768px) {
+  .logo {
+    height: 50px;     
+  }
+
+
