@@ -78,14 +78,12 @@ footer {
 }
 
 .logo {
-  height: 80px;           
+  height: 90px;           
   width: auto;
   padding: 6px;            
-  background-color: white; 
   border-radius: 10px;    
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2); 
   cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.3s;
 }
 
 /* Add hover effect for interactivity */
@@ -98,5 +96,5 @@ footer {
   .logo {
     height: 50px;     
   }
-
+}
 
