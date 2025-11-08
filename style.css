@@ -19,18 +19,6 @@ header {
   padding: 10px 30px;
 }
 
-.home-btn {
-  background-color: #444;
-  color: white;
-  font-weight: bold;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  text-decoration: none;
-}
-
 .brand {
   text-align: right;
 }
@@ -82,11 +70,8 @@ footer {
   height: 90px;           
   width: auto;
   padding: 6px;            
-  background-color: white; 
-  border-radius: 10px;    
   box-shadow: 0 2px 5px rgba(0,0,0,0.2); 
   cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
   transition: transform 0.3s;
 }
 
