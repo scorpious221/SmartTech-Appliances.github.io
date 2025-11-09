@@ -69,8 +69,8 @@ footer {
   height: 80px;           
   height: 90px;           
   width: auto;
-  padding: 6px;            
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2); 
+  padding: 6px;     
+  border-radius: 10px;
   cursor: pointer;
   transition: transform 0.3s;
 }
@@ -81,9 +81,3 @@ footer {
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
-@media (max-width: 768px) {
-  .logo {
-    height: 50px;     
-  }
-
-}
