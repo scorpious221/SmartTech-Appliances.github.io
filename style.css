@@ -19,6 +19,7 @@ header {
   padding: 10px 30px;
 }
 
+
 .brand {
   text-align: right;
 }
@@ -69,9 +70,9 @@ footer {
   height: 80px;           
   height: 90px;           
   width: auto;
-  padding: 6px;     
-  border-radius: 10px;
+  padding: 6px;            
   cursor: pointer;
+  border-radius: 10px;
   transition: transform 0.3s;
 }
 
@@ -81,3 +82,94 @@ footer {
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
+
+/* mobile friendly design */
+@media (max-width: 768px) {
+
+  /* General layout for all pages */
+  body {
+    font-size: 15px;
+    padding: 0;
+    margin: 0;
+  }
+
+  header {
+    flex-direction: column;
+    text-align: center;
+    padding: 12px;
+  }
+
+  .logo {
+    width: 80px;
+    height: auto;
+    margin-bottom: 8px;
+  }
+
+  footer {
+    text-align: center;
+    font-size: 13px;
+    padding: 10px;
+  }
+
+  /* Homepage adjustments */
+  .banner-content h1 {
+    font-size: 34px;
+  }
+
+  .navigation {
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px;
+  }
+
+  .nav-item {
+    font-size: 20px;
+  }
+
+  /* About Us / Company Background page */
+  .main {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .left, .right {
+    width: 100%;
+    border: none;
+  }
+
+  .left img {
+    height: 220px;
+  }
+
+  .right {
+    padding: 20px;
+  }
+
+  /* Products page */
+  .top-cats {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .cat-box {
+    width: 90%;
+  }
+
+  .product-grid {
+    grid-template-columns: 1fr 1fr; /* 2 columns on phones */
+  }
+
+  .product-card {
+    font-size: 14px;
+  }
+
+  .cart-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .payment-inner {
+    padding: 10px;
+  }
+}
