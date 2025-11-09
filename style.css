@@ -44,8 +44,8 @@ footer {
   font-size: 13px;
 }
 
-/*  BANNER & TITLE SECTIONS */
-.banner, .title {
+/*  BANNER  */
+.banner {
   position: relative;
   background-image: url("https://images.unsplash.com/photo-1615874959474-d609969a20ed?auto=format&fit=crop&w=1400&q=80");
   background-size: cover;
@@ -57,7 +57,7 @@ footer {
   border-bottom: 8px solid #999;
 }
 
-.banner h1, .title h1 {
+.banner h1 {
   font-size: 56px;
   font-weight: bold;
   color: white;
