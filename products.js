@@ -2,8 +2,20 @@
 /* Each product: { id, name, price, img, category, sub } */
 const PRODUCTS = [
   // Household -> Security Devices
-  {id:'smoke', name:'Smoke Detector', price:2500, img:'images/smokedetector.JPG', category:'household', sub:'Security Devices'},
-  {id:'motion', name:'Motion Sensor', price:5330, img:'images/motionsensor.jpg', category:'household', sub:'Security Devices'},
+  {id:'smoke', name:'Smoke Detector', price:2500, img:'images/smokedetector.JPG', category:'household', sub:'Security Devices', desc:`A smoke detector is a safety device that senses smoke and sounds an alarm to warn of a potential fire.
+  <br><br><strong>Features:</strong><br>
+  • Reliable fire detection<br>
+  • Easy ceiling installation<br>
+  • Loud 84dB alarm<br>
+  • Long battery life (up to 10 years)<br>
+  • Operates effectively from 10°C–50°C.`},
+  {id:'motion', name:'Motion Sensor', price:5330, img:'images/motionsensor.jpg', category:'household', sub:'Security Devices', desc:`The sensor is suitable for home lighting, indoor and outdoor lighting fixtures. It can be adjusted to be used all day or at night. When someone enters the sensing range of the switch, the sensor detects changes in the infrared spectrum of the human body, and the switch automatically switches on the load. The light turns on when the person arrives, and the light turns off when the person leaves. It is friendly, convenient, safe, and energy-saving.
+<br><br><strong>FEATURES:</strong><br>
+Stable performance, intelligent light control, delayed shutdown<br>
+High sensitivity, 360 °full range detection without blind spots<br>
+Ceiling mounted, bottom bracket design, quick wiring for easy installation and disassembly<br>
+Fireproof and flame-retardant material: effectively preventing fire hazards, not deformed, not easily oxidized, safe, durable, and durable<br>
+Wide application range: can be used for switch control of lighting fixtures in various buildings, such as stairs, corridors, restrooms, school communities, etc.`},
   {id:'doorknob', name:'Smart Doorknob', price:10350, img:'images/smartdoorknob.jpg', category:'household', sub:'Security Devices'},
   {id:'doorbell', name:'Video Doorbell', price:13500, img:'images/vidbell.jpg', category:'household', sub:'Security Devices'},
   {id:'cctv', name:'CCTV Camera', price:8900, img:'images/cctv.jpg', category:'household', sub:'Security Devices'},
@@ -124,10 +136,11 @@ function renderProducts(){
       <div class="product-name">${p.name}</div>
       <div class="product-price">₱${p.price.toLocaleString()}</div>
       <div style="color:var(--muted); font-size:13px; margin-bottom:8px;">${p.sub}</div>
-      <div class="product-actions">
-        <button class="btn-add" onclick="addToCart('${p.id}')">Add to Cart</button>
-        <button class="btn-buy" onclick="buyNow('${p.id}')">Buy Now</button>
-      </div>
+<div class="product-actions">
+  <button class="btn-add" onclick="addToCart('${p.id}')">Add to Cart</button>
+  <button class="btn-buy" onclick="buyNow('${p.id}')">Buy Now</button>
+  <button class="btn-view" onclick="showDetails('${p.id}')">View Details</button>
+</div>
     `;
     grid.appendChild(card);
   });
@@ -295,4 +308,33 @@ document.querySelectorAll('.cat-box').forEach(box=>{
   });
 });
 
+function showDetails(id) {
+  const p = PRODUCTS.find(pr => pr.id === id);
+  if (!p) return;
+
+  const desc = p.desc;
+  document.getElementById('descContent').innerHTML = `
+    <img src="${p.img}" alt="${p.name}">
+    <h2>${p.name}</h2>
+    <p><strong>₱${p.price.toLocaleString()}</strong></p>
+    <p style="color:#555;">${p.sub}</p>
+    <div style="text-align:left; margin:10px auto; max-width:600px;">${desc}</div>
+    <div style="margin-top:15px;">
+      <button class="btn-add" onclick="addToCart('${p.id}')">Add to Cart</button>
+      <button class="btn-buy" onclick="buyNow('${p.id}')">Buy Now</button>
+    </div>
+  `;
+
+  document.getElementById('descOverlay').style.display = 'flex';
+}
+
+function closeOverlay() {
+  document.getElementById('descOverlay').style.display = 'none';
+}
+
+/* Optional: close when clicking outside the content */
+window.addEventListener('click', e => {
+  const overlay = document.getElementById('descOverlay');
+  if (e.target === overlay) closeOverlay();
+});
 window.addEventListener('load', init);
