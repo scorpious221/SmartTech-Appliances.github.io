@@ -11,19 +11,8 @@
     --accent-2:#444;
     --muted:#888;
     --card-bg:#fff;
-    --page-bg:#e6e6e6;
+    --page-bg:#acbbaa;
   }
-
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #999;  
-  padding: 10px 20px;
-  position: sticky;
-  top: 0;
-  z-index: 300;
-}
 
 .header-left {
   display: flex;
@@ -33,7 +22,7 @@ header {
 
 
 .cart-btn {
-  background: #28a745; /* green */
+  background: #28a745; 
   color: #fff;
   padding: 8px 12px;
   border-radius: 6px;
@@ -46,7 +35,7 @@ header {
   /* container box for content */
   .container { max-width:1200px; margin:24px auto; padding:0 16px; }
 
-  /* big category boxes (now placed below the PRODUCTS banner) */
+  /* big category boxes  */
   .top-cats {
     display:flex;
     gap:18px;
@@ -56,24 +45,25 @@ header {
     margin-bottom:18px;
   }
   .cat-box {
-    border:3px solid #111;
-    background:#fff;
+    color: white;
+    background:#90a68d;
     padding:16px 22px;
     font-weight:bold;
+    text-decoration: underline;
     cursor:pointer;
-    border-radius:6px;
+    border-radius:20px;
     min-width:200px;
     text-align:center;
     box-shadow: 0 2px 0 rgba(0,0,0,0.05);
   }
-  .cat-box.active { background:#f7f7f7; box-shadow: 0 6px 20px rgba(0,0,0,0.08); transform:translateY(-2px); }
+  .cat-box.active { background:#d4dcd3; box-shadow: 0 6px 20px rgba(0,0,0,0.08); transform:translateY(-2px); }
 
   /* subcategory buttons */
   .subcats { display:flex; gap:12px; flex-wrap:wrap; margin:12px 0 18px; }
   .subcat-btn {
-    border:3px solid #111; background:#fff; padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:bold;
+    border:3px solid #111; background:#acbbaa; padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:bold;
   }
-  .subcat-btn.active { background:#f0f0f0; transform:translateY(-2px); }
+  .subcat-btn.active { background:#d4dcd3; transform:translateY(-2px); }
 
   /* product grid (cards) */
   .product-grid {
@@ -129,12 +119,12 @@ header {
    }
   
  .btn-add  {
-    background:var(--accent); 
+    background:black; 
     color:#fff;
     }
 
   .btn-buy { 
-     background:#ff9800; 
+     background:#acbbaa; 
      color:#000; 
      }
 
@@ -193,7 +183,7 @@ header {
        padding:6px 8px;
        border-radius:6px;
        border:1px solid #ccc;
-       background:#fff; 
+       background:#90a68d; 
        cursor:pointer;
      }
   .remove-btn { 
@@ -221,7 +211,7 @@ header {
      }
  
   .primary { 
-      background:#007bff;
+      background:#90a68d;
       color:#fff;
       border:none;
       padding:10px 16px; 
@@ -231,7 +221,7 @@ header {
       }
 
   .secondary { 
-     background:#6c757d; 
+     background:#acbbaa; 
      color:#fff;
      border:none;
      padding:10px 16px; 
@@ -243,7 +233,7 @@ header {
   /* Payment area */
   #payment { 
       display:none;
-      background:#fafafa;
+      background:#d4dcd3;
       padding:20px;
       border-top:4px solid #ddd;
       margin-top:18px;
@@ -277,7 +267,7 @@ header {
 </style>
 </head>
 
-<body style="background-color:#e6e6e6;">
+<body style="background-color:#d4dcd3">
 
 <header>
   <div class="header-left">
