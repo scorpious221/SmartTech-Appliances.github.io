@@ -1,207 +1,254 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>About Us - SmartTech Appliances</title>
   <link rel="stylesheet" href="style.css">
+
   <style>
- 
-    /* Geolocation */
-    .location {
-      background-color: white;
-      border: 4px solid #8B8B8B;
-      margin: 25px;
-      padding: 30px 0;
-      text-align: center;
+    /*MAIN BACKGROUND */
+    .background {
+      background: url('images/background.jpg') no-repeat center center/cover;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      border-top: 6px solid #9caea0;
+      border-bottom: 6px solid #9caea0;
+      position: relative;
+      color: white;
     }
-    .location h2 {
-      font-size: 32px;
-      margin: 0 0 20px 0;
-      color: #111;
-      font-weight: bold;
-      text-align: center;
+
+    /*  ABOUT US TITLE */
+    .about-title {
+      position: absolute;
+      top: 150px;
+      left: 0;
+      background-color: rgba(156, 174, 160, 0.9);
+      padding: 10px 70px;
+      border-top-right-radius: 10px;
+      border-bottom-right-radius: 10px;
     }
-    .map-container {
-      margin: 0 auto 20px auto;
-      max-width: 600px;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-    .map-container iframe {
-      width: 100%;
-      height: 400px;
-      border: 0;
-    }
-    .location-address {
-      font-size: 16px;
-      color: #333;
+
+    .about-title h1 {
+      font-size: 80px;
       margin: 0;
-      padding: 0 20px;
-      text-align: center;
+      font-weight: bold;
     }
-    .location-address strong {
-      color: #111;
+
+    /* BOTTOM CONTENT BOX */
+    .bottom-box {
+      background-color: #acbbaa80;
+      width: 100%;
+      padding: 40px 50px;
+      box-sizing: border-box;
+      color: black;
+    }
+
+    /*  NAVIGATION BUTTONS */
+    .buttons {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .buttons button {
+      background-color: #90a68d;
+      color: white;
+      border: none;
+      padding: 10px 25px;
+      margin: 0 10px;
       font-size: 18px;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .buttons button:hover,
+    .buttons button.active {
+      background-color: #acbbaa;
+    }
+
+    /*  CONTENT SECTIONS  */
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: white;
+    }
+
+    /* TEAM SECTION  */
+    .team-section {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .team-member {
       text-align: center;
     }
 
-    /* Team section */
-  .team {
-  background-color: #d4dcd3;
-  border: 4px solid #90a68d;
-  margin: 25px;
-  padding: 30px;
-  gap: 20px;
-  display: flex;               
-  flex-wrap: wrap;            
-  justify-content: center;     
-   }
-
-    /* Team member boxes */
-.team-member {                          
-  text-align: center;         
-  transition: transform 0.3s;
-    margin: 10px
-}
-.team-member img {
-  width: 200px;
-  height: 200px;
-  object-fit: cover;        
-  margin-bottom: 8px;
-}
-  .team-member h3 {
-      font-size: 17px;
-      margin: 5px 0;
-      color: #111;
-      text-align:center;
+    .team-member img {
+      width: 150px;
+      height: 150px;
+      border-radius: 8px;
+      object-fit: cover;
     }
 
-  .map-container iframe {
-    height: 300px;
-  }
-  .team-member {
-    width: 90%;
-    max-width: 280px;
-  }
+    .team-member p {
+      font-weight: bold;
+      margin-top: 8px;
+      color: black;
+    }
 
-  .title {
-    height: 250px;
-  }
-  .title h1 {
-    font-size: 46px;
-  }
-  .team, .location {
-    text-align: center;
-  }
+    /*  LOCATION SECTION  */
+    .map-section {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      color: black;
+    }
 
-.contact-form {
-  width: 350px;        
-  margin: 25px;    
-  padding: 15px 25px;
-}
+    .map-section iframe {
+      width: 400px;
+      height: 250px;
+      border: none;
+      border-radius: 10px;
+    }
 
-.contact-form input,
-.contact-form textarea {
-  display: block;
-  width: 100%;
-  margin: 6px 0;
-  padding: 8px;
-  border: 1px solid #2a272b;
-  }
+    /* CONTACT FORM SECTION */
+    .form-section {
+      max-width: 450px;
+      margin: 0 auto;
+    }
 
-.contact-form button {
-  padding: 8px;
-  width: 100%;
-  background: #0d1210;
-  color: #fff;
-  cursor: pointer;
-}
+    .form-section input,
+    .form-section textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0;
+      border: 1px solid #2a272b;
+      border-radius: 5px;
+    }
 
+    .form-section button {
+      width: 100%;
+      padding: 10px;
+      background: #90a68d;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
   </style>
-
 </head>
-<body style="background-color:#e6e6e6;">
 
-  <!-- HEADER -->
+<body>
+
+  <!-- HEADER  -->
   <header>
-   <a href="homepage.html">
-    <img src="images/logo.jpg" alt="SmartTech Appliances Logo" class="logo">
+    <a href="homepage.html">
+      <img src="images/logo.jpg" alt="SmartTech Appliances Logo" class="logo">
     </a>
     <div>
-      <h2 style="margin:0;">SmartTech Appliances</h2>
-      <small class="tagline">"Where Innovation Meets Everyday Living."</small>
+      <h2 style="margin:0; font-size:28px; font-weight:bold;, color: white;">SmartTech Appliances</h2>
+      <p style="margin:0; font-style:italic; font-size:14px;, color: white;">"Where Innovation Meets Everyday Living."</p>
     </div>
-  </div>
-
   </header>
 
-  <!-- Title -->
-  <section class="title">
-    <h1>About Us</h1>
+  <!--  MAIN ABOUT SECTION  -->
+  <section class="background">
+    <div class="about-title">
+      <h1>About Us</h1>
+    </div>
+
+    <!--BOTTOM TINTED BOX -->
+    <div class="bottom-box">
+      <div class="buttons">
+        <button class="active" onclick="switchTab('team', this)">Our Team</button>
+        <button onclick="switchTab('location', this)">Our Location</button>
+        <button onclick="switchTab('contact', this)">Contact Us</button>
+      </div>
+
+      <!-- TEAM -->
+      <div id="team" class="tab-content active">
+        <h2 class="section-title">Our Team</h2>
+        <div class="team-section">
+          <div class="team-member">
+            <img src="images/castañeda.jpg" alt="Castañeda">
+            <p>Castañeda, Anicka Felisse L.</p>
+          </div>
+          <div class="team-member">
+            <img src="images/balon.jpg" alt="Balon">
+            <p>Balon, Gabrielle</p>
+          </div>
+          <div class="team-member">
+            <img src="images/de-luna.jpg" alt="De Luna">
+            <p>De Luna, Pauleen M.</p>
+          </div>
+          <div class="team-member">
+            <img src="images/lacatan.jpg" alt="Lacatan">
+            <p>Lacatan, Lara Jessica O.</p>
+          </div>
+          <div class="team-member">
+            <img src="images/santos.jpg" alt="Santos">
+            <p>Santos, Sandra D.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOCATION -->
+      <div id="location" class="tab-content">
+        <h2 class="section-title">Our Location</h2>
+        <div class="map-section">
+          <div>
+            <p><strong>SmartTech Appliances</strong></p>
+            <p>Quezon City, Metro Manila<br>Philippines</p>
+            <p>+63 992 001 1520</p>
+          </div>
+          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3860.5310646720527!2d121.05914151000712!3d14.625768976402338!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b796aecb8763%3A0xaa026ea7350f82e7!2sTechnological%20Institute%20of%20the%20Philippines%20-%20Quezon%20City!5e0!3m2!1sen!2sph!4v1761917559782!5m2!1sen!2sph"
+            allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+      </div>
+
+      <!-- CONTACT -->
+      <div id="contact" class="tab-content">
+        <h2 class="section-title">Contact Us</h2>
+        <form class="form-section">
+          <input type="text" placeholder="Name" required>
+          <input type="email" placeholder="Email" required>
+          <input type="tel" placeholder="Phone number" required>
+          <textarea placeholder="Message" required></textarea>
+          <button>Send</button>
+        </form>
+      </div>
+    </div>
   </section>
-<!-- Team Members -->
-<section class="team">
-  
-<div class="team-member">
-    <img src="images/castañeda.jpg" alt="Castañeda">
-    <p class="name">Castañeda, Anicka Felisse L.</p>
-  </div>
 
-  <div class="team-member">
-    <img src="images/balon.jpg" alt="Balon">
-    <p class="name">Balon, Gabrielle</p>
-  </div>
-
-  <div class="team-member">
-    <img src="images/de-luna.jpg" alt="De Luna">
-    <p class="name">De Luna, Pauleen M.</p>
-  </div>
-
-  <div class="team-member">
-    <img src="images/lacatan.jpg" alt="Lacatan">
-    <p class="name">Lacatan, Lara Jessica O.</p>
-  </div>
-
-  <div class="team-member">
-    <img src="images/santos.jpg" alt="Santos">
-    <p class="name">Santos, Sandra D.</p>
-  </div>
-</section>
-
-  <!-- GeoLocation -->
-  <section class="location">
-    <h2> 📌 Our Location</h2>
-    <div class="map-container">
- <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3860.5310646720527!2d121.05914151000712!3d14.625768976402338!2m3!1f0!2f0!3f0!	     3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b796aecb8763%3A0xaa026ea7350f82e7!2sTechnological%20Institute%20of%20the%20Philippines%20-%	     20Quezon%20City!5e0!3m2!1sen!2sph!4v1761917559782!5m2!1sen!2sph" 
-             width="600" 
-             height="450" 
-             style="border:0;" 
-             allowfullscreen="" loading="lazy" 
-             referrerpolicy="no-referrer-when-downgrade">
-       </iframe>
-
-       </div>
-    <p class="location-address">
-      <strong>SmartTech Appliances</strong><br>
-      Quezon City, Metro Manila <br> Philippines
-      <br> +63 992 001 1520
-    </p>
-  </section>
-    
-<form class="contact-form">
-  <strong>Contact Us</strong>
-  <input type="text" placeholder="Name" required>
-  <input type="email" placeholder="Email" required>
-  <input type="tel" placeholder="Phone number" required>
-  <textarea placeholder="Comment" required></textarea>
-  <button>SEND MESSAGE</button>
-</form>
-
-  <!-- Footer -->
+  <!-- FOOTER  -->
   <footer>
     © 2025 SmartTech Appliances. All rights reserved.
   </footer>
+
+  <script>
+    function switchTab(tabId, button) {
+      document.querySelectorAll('.tab-content').forEach(sec => sec.classList.remove('active'));
+      document.querySelectorAll('.buttons button').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      button.classList.add('active');
+    }
+  </script>
 </body>
 </html>
