@@ -15,7 +15,7 @@ header {
   display: flex;
   align-items: center;     
   justify-content: space-between;
-  background-color: #999;
+  background-color: #d4dcd3;
   padding: 10px 30px;
 }
 
@@ -38,27 +38,28 @@ header {
 }
 
 footer {
-  background-color: #999;
+  background-color: #90a68d;
   color: white;
   text-align: center;
   padding: 10px 0;
-  font-size: 13px;
+  border-top: 6px solid #90a68d;
+  font-size: 14px;
 }
 
-/*  BANNER  */
-.banner {
-  position: relative;
-  background-image: url("https://images.unsplash.com/photo-1615874959474-d609969a20ed?auto=format&fit=crop&w=1400&q=80");
-  background-size: cover;
+/*  TITLE  */
+  .title {
+ position: relative;
+  background-image: url("images/background.jpg");
+  background-size: cover; 
+  background-repeat: no-repeat;
   background-position: center;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-top: 8px solid #999;
-  border-bottom: 8px solid #999;
+  border-top: 6px solid #9caea0;  
+  border-bottom: 6px solid #9caea0;    
 }
-
-.banner h1 {
+  .title h1 {
   font-size: 56px;
   font-weight: bold;
   color: white;
@@ -86,7 +87,6 @@ footer {
 /* mobile friendly design */
 @media (max-width: 768px) {
 
-  /* General layout for all pages */
   body {
     font-size: 15px;
     padding: 0;
@@ -173,3 +173,54 @@ footer {
     padding: 10px;
   }
 }
+
+/* overlay description */
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.8);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.overlay-content {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  width: 90%;
+  max-width: 700px;
+  max-height: 80vh;
+  overflow-y: auto;
+  text-align: center;
+  color: #000;
+  position: relative;
+}
+
+.overlay-content img {
+  max-width: 60%;
+  height: auto;
+  border-radius: 10px;
+  margin-bottom: 15px;
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+.btn-view {
+  background: #333;
+  color: #fff;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
