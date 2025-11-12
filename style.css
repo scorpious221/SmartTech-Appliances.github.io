@@ -23,8 +23,34 @@ footer {
   font-size: 14px;
 }
 
+ /*MAIN BACKGROUND FOR ABOUT US AND COMPANY BG */
+    .background {
+      background: url('images/background.jpg') no-repeat center center/cover;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      border-top: 6px solid #9caea0;
+      border-bottom: 6px solid #9caea0;
+      position: relative;
+      color: white;
+    }
+    .text {
+      position: absolute;
+      top: 150px;
+      left: 0;
+      padding: 10px 70px;
+      border-top-right-radius: 10px;
+      border-bottom-right-radius: 10px;
+    }
 
-/*  TITLE  */
+    .text h1 {
+      font-size: 80px;
+      margin: 0;
+      font-weight: bold;
+    }
+
+/*  TITLE FOR PRODUCTS */
   .title {
  position: relative;
   background-image: url("images/background.jpg");
@@ -135,7 +161,7 @@ footer {
   }
 
   .product-grid {
-    grid-template-columns: 1fr 1fr; /* 2 columns on phones */
+    grid-template-columns: 1fr 1fr;
   }
 
   .product-card {
@@ -202,3 +228,11 @@ footer {
   font-weight: bold;
 }
 
+/* GREEN BAR AT THE BOTTOM OF TITLE */
+.title-bar {
+  background-color: #90a68d;
+  height: 40px;
+  width: 700px;
+  position: relative;
+  left: -70px;     
+}
