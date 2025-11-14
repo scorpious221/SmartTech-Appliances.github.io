@@ -14,13 +14,6 @@
     --page-bg:#acbbaa;
   }
 
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-
 .cart-btn {
   background: #28a745; 
   color: #fff;
@@ -272,19 +265,24 @@
 <header>
   <div class="header-left">
     <a href="homepage.html">
-      <img src="images/logo.jpg" alt="SmartTech Appliances Logo" class="logo">
+      <img src="images/logo.jpg" class="logo" alt="SmartTech Appliances Logo">
     </a>
+ <a href="homepage.html" class="home-link">
+      <button class="home-btn">Home Page</button>
+    </a>
+
     <div>
       <h2 style="margin:0;">SmartTech Appliances</h2>
-      <small class="tagline">"Where Innovation Meets Everyday Living."</small>
+      <small>"Where Innovation Meets Everyday Living."</small>
     </div>
   </div>
 
   <div class="header-right">
-    <button class="cart-btn" onclick="scrollToCart()">🛒 Go to Cart (<span id="cart-count">0</span>)</button>
+    <button class="cart-btn" onclick="scrollToCart()">
+      🛒 Go to Cart (<span id="cart-count">0</span>)
+    </button>
   </div>
 </header>
-
 
 
 <!-- Title -->
