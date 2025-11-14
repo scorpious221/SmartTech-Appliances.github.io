@@ -578,26 +578,55 @@ document.addEventListener('change', (e)=>{
 
 /* complete payment (simulated) */
 function completePayment(){
-  const address = document.getElementById('address').value.trim();
-  const method = document.querySelector('input[name="paymethod"]:checked')?.value;
-  if(!address) return alert('Please add delivery address.');
-  if(!method) return alert('Please choose a payment method.');
-  if(method === 'Card'){
-    const cn = document.getElementById('card-number').value.replace(/\s/g,'');
-    const nm = document.getElementById('card-name').value.trim();
-    const exp = document.getElementById('card-exp').value.trim();
-    const cvv = document.getElementById('card-cvv').value.trim();
-    if(!nm||!cn||!exp||!cvv) return alert('Please fill card details.');
-    if(cn.replace(/\D/g,'').length < 13) return alert('Enter a valid card number.');
-  }
-  alert('Payment successful!\nMode: ' + method + '\nDelivery to: ' + address);
-  // clear cart & payment fields
-  cart = []; saveCart(); renderCart();
-  document.getElementById('address').value = '';
-  document.querySelectorAll('input[name="paymethod"]').forEach(i=>i.checked=false);
-  document.getElementById('card-fields').style.display='none';
-  document.getElementById('payment').style.display='none';
+    const address = document.getElementById('address').value.trim();
+    const method = document.querySelector('input[name="paymethod"]:checked')?.value;
+
+    if(!address) return alert('Please add delivery address.');
+    if(!method) return alert('Please choose a payment method.');
+
+    if(method === 'Card'){
+        const cn = document.getElementById('card-number').value.replace(/\s/g,'');
+        const nm = document.getElementById('card-name').value.trim();
+        const exp = document.getElementById('card-exp').value.trim();
+        const cvv = document.getElementById('card-cvv').value.trim();
+        if(!nm || !cn || !exp || !cvv) return alert('Please fill card details.');
+        if(cn.replace(/\D/g,'').length < 13) return alert('Enter a valid card number.');
+    }
+
+    // ------------- save order data for receipt.html -------------
+    let subtotal = 0;
+    const cartItems = cart.map(item => {
+        subtotal += item.price * item.qty;
+        return {
+            name: item.name,
+            price: item.price,
+            quantity: item.qty
+        };
+    });
+
+    const shippingFee = 150;
+    const grandTotal = subtotal + shippingFee;
+
+    const orderData = {
+        orderNumber: "ORD-" + Math.floor(Math.random() * 900000 + 100000),
+        orderDate: new Date().toLocaleString(),
+        paymentMethod: method,
+        address: address,
+        cartItems: cartItems,
+        subtotal: subtotal,
+        grandTotal: grandTotal
+    };
+
+    localStorage.setItem("lastOrder", JSON.stringify(orderData));
+
+    // ----------- clear cart after checkout -----------
+    cart = [];
+    saveCart();
+
+    // ----------- redirect to receipt page -----------
+    window.location.href = "receipt.html";
 }
+
 
 /* ---------- startup ---------- */
 function init(){
