@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>SmartTech Appliances - Receipt</title>
+    <link rel="stylesheet" href="style.css"> 
+    <style>
+        /* Re-include primary CSS variables and button styles for printing */
+        :root{
+            --accent:#000;
+            --accent-2:#444;
+            --muted:#888;
+            --card-bg:#fff;
+            --page-bg:#acbbaa;
+        }
+
+        .primary {  
+            background:#90a68d;
+            color:#fff;
+            border:none;
+            padding:10px 16px;  
+            border-radius:8px;
+            cursor:pointer;
+            font-weight:bold;
+        }
+
+        .secondary {  
+            background:#acbbaa;  
+            color:#fff;
+            border:none;
+            padding:10px 16px;  
+            border-radius:8px;
+            cursor:pointer;
+            font-weight:bold;
+        }
+
+        /* --- RECEIPT CSS STYLES --- */
+        .receipt-container {
+            max-width: 500px;
+            margin: 30px auto;
+            padding: 20px 40px;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border: 1px dashed #333; /* Thermal paper look */
+            font-family: 'Courier New', Courier, monospace; /* Monospace for receipt feel */
+            font-size: 14px;
+        }
+
+        .receipt-container h3 {
+            text-align: center;
+            margin-bottom: 5px;
+            font-size: 20px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 5px;
+        }
+
+        .receipt-item-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 0;
+            border-bottom: 1px dotted #888;
+        }
+
+        .receipt-item-line:last-of-type {
+            border-bottom: none;
+        }
+
+        .receipt-summary-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            font-weight: bold;
+        }
+
+        .receipt-separator {
+            margin: 10px 0;
+            border-top: 1px dashed #333;
+        }
+
+        .receipt-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+        }
+
+        .receipt-details p {
+            margin: 4px 0;
+        }
+        
+        @media print {
+            body { background: none; }
+            .receipt-actions { display: none; }
+            .receipt-container { 
+                margin: 0; 
+                box-shadow: none; 
+                border: none; 
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+
+<body style="background-color:#d4dcd3">
+
+    <div class="receipt-container">
+        <h3>SmartTech Appliances</h3>
+        <p style="text-align: center;">Order Confirmed! Thank you.</p>
+        <div class="receipt-separator"></div>
+
+        <div class="receipt-details">
+            <p><strong>Order No:</strong> <span id="receipt-order-num"></span></p>
+            <p><strong>Date:</strong> <span id="receipt-date"></span></p>
+            <p><strong>Payment:</strong> <span id="receipt-payment-method"></span></p>
+            <p><strong>Ship To:</strong> <span id="receipt-address"></span></p>
+        </div>
+
+        <div class="receipt-separator"></div>
+
+        <div id="receipt-items-list">
+            </div>
+
+        <div class="receipt-separator"></div>
+
+        <div class="receipt-summary">
+            <div class="receipt-summary-line">
+                <span>Subtotal:</span>
+                <span id="receipt-subtotal">₱0.00</span>
+            </div>
+            <div class="receipt-summary-line">
+                <span>Shipping:</span>
+                <span>₱150.00</span>
+            </div>
+            <div class="receipt-summary-line" style="font-size: 18px;">
+                <span>GRAND TOTAL:</span>
+                <span id="receipt-grand-total">₱0.00</span>
+            </div>
+        </div>
+
+        <div class="receipt-separator"></div>
+
+        <p class="receipt-footer">
+            ** All Sales Final. Items ship within 3-5 days. **
+        </p>
+
+        <div class="receipt-actions" style="text-align:center; margin-top:15px;">
+            <button class="primary" onclick="window.print()">Print Receipt</button>
+            <button class="secondary" onclick="window.location.href='products.html'">Start New Order</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const orderData = localStorage.getItem('lastOrder');
+            
+            if (!orderData) {
+                document.querySelector('.receipt-container').innerHTML = '<h3>Error</h3><p>No order data found. Please place an order first.</p><div class="receipt-actions" style="text-align:center;"><button class="secondary" onclick="window.location.href=\'products.html\'">Go Shopping</button></div>';
+                return;
+            }
+
+            const data = JSON.parse(orderData);
+            
+            // Populate details
+            document.getElementById('receipt-order-num').textContent = data.orderNumber;
+            document.getElementById('receipt-date').textContent = data.orderDate;
+            document.getElementById('receipt-payment-method').textContent = data.paymentMethod;
+            document.getElementById('receipt-address').textContent = data.address;
+
+            // Populate items
+            const receiptItemsList = document.getElementById('receipt-items-list');
+            receiptItemsList.innerHTML = '<div class="receipt-item-line"><span style="font-weight: bold;">ITEM (Qty)</span><span style="font-weight: bold;">AMOUNT</span></div>';
+
+            data.cartItems.forEach(item => {
+                const itemLine = document.createElement('div');
+                itemLine.classList.add('receipt-item-line');
+                itemLine.innerHTML = `
+                    <span>${item.name} (${item.quantity} pc${item.quantity > 1 ? 's' : ''})</span>
+                    <span>₱${(item.price * item.quantity).toFixed(2)}</span>
+                `;
+                receiptItemsList.appendChild(itemLine);
+            });
+
+            // Populate totals
+            document.getElementById('receipt-subtotal').textContent = `₱${data.subtotal.toFixed(2)}`;
+            document.getElementById('receipt-grand-total').textContent = `₱${data.grandTotal.toFixed(2)}`;
+
+            // Clear storage after successful display (optional, but good practice)
+            localStorage.removeItem('lastOrder');
+        });
+    </script>
+</body>
+</html>
+
+
