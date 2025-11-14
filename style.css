@@ -1,16 +1,17 @@
 /*  GLOBAL / SHARED STYLES */
 
-html {
-scroll-behavior:smooth;
- }
-
-
 header {
   display: flex;
-  align-items: center;     
-  justify-content: space-between;
-  background-color: #d4dcd3;
-  padding: 10px 30px;
+  justify-content: space-between; 
+  align-items: center;
+  background-color: #d4dbd4;
+  padding: 15px 40px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 
@@ -22,6 +23,17 @@ footer {
   border-top: 6px solid #90a68d;
   font-size: 14px;
 }
+
+.home-btn {
+    background-color: #9caea0;
+    color: white;
+    font-weight: bold;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+     font-size: 14px;
+  }
 
  /*MAIN BACKGROUND FOR ABOUT US AND COMPANY BG */
     .background {
