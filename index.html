@@ -3,17 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sign In / Log In</title>
+  <title>Registration / Log In</title>
 
   <style>
-  body { 
-   font-family: Arial, sans-serif;
-   background-color: #f0f8ff; 
-   display: flex; 
-   justify-content: center; 
-   align-items: center;
-    height: 100vh;
-   }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f8ff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
     .container {
       background: white;
       padding: 30px;
@@ -21,24 +22,39 @@
       box-shadow: 0 0 10px rgba(0,0,0,0.2);
       width: 350px;
       text-align: center;
+      /* Increased height to accommodate more fields */
+      max-height: 90vh; 
+      overflow-y: auto; /* Allows scrolling if many fields */
     }
 
     h2 {
-      margin-bottom: 20px;
+      margin-bottom: 10px;
+      margin-top: 10px;
     }
 
-    input {
+    input, select { /* Added select for sex field */
       width: 90%;
       padding: 10px;
       margin: 8px 0;
       border: 1px solid #ccc;
       border-radius: 8px;
+      box-sizing: border-box; /* Ensures padding doesn't widen the input */
+    }
+
+    /* Smaller font for placeholder labels */
+    .input-label {
+        display: block;
+        text-align: left;
+        width: 90%;
+        margin: 10px auto 0;
+        font-size: 0.9em;
+        color: #555;
     }
 
     button {
       width: 95%;
       padding: 10px;
-      margin-top: 10px;
+      margin-top: 15px;
       border: none;
       background-color: #007bff;
       color: white;
@@ -68,97 +84,159 @@
   </style>
 </head>
 <body>
-<div class="container"> 
-<!-- Sign In Form -->
-  <div id="signInForm">
-  <h2>Sign In</h2>
- <input type="email" id="gmail" placeholder="Enter Gmail" 
-required><br> 
-<input type="text" id="signInUsername" placeholder="Create
- Username" required><br>
- <input type="password" id="signInPassword" placeholder="Create
- Password" required><br> 
-     <button onclick="signIn()">Sign In</button> 
-     <p>Already have an account? <span class="switch"
-     onclick="showLogin()">Log In</span></p> 
-  </div>
+  <div class="container">
+    <div id="registrationForm">
+      <h2>Create Account</h2>
+      <input type="email" id="regGmail" placeholder="Enter Gmail" required><br>
+      <input type="text" id="regUsername" placeholder="Create Username" required><br>
+      <input type="password" id="regPassword" placeholder="Create Password" required><br>
+      
+      <h3>Customer Details</h3>
+      <input type="text" id="regName" placeholder="Full Name" required><br>
+      <input type="number" id="regAge" placeholder="Age" min="1" required><br>
+      
+      <label for="regBirthday" class="input-label">Birthday</label>
+      <input type="date" id="regBirthday" required><br>
+      
+      <select id="regSex" required>
+        <option value="" disabled selected>Select Sex</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+      </select><br>
 
-    <!-- Log In Form -->
+      <input type="text" id="regAddress" placeholder="Address" required><br>
+      <input type="tel" id="regContact" placeholder="Contact Number (e.g. 09123456789)" required><br>
+
+      <button onclick="register()">Register</button>
+      <p>Already have an account? <span class="switch" onclick="showLogin()">Log In</span></p>
+    </div>
+
     <div id="loginForm" class="hidden">
       <h2>Log In</h2>
       <input type="text" id="loginUsername" placeholder="Username" required><br>
       <input type="password" id="loginPassword" placeholder="Password" required><br>
       <button onclick="logIn()">Log In</button>
-      <p>Don't have an account? <span class="switch" onclick="showSignIn()">Sign In</span></p>
+      <p>Don't have an account? <span class="switch" onclick="showRegistration()">Register</span></p>
     </div>
 
     <p id="message"></p>
   </div>
 
   <script>
-    // ===== SIGN IN FUNCTION (GMAIL ONLY) =====
-    function signIn() {
-      const gmail = document.getElementById("gmail").value.trim();
-      const username = document.getElementById("signInUsername").value.trim();
-      const password = document.getElementById("signInPassword").value.trim();
+    // Renamed to 'registrationForm' and 'showRegistration' for clarity
+    const registrationForm = document.getElementById("registrationForm");
+    const loginForm = document.getElementById("loginForm");
+    const messageElement = document.getElementById("message");
 
-      // Empty field validation
-      if (!gmail || !username || !password) {
-        alert("Please fill in all fields.");
+    // ===== REGISTRATION FUNCTION =====
+    function register() {
+      // Account Fields
+      const gmail = document.getElementById("regGmail").value.trim();
+      const username = document.getElementById("regUsername").value.trim();
+      const password = document.getElementById("regPassword").value.trim();
+      
+      // Customer Detail Fields
+      const name = document.getElementById("regName").value.trim();
+      const age = document.getElementById("regAge").value.trim();
+      const birthday = document.getElementById("regBirthday").value.trim();
+      const sex = document.getElementById("regSex").value;
+      const address = document.getElementById("regAddress").value.trim();
+      const contact = document.getElementById("regContact").value.trim();
+
+      // Simple Empty field validation for ALL fields
+      if (!gmail || !username || !password || !name || !age || !birthday || !sex || !address || !contact) {
+        messageElement.innerText = "Please fill in all fields.";
+        messageElement.style.color = "red";
         return;
       }
 
-      // ✅ Gmail must end with "@gmail.com"
+      // Gmail validation
       if (!gmail.endsWith("@gmail.com")) {
-        alert("Please enter a valid Gmail address (must end with @gmail.com).");
+        messageElement.innerText = "Please enter a valid Gmail address (must end with @gmail.com).";
+        messageElement.style.color = "red";
         return;
       }
 
       // Check if username already exists
       if (localStorage.getItem(username)) {
-        document.getElementById("message").innerText = "Username already exists!";
+        messageElement.innerText = "Username already exists!";
+        messageElement.style.color = "red";
         return;
       }
 
+      // Create user object with all data
+      const userData = {
+        gmail,
+        password,
+        name,
+        age,
+        birthday,
+        sex,
+        address,
+        contact
+      };
+
       // Save account in localStorage
-      localStorage.setItem(username, JSON.stringify({ gmail, password }));
-      alert("Account created successfully! You can now log in.");
+      localStorage.setItem(username, JSON.stringify(userData));
+      
+      messageElement.innerText = "Account created successfully! You can now log in.";
+      messageElement.style.color = "green";
+      
+      // Clear fields (optional but good practice)
+      document.getElementById("regGmail").value = "";
+      document.getElementById("regUsername").value = "";
+      document.getElementById("regPassword").value = "";
+      document.getElementById("regName").value = "";
+      document.getElementById("regAge").value = "";
+      document.getElementById("regBirthday").value = "";
+      document.getElementById("regSex").value = "";
+      document.getElementById("regAddress").value = "";
+      document.getElementById("regContact").value = "";
+      
       showLogin();
     }
 
-    // ===== LOG IN FUNCTION =====
+    // ===== LOG IN FUNCTION (No change needed) =====
     function logIn() {
       const username = document.getElementById("loginUsername").value.trim();
       const password = document.getElementById("loginPassword").value.trim();
       const storedUser = localStorage.getItem(username);
 
+      messageElement.style.color = "red";
+
       if (!storedUser) {
-        document.getElementById("message").innerText = "Username not found.";
+        messageElement.innerText = "Username not found.";
         return;
       }
 
       const user = JSON.parse(storedUser);
       if (user.password === password) {
-        alert(`Welcome back, ${username}!`);
+        alert(`Welcome back, ${user.name || username}!`); 
+        // We can now use the stored 'name' if available.
         // ✅ Redirect to SmartTech homepage
         window.location.href = "homepage.html";
       } else {
-        document.getElementById("message").innerText = "Incorrect password.";
+        messageElement.innerText = "Incorrect password.";
       }
     }
 
-    // ===== SWITCH FORMS =====
+    // ===== SWITCH FORMS (Updated references) =====
     function showLogin() {
-      document.getElementById("signInForm").classList.add("hidden");
-      document.getElementById("loginForm").classList.remove("hidden");
-      document.getElementById("message").innerText = "";
+      registrationForm.classList.add("hidden");
+      loginForm.classList.remove("hidden");
+      messageElement.innerText = "";
     }
 
-    function showSignIn() {
-      document.getElementById("loginForm").classList.add("hidden");
-      document.getElementById("signInForm").classList.remove("hidden");
-      document.getElementById("message").innerText = "";
+    function showRegistration() {
+      loginForm.classList.add("hidden");
+      registrationForm.classList.remove("hidden");
+      messageElement.innerText = "";
     }
+    
+    // Initial setup: Show registration form first
+    showRegistration();
   </script>
 </body>
 </html>
+
