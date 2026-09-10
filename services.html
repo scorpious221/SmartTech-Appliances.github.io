@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Services Offered - SmartTech Appliances</title>
+
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+
+  <link rel="stylesheet" href="style.css">
+
+
+  <style>
+
+    h1 {
+      font-size: 60px;
+      color: var(--color-bg);
+      text-align: center;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+
+    .box {
+      background-color: color-mix(
+        in srgb,
+        var(--color-primary) 80%,
+        transparent
+      );
+
+      width: 100%;
+
+      margin: auto;
+
+      padding: 40px 50px;
+
+      box-sizing: border-box;
+
+      margin-bottom: 40px;
+
+      font-family: "Georgia", serif;
+
+      display: flex;
+
+      justify-content: center;
+
+      gap: 60px;
+
+      flex-wrap: wrap;
+    }
+
+
+    .service-card {
+      width: 250px;
+
+      color: var(--color-bg);
+    }
+
+
+    .service-card img {
+      width: 100%;
+
+      border-radius: 15px;
+
+      margin-bottom: 10px;
+    }
+
+
+    .service-card h2 {
+      font-size: 22px;
+
+      text-align: center;
+    }
+
+
+    .service-card p {
+      font-size: 18px;
+
+      text-align: center;
+
+      color: var(--color-bg);
+
+      text-shadow:
+        2px 2px 5px
+        color-mix(
+          in srgb,
+          var(--color-primary) 70%,
+          transparent
+        );
+    }
+
+
+    /* RESPONSIVE OVERRIDES */
+    @media (max-width: 991px) {
+      h1 { font-size: clamp(45px, 8vw, 60px); }
+      .box { gap: 35px; padding: 32px 24px; }
+      .service-card { width: min(250px, 42vw); }
+    }
+
+    @media (max-width: 767px) {
+      header { flex-direction: column; align-items: stretch; gap: 12px; text-align: center; }
+      .header-left { justify-content: center; flex-wrap: wrap; }
+      header > .text-end { text-align: center !important; }
+      header h2 { font-size: 21px; }
+      header small { font-size: 12px; }
+      .logo { height: 60px; }
+      .home-btn { padding: 8px 14px; font-size: 13px; }
+      .background { height: auto; min-height: calc(100vh - 120px); }
+      .text { position: relative; top: auto; left: auto; padding: 32px 20px 15px; }
+      h1 { font-size: clamp(36px, 11vw, 50px); line-height: 1.05; }
+      .title-bar { width: 72%; height: 24px; left: -20px; }
+      .box { width: calc(100% - 24px); margin: 0 12px 24px; padding: 24px 16px; gap: 28px; }
+      .service-card { width: 100%; max-width: 340px; }
+      .service-card img { width: 100%; height: auto; }
+      .service-card p { font-size: 16px; line-height: 1.5; }
+      footer { font-size: 12px; padding: 10px 12px; }
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+
+  <!-- HEADER -->
+
+  <header>
+
+    <div class="header-left">
+
+
+      <a href="homepage.html">
+
+        <img
+          src="images/logo.svg"
+          class="logo"
+          alt="SmartTech Appliances Logo"
+        >
+
+      </a>
+
+
+      <!-- HOME PAGE -->
+
+      <a
+        href="homepage.html"
+        class="home-btn btn home-link text-decoration-none"
+      >
+
+        Home Page
+
+      </a>
+
+
+    </div>
+
+
+    <div class="text-end">
+
+      <h2 style="margin:0;">
+
+        SmartTech Appliances
+
+      </h2>
+
+      <small>
+
+        "Where Innovation Meets Everyday Living."
+
+      </small>
+
+    </div>
+
+  </header>
+
+
+
+  <!-- MAIN SERVICES SECTION -->
+
+  <section class="background">
+
+
+    <div class="text">
+
+      <h1>
+
+        Services Offered
+
+      </h1>
+
+
+      <div class="title-bar"></div>
+
+    </div>
+
+
+
+    <div class="box">
+
+
+      <!-- HOME SERVICE -->
+
+      <div class="service-card">
+
+        <img
+          src="images/home.jpg"
+          alt="Home Service"
+        >
+
+
+        <h2>
+
+          Home Service
+
+        </h2>
+
+
+        <p>
+
+          Professional installation, repair, and maintenance right at your doorstep.
+
+        </p>
+
+      </div>
+
+
+
+      <!-- WARRANTY -->
+
+      <div class="service-card">
+
+        <img
+          src="images/warranty.jpg"
+          alt="Warranty"
+        >
+
+
+        <h2>
+
+          Warranty
+
+        </h2>
+
+
+        <p>
+
+          We offer product warranty and customer support for replacements or repairs.
+
+        </p>
+
+      </div>
+
+
+
+      <!-- SECURE CHECKOUT -->
+
+      <div class="service-card">
+
+        <img
+          src="images/secure.jpg"
+          alt="Secure Checkout"
+        >
+
+
+        <h2>
+
+          Secure Checkout
+
+        </h2>
+
+
+        <p>
+
+          Enjoy safe and flexible payment methods through credit/debit cards, e-wallets, or Cash on Delivery — giving you a smooth, secure, and hassle-free shopping experience.
+
+        </p>
+
+      </div>
+
+
+    </div>
+
+
+  </section>
+
+
+
+  <!-- FOOTER -->
+
+  <footer>
+
+    © 2026 SmartTech Appliances. All rights reserved.
+
+  </footer>
+
+
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+  ></script>
+
+
+</body>
+
+</html>

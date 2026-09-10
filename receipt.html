@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>SmartTech Appliances - Receipt</title>
+
+
+    <!-- Bootstrap CSS -->
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+
+    <link rel="stylesheet" href="style.css">
+
+
+    <style>
+
+        /* SMARTTECH COLORS */
+
+        body {
+            background-color: #F7F8FA;
+            color: #0F1419;
+        }
+
+
+        /* RECEIPT */
+
+        .receipt-container {
+            max-width: 500px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 14px;
+        }
+
+
+        .receipt-title {
+            color: #1A2333;
+            border-bottom: 2px solid #1A2333;
+        }
+
+
+        .receipt-separator {
+            border-top: 1px dashed #1A2333;
+        }
+
+
+        .receipt-item-line {
+            border-bottom: 1px dotted #6b7280;
+        }
+
+
+        .receipt-item-line:last-child {
+            border-bottom: none;
+        }
+
+
+        /* SMARTTECH BUTTON COLORS */
+
+        .btn-smarttech {
+            background-color: #1A2333;
+            color: #F7F8FA;
+            border: none;
+        }
+
+
+        .btn-smarttech:hover {
+            background-color: #0F1419;
+            color: #F7F8FA;
+        }
+
+
+        .btn-smarttech-light {
+            background-color: #e8eaee;
+            color: #0F1419;
+            border: none;
+        }
+
+
+        .btn-smarttech-light:hover {
+            background-color: #1A2333;
+            color: #F7F8FA;
+        }
+
+
+        /* PRINT */
+
+        @media print {
+
+            body {
+                background-color: white !important;
+            }
+
+
+            .receipt-actions {
+                display: none !important;
+            }
+
+
+            .receipt-container {
+                box-shadow: none !important;
+                border: none !important;
+                margin: 0 !important;
+                max-width: 100% !important;
+            }
+
+        }
+
+
+        /* RESPONSIVE OVERRIDES */
+        *, *::before, *::after { box-sizing: border-box; }
+        html, body { overflow-x: hidden; }
+
+        .receipt-container {
+            overflow-wrap: anywhere;
+        }
+
+        @media (max-width: 576px) {
+            .container {
+                width: 100%;
+                max-width: 100%;
+                padding-left: 12px !important;
+                padding-right: 12px !important;
+            }
+            .receipt-container {
+                max-width: 100%;
+                padding: 16px !important;
+                font-size: 13px;
+            }
+            .receipt-details p,
+            #receipt-items-list > div {
+                overflow-wrap: anywhere;
+            }
+            .receipt-actions {
+                flex-direction: column;
+            }
+            .receipt-actions .btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .receipt-container { padding: 12px !important; font-size: 12px; }
+            .receipt-title { font-size: 1rem !important; }
+            .receipt-summary .fs-5 { font-size: 1rem !important; }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- MAIN BOOTSTRAP CONTAINER -->
+
+    <div
+        class="container min-vh-100 d-flex justify-content-center align-items-start py-5"
+    >
+
+
+        <!-- BOOTSTRAP CARD -->
+
+        <div
+            class="receipt-container card shadow-sm border border-secondary-subtle p-4 w-100"
+        >
+
+
+            <!-- RECEIPT HEADER -->
+
+            <div class="text-center">
+
+
+                <!-- Changed h3 to h1 for HTML validation -->
+
+                <h1
+                    class="receipt-title fw-bold pb-2 mb-2 fs-4"
+                >
+
+                    SmartTech Appliances
+
+                </h1>
+
+
+                <p class="mb-2">
+
+                    Order Confirmed! Thank you.
+
+                </p>
+
+            </div>
+
+
+            <div class="receipt-separator my-3"></div>
+
+
+
+            <!-- RECEIPT DETAILS -->
+
+            <div class="receipt-details">
+
+
+                <p class="mb-1">
+
+                    <strong>Order No:</strong>
+
+                    <span id="receipt-order-num"></span>
+
+                </p>
+
+
+                <p class="mb-1">
+
+                    <strong>Date:</strong>
+
+                    <span id="receipt-date"></span>
+
+                </p>
+
+
+                <p class="mb-1">
+
+                    <strong>Payment:</strong>
+
+                    <span id="receipt-payment-method"></span>
+
+                </p>
+
+
+                <p class="mb-1">
+
+                    <strong>Ship To:</strong>
+
+                    <span id="receipt-address"></span>
+
+                </p>
+
+
+            </div>
+
+
+            <div class="receipt-separator my-3"></div>
+
+
+
+            <!-- ITEMS -->
+
+            <div id="receipt-items-list">
+
+            </div>
+
+
+            <div class="receipt-separator my-3"></div>
+
+
+
+            <!-- SUMMARY -->
+
+            <div class="receipt-summary">
+
+
+                <div
+                    class="d-flex justify-content-between fw-bold py-1"
+                >
+
+                    <span>
+
+                        Subtotal:
+
+                    </span>
+
+
+                    <span id="receipt-subtotal">
+
+                        ₱0.00
+
+                    </span>
+
+                </div>
+
+
+                <div
+                    class="d-flex justify-content-between fw-bold py-1"
+                >
+
+                    <span>
+
+                        Shipping:
+
+                    </span>
+
+
+                    <span>
+
+                        ₱150.00
+
+                    </span>
+
+                </div>
+
+
+                <div
+                    class="d-flex justify-content-between fw-bold py-1"
+                >
+
+                    <span>
+
+                        GRAND TOTAL:
+
+                    </span>
+
+
+                    <span
+                        id="receipt-grand-total"
+                        class="fs-5"
+                    >
+
+                        ₱0.00
+
+                    </span>
+
+                </div>
+
+
+            </div>
+
+
+            <div class="receipt-separator my-3"></div>
+
+
+
+            <!-- RECEIPT FOOTER -->
+
+            <p
+                class="text-center text-muted small mt-4 mb-3"
+            >
+
+                ** All Sales Final. Items ship within 3-5 days. **
+
+            </p>
+
+
+
+            <!-- ACTION BUTTONS -->
+
+            <div
+                class="receipt-actions d-flex justify-content-center gap-2 flex-wrap mt-3"
+            >
+
+
+                <button
+                    type="button"
+                    class="btn btn-smarttech px-4"
+                    onclick="window.print()"
+                >
+
+                    Print Receipt
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="btn btn-smarttech-light px-4"
+                    onclick="window.location.href='products.html'"
+                >
+
+                    Start New Order
+
+                </button>
+
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- Bootstrap JavaScript -->
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    ></script>
+
+
+
+    <script>
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+
+                const orderData =
+                    localStorage.getItem("lastOrder");
+
+
+                if (!orderData) {
+
+
+                    document.querySelector(
+                        ".receipt-container"
+                    ).innerHTML = `
+
+
+                        <div class="text-center">
+
+
+                            <!-- Changed h3 to h1 for HTML validation -->
+
+                            <h1 class="fw-bold mb-3 fs-3">
+
+                                Error
+
+                            </h1>
+
+
+                            <p class="mb-4">
+
+                                No order data found.
+                                Please place an order first.
+
+                            </p>
+
+
+                            <button
+                                type="button"
+                                class="btn btn-smarttech"
+                                onclick="window.location.href='products.html'"
+                            >
+
+                                Go Shopping
+
+                            </button>
+
+
+                        </div>
+
+
+                    `;
+
+
+                    return;
+
+                }
+
+
+                const data =
+                    JSON.parse(orderData);
+
+
+
+                /* POPULATE DETAILS */
+
+                document.getElementById(
+                    "receipt-order-num"
+                ).textContent =
+                    data.orderNumber;
+
+
+                document.getElementById(
+                    "receipt-date"
+                ).textContent =
+                    data.orderDate;
+
+
+                document.getElementById(
+                    "receipt-payment-method"
+                ).textContent =
+                    data.paymentMethod;
+
+
+                document.getElementById(
+                    "receipt-address"
+                ).textContent =
+                    data.address;
+
+
+
+                /* POPULATE ITEMS */
+
+                const receiptItemsList =
+                    document.getElementById(
+                        "receipt-items-list"
+                    );
+
+
+                receiptItemsList.innerHTML = `
+
+
+                    <div
+                        class="receipt-item-line d-flex justify-content-between py-1"
+                    >
+
+                        <span class="fw-bold">
+
+                            ITEM (Qty)
+
+                        </span>
+
+
+                        <span class="fw-bold">
+
+                            AMOUNT
+
+                        </span>
+
+
+                    </div>
+
+
+                `;
+
+
+                data.cartItems.forEach(
+                    function (item) {
+
+
+                        const itemLine =
+                            document.createElement("div");
+
+
+                        itemLine.classList.add(
+                            "receipt-item-line",
+                            "d-flex",
+                            "justify-content-between",
+                            "py-1"
+                        );
+
+
+                        itemLine.innerHTML = `
+
+
+                            <span>
+
+                                ${item.name}
+
+                                (${item.quantity}
+                                pc${item.quantity > 1 ? "s" : ""})
+
+                            </span>
+
+
+                            <span>
+
+                                ₱${(
+                                    item.price *
+                                    item.quantity
+                                ).toFixed(2)}
+
+                            </span>
+
+
+                        `;
+
+
+                        receiptItemsList.appendChild(
+                            itemLine
+                        );
+
+                    }
+                );
+
+
+
+                /* POPULATE TOTALS */
+
+                document.getElementById(
+                    "receipt-subtotal"
+                ).textContent =
+
+                    `₱${data.subtotal.toFixed(2)}`;
+
+
+                document.getElementById(
+                    "receipt-grand-total"
+                ).textContent =
+
+                    `₱${data.grandTotal.toFixed(2)}`;
+
+
+
+                /* CLEAR ORDER DATA */
+
+                localStorage.removeItem(
+                    "lastOrder"
+                );
+
+
+            }
+
+        );
+
+    </script>
+
+
+</body>
+
+</html>

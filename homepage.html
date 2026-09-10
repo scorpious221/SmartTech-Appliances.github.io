@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>SmartTech Appliances</title>
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+
+  <link rel="stylesheet" href="style.css">
+
+
+  <style>
+
+    /* BANNER */
+
+    .banner {
+      position: relative;
+
+      background:
+        url('images/background.png')
+        no-repeat
+        center center/cover;
+
+      width: 100%;
+
+      height: 100vh;
+
+      border-top: 6px solid #1A2333;
+
+      border-bottom: 6px solid #1A2333;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: flex-start;
+
+      overflow: hidden;
+    }
+
+
+    /* BANNER CONTENT */
+
+    .banner-content {
+      color: #F7F8FA;
+
+      padding-left: 30px;
+
+      max-width: 600px;
+
+      text-shadow:
+        2px 2px 5px rgba(15, 20, 25, 0.6);
+
+      position: relative;
+
+      z-index: 2;
+    }
+
+
+    .banner-content h1 {
+      font-size: 100px;
+
+      font-weight: bold;
+
+      margin: 0;
+
+      letter-spacing: 2px;
+
+      line-height: 1;
+    }
+
+
+    .tagline {
+      font-style: italic;
+
+      font-size: 25px;
+
+      margin: 10px 0 25px;
+
+      color: #F7F8FA;
+    }
+
+
+    /* ABOUT US BUTTON */
+
+    .about-link {
+      background: #1A2333;
+
+      color: #F7F8FA;
+
+      font-weight: bold;
+
+      font-size: 20px;
+
+      display: inline-block;
+
+      width: 700px;
+
+      max-width: 100%;
+
+      text-align: center;
+
+      padding: 14px 0;
+
+      transition: 0.3s;
+
+      text-decoration: none;
+
+      border: none;
+
+      border-radius: 6px;
+    }
+
+
+    .about-link:hover {
+      background: #0F1419;
+
+      color: #F7F8FA;
+
+      text-decoration: underline;
+    }
+
+
+    /* NAVIGATION SECTION */
+
+    .nav-section {
+      position: absolute;
+
+      bottom: 0;
+
+      left: 0;
+
+      width: 100%;
+
+      padding: 30px 0;
+
+      background-color: rgba(15, 20, 25, 0.72);
+
+      z-index: 3;
+    }
+
+
+    /* NAVIGATION BOXES */
+
+    .nav-item {
+      min-width: 260px;
+
+      height: 90px;
+
+      padding: 20px 40px;
+
+      color: #F7F8FA;
+
+      font-size: 24px;
+
+      font-style: italic;
+
+      font-weight: bold;
+
+      text-decoration: underline;
+
+      display: flex;
+
+      justify-content: center;
+
+      align-items: center;
+
+      text-align: center;
+
+      border-radius: 40px;
+
+      transition: 0.3s;
+
+      background-color: #1A2333;
+
+      border: 3px solid #F7F8FA;
+    }
+
+
+    .nav-item a {
+      color: #F7F8FA;
+
+      text-decoration: underline;
+
+      font-size: 24px;
+
+      font-style: italic;
+
+      font-weight: bold;
+    }
+
+
+    .nav-item a:hover {
+      color: #F7F8FA;
+
+      text-decoration: underline;
+    }
+
+
+    .nav-item:hover {
+      background-color: #0F1419;
+
+      border-color: #F7F8FA;
+
+      transform: translateY(-3px);
+    }
+
+
+    /* HEADER */
+
+    header {
+      background-color: #1A2333;
+    }
+
+
+    /* HOME PAGE BUTTON */
+
+    .home-btn {
+      background-color: #0F1419;
+
+      color: #F7F8FA;
+
+      font-weight: bold;
+
+      padding: 10px 20px;
+
+      border: none;
+
+      border-radius: 8px;
+
+      cursor: pointer;
+
+      font-size: 14px;
+
+      display: inline-block;
+
+      text-decoration: none;
+    }
+
+
+    .home-btn:hover {
+      background-color: #1A2333;
+
+      color: #F7F8FA;
+
+      outline: 1px solid #F7F8FA;
+
+      text-decoration: none;
+    }
+
+
+    /* FOOTER */
+
+    footer {
+      background-color: #1A2333;
+
+      color: #F7F8FA;
+
+      text-align: center;
+
+      padding: 10px 0;
+
+      border-top: 6px solid #0F1419;
+
+      font-size: 14px;
+    }
+
+
+    @media (max-width: 991px) {
+
+      .banner-content {
+        padding-left: 40px;
+      }
+
+
+      .banner-content h1 {
+        font-size: 60px;
+      }
+
+
+      .tagline {
+        font-size: 20px;
+      }
+
+
+      .about-link {
+        width: 550px;
+      }
+
+
+      .nav-item {
+        min-width: 220px;
+
+        font-size: 20px;
+      }
+
+
+      .nav-item a {
+        font-size: 20px;
+      }
+
+    }
+
+
+    @media (max-width: 767px) {
+
+      .banner {
+        height: auto;
+
+        min-height: 100vh;
+
+        padding-bottom: 300px;
+      }
+
+
+      .banner-content {
+        padding-left: 20px;
+
+        padding-right: 20px;
+      }
+
+
+      .banner-content h1 {
+        font-size: 48px;
+      }
+
+
+      .tagline {
+        font-size: 18px;
+      }
+
+
+      .about-link {
+        width: 100%;
+      }
+
+
+      .nav-section {
+        padding: 15px;
+      }
+
+
+      .nav-item {
+        min-width: 100%;
+
+        height: 75px;
+      }
+
+
+      .nav-item a {
+        font-size: 18px;
+      }
+
+    }
+
+
+    /* RESPONSIVE OVERRIDES */
+    @media (max-width: 991px) {
+      .banner-content { padding-left: clamp(20px, 5vw, 40px); padding-right: 20px; max-width: 75%; }
+      .banner-content h1 { font-size: clamp(58px, 8vw, 80px); }
+      .tagline { font-size: clamp(18px, 2.5vw, 22px); }
+      .about-link { width: min(550px, 100%); }
+      .nav-item { min-width: 0; width: 100%; }
+    }
+
+    @media (max-width: 767px) {
+      header { flex-direction: column; align-items: stretch !important; gap: 12px; text-align: center; }
+      header .header-left { justify-content: center; flex-wrap: wrap; }
+      header .header-right { text-align: center; }
+      header h2 { font-size: 20px; }
+      header small { font-size: 12px; }
+      .logo { height: 60px; }
+      .home-btn, .cart-btn { padding: 8px 14px; font-size: 13px; }
+
+      .banner { height: auto; min-height: 100vh; padding-bottom: 0; display: flex; flex-direction: column; justify-content: flex-start; }
+      .banner-content { padding: 55px 20px 170px; max-width: 100%; width: 100%; }
+      .banner-content h1 { font-size: clamp(42px, 13vw, 60px); line-height: 1.05; letter-spacing: 1px; }
+      .tagline { font-size: clamp(16px, 4vw, 19px); line-height: 1.4; margin: 10px 0 20px; }
+      .about-link { width: 100%; font-size: 17px; padding: 12px 8px; }
+
+      .nav-section { position: relative; bottom: auto; padding: 18px 12px; margin-top: auto; }
+      .nav-section .container { padding-left: 0; padding-right: 0; }
+      .nav-item { min-width: 0; width: 100%; height: 68px; padding: 12px 16px; border-radius: 25px; }
+      .nav-item a { font-size: 17px; line-height: 1.2; }
+      .nav-section .row { row-gap: 10px !important; }
+      footer { font-size: 12px; padding: 10px 12px; }
+    }
+
+    @media (max-width: 400px) {
+      .banner-content { padding-left: 15px; padding-right: 15px; }
+      .nav-item { height: 64px; }
+      .nav-item a { font-size: 15px; }
+    }
+
+  </style>
+
+</head>
+
+
+<body style="background-color:#F7F8FA;">
+
+
+  <!-- HEADER -->
+
+  <header
+    class="d-flex justify-content-between align-items-center"
+  >
+
+    <div
+      class="header-left d-flex align-items-center"
+    >
+
+      <!-- LOGO -->
+
+      <a href="homepage.html">
+
+        <img
+          src="images/logo.svg"
+          class="logo"
+          alt="SmartTech Appliances Logo"
+        >
+
+      </a>
+
+
+      <!-- HOME PAGE BUTTON -->
+
+      <div>
+
+        <a
+          href="homepage.html"
+          class="home-btn btn"
+        >
+
+          Home Page
+
+        </a>
+
+      </div>
+
+    </div>
+
+  </header>
+
+
+
+  <!-- BANNER -->
+
+  <section class="banner">
+
+
+    <!-- Bootstrap Container Fluid -->
+
+    <div class="container-fluid px-0">
+
+
+      <!-- Bootstrap Row -->
+
+      <div class="row">
+
+        <!-- Bootstrap Column -->
+
+        <div class="col-12">
+
+          <div class="banner-content">
+
+            <h1>
+
+              SmartTech<br>
+              Appliances
+
+            </h1>
+
+            <p class="tagline">
+
+              "Where Innovation Meets Everyday Living."
+
+            </p>
+
+            <!-- ABOUT US -->
+
+            <a
+              href="aboutus.html"
+              class="about-link btn"
+            >
+
+              About Us
+
+            </a>
+
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="nav-section">
+
+
+      <div class="container">
+
+        <div class="row justify-content-center g-3">
+
+
+          <!-- COMPANY BACKGROUND -->
+
+          <div class="col-12 col-md-4">
+
+            <div class="card nav-item">
+
+              <a
+                href="companybg.html"
+                class="w-100 h-100 d-flex justify-content-center align-items-center"
+              >
+
+                Company Background
+
+              </a>
+
+            </div>
+
+          </div>
+
+
+          <!-- PRODUCTS SOLD -->
+
+          <div class="col-12 col-md-4">
+
+            <div class="card nav-item">
+
+              <a
+                href="products.html"
+                class="w-100 h-100 d-flex justify-content-center align-items-center"
+              >
+
+                Products Sold
+
+              </a>
+
+            </div>
+
+          </div>
+
+
+          <!-- SERVICES OFFERED -->
+
+          <div class="col-12 col-md-4">
+
+            <div class="card nav-item">
+
+              <a
+                href="services.html"
+                class="w-100 h-100 d-flex justify-content-center align-items-center"
+              >
+
+                Services Offered
+
+              </a>
+
+            </div>
+
+          </div>
+
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+  </section>
+
+
+
+  <!-- FOOTER -->
+
+  <footer class="text-center">
+
+    © 2026 SmartTech Appliances. All rights reserved.
+
+  </footer>
+
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+  ></script>
+
+
+</body>
+
+</html>

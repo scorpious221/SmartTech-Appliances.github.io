@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Registration / Log In</title>
+
+
+  <!-- Bootstrap CSS -->
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+
+
+  <style>
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f8ff;
+      min-height: 100vh;
+    }
+
+
+    /* Main Card */
+
+    .registration-container {
+      max-width: 650px;
+      width: 100%;
+      border-radius: 15px;
+    }
+
+
+    /* Form Controls */
+
+    .form-control,
+    .form-select {
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+
+
+    /* Buttons */
+
+    .btn {
+      border-radius: 8px;
+    }
+
+
+    /* Login/Register Switch */
+
+    .switch {
+      color: #0d6efd;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+
+    .switch:hover {
+      text-decoration: underline;
+    }
+
+
+    /* Message */
+
+    #message {
+      font-weight: bold;
+    }
+
+
+    /* Section Headings */
+
+    .form-section-title {
+      font-weight: 600;
+      margin-bottom: 15px;
+      margin-top: 5px;
+    }
+
+
+    /* Responsive */
+
+    @media (max-width: 767px) {
+      .registration-container {
+        width: calc(100% - 24px);
+        max-width: 650px;
+        margin: 12px;
+        padding: 20px !important;
+      }
+      .container-fluid { padding-left: 0 !important; padding-right: 0 !important; }
+      .registration-container h1 { font-size: 1.6rem !important; }
+    }
+
+    @media (max-width: 400px) {
+      .registration-container { padding: 16px !important; border-radius: 10px; }
+      .registration-container p { font-size: 14px; }
+      .form-control, .form-select { padding: 9px 10px; font-size: 14px; }
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+
+  <div
+    class="container-fluid min-vh-100 d-flex justify-content-center align-items-center py-4"
+  >
+
+
+    <div class="registration-container card shadow p-4">
+
+
+      <!-- REGISTRATION FORM -->
+
+      <div id="registrationForm">
+
+
+        <!-- TITLE -->
+
+        <div class="text-center mb-4">
+
+          <h1 class="fw-bold fs-2 mb-1">
+
+            Create Account
+
+          </h1>
+
+
+          <p class="text-muted mb-0">
+
+            Register your SmartTech Appliances account
+
+          </p>
+
+        </div>
+
+
+
+        <!-- ACCOUNT INFORMATION -->
+
+        <h2 class="form-section-title fs-5">
+
+          Account Information
+
+        </h2>
+
+
+        <div class="row g-3 mb-4">
+
+
+          <div class="col-md-4">
+
+            <label
+              for="regGmail"
+              class="form-label"
+            >
+
+              Gmail
+
+            </label>
+
+            <input
+              type="email"
+              id="regGmail"
+              class="form-control"
+              placeholder="Enter Gmail"
+              required
+            >
+
+          </div>
+
+
+          <div class="col-md-4">
+
+            <label
+              for="regUsername"
+              class="form-label"
+            >
+
+              Username
+
+            </label>
+
+            <input
+              type="text"
+              id="regUsername"
+              class="form-control"
+              placeholder="Create Username"
+              required
+            >
+
+          </div>
+
+
+          <div class="col-md-4">
+
+            <label
+              for="regPassword"
+              class="form-label"
+            >
+
+              Password
+
+            </label>
+
+            <input
+              type="password"
+              id="regPassword"
+              class="form-control"
+              placeholder="Create Password"
+              required
+            >
+
+          </div>
+
+        </div>
+
+
+
+        <!-- CUSTOMER DETAILS -->
+
+        <h2 class="form-section-title fs-5">
+
+          Customer Details
+
+        </h2>
+
+
+        <div class="row g-3">
+
+
+          <!-- FULL NAME -->
+
+          <div class="col-md-6">
+
+            <label
+              for="regName"
+              class="form-label"
+            >
+
+              Full Name
+
+            </label>
+
+            <input
+              type="text"
+              id="regName"
+              class="form-control"
+              placeholder="Full Name"
+              required
+            >
+
+          </div>
+
+
+
+          <!-- AGE -->
+
+          <div class="col-md-3">
+
+            <label
+              for="regAge"
+              class="form-label"
+            >
+
+              Age
+
+            </label>
+
+            <input
+              type="number"
+              id="regAge"
+              class="form-control"
+              placeholder="Age"
+              min="1"
+              required
+            >
+
+          </div>
+
+
+
+          <!-- SEX -->
+
+          <div class="col-md-3">
+
+            <label
+              for="regSex"
+              class="form-label"
+            >
+
+              Sex
+
+            </label>
+
+            <select
+              id="regSex"
+              class="form-select"
+              required
+            >
+
+              <option
+                value=""
+                disabled
+                selected
+              >
+
+                Select
+
+              </option>
+
+              <option value="Male">
+
+                Male
+
+              </option>
+
+              <option value="Female">
+
+                Female
+
+              </option>
+
+              <option value="Other">
+
+                Other
+
+              </option>
+
+            </select>
+
+          </div>
+
+
+
+          <!-- BIRTHDAY -->
+
+          <div class="col-md-6">
+
+            <label
+              for="regBirthday"
+              class="form-label"
+            >
+
+              Birthday
+
+            </label>
+
+            <input
+              type="date"
+              id="regBirthday"
+              class="form-control"
+              required
+            >
+
+          </div>
+
+
+
+          <!-- CONTACT -->
+
+          <div class="col-md-6">
+
+            <label
+              for="regContact"
+              class="form-label"
+            >
+
+              Contact Number
+
+            </label>
+
+            <input
+              type="tel"
+              id="regContact"
+              class="form-control"
+              placeholder="09123456789"
+              required
+            >
+
+          </div>
+
+
+
+          <!-- ADDRESS -->
+
+          <div class="col-12">
+
+            <label
+              for="regAddress"
+              class="form-label"
+            >
+
+              Address
+
+            </label>
+
+            <input
+              type="text"
+              id="regAddress"
+              class="form-control"
+              placeholder="Enter your address"
+              required
+            >
+
+          </div>
+
+
+        </div>
+
+
+
+        <!-- REGISTER BUTTON -->
+
+        <button
+          type="button"
+          class="btn btn-primary w-100 mt-4"
+          onclick="register()"
+        >
+
+          Register
+
+        </button>
+
+
+        <!-- LOGIN SWITCH -->
+
+        <p class="text-center mt-3 mb-0">
+
+          Already have an account?
+
+          <span
+            class="switch"
+            onclick="showLogin()"
+          >
+
+            Log In
+
+          </span>
+
+        </p>
+
+
+      </div>
+
+
+
+      <!-- LOGIN FORM -->
+
+      <div
+        id="loginForm"
+        class="d-none"
+      >
+
+
+        <div class="text-center mb-4">
+
+          <h1 class="fw-bold fs-2 mb-1">
+
+            Log In
+
+          </h1>
+
+
+          <p class="text-muted mb-0">
+
+            Log in to your SmartTech Appliances account
+
+          </p>
+
+        </div>
+
+
+
+        <!-- LOGIN USERNAME -->
+
+        <div class="mb-3">
+
+          <label
+            for="loginUsername"
+            class="form-label"
+          >
+
+            Username
+
+          </label>
+
+          <input
+            type="text"
+            id="loginUsername"
+            class="form-control"
+            placeholder="Username"
+            required
+          >
+
+        </div>
+
+
+
+        <!-- LOGIN PASSWORD -->
+
+        <div class="mb-3">
+
+          <label
+            for="loginPassword"
+            class="form-label"
+          >
+
+            Password
+
+          </label>
+
+          <input
+            type="password"
+            id="loginPassword"
+            class="form-control"
+            placeholder="Password"
+            required
+          >
+
+        </div>
+
+
+
+        <!-- LOGIN BUTTON -->
+
+        <button
+          type="button"
+          class="btn btn-primary w-100 mt-2"
+          onclick="logIn()"
+        >
+
+          Log In
+
+        </button>
+
+
+
+        <!-- REGISTER SWITCH -->
+
+        <p class="text-center mt-3 mb-0">
+
+          Don't have an account?
+
+          <span
+            class="switch"
+            onclick="showRegistration()"
+          >
+
+            Register
+
+          </span>
+
+        </p>
+
+
+      </div>
+
+
+
+      <!-- MESSAGE -->
+
+      <p
+        id="message"
+        class="text-center mt-3 mb-0"
+      ></p>
+
+
+    </div>
+
+  </div>
+
+
+
+  <!-- Bootstrap JavaScript -->
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+  ></script>
+
+
+
+  <script>
+
+    const registrationForm =
+      document.getElementById("registrationForm");
+
+    const loginForm =
+      document.getElementById("loginForm");
+
+    const messageElement =
+      document.getElementById("message");
+
+
+
+    // ===== REGISTRATION FUNCTION =====
+
+    function register() {
+
+      const gmail =
+        document.getElementById("regGmail").value.trim();
+
+      const username =
+        document.getElementById("regUsername").value.trim();
+
+      const password =
+        document.getElementById("regPassword").value.trim();
+
+
+      const name =
+        document.getElementById("regName").value.trim();
+
+      const age =
+        document.getElementById("regAge").value.trim();
+
+      const birthday =
+        document.getElementById("regBirthday").value.trim();
+
+      const sex =
+        document.getElementById("regSex").value;
+
+      const address =
+        document.getElementById("regAddress").value.trim();
+
+      const contact =
+        document.getElementById("regContact").value.trim();
+
+
+
+      // Check empty fields
+
+      if (
+        !gmail ||
+        !username ||
+        !password ||
+        !name ||
+        !age ||
+        !birthday ||
+        !sex ||
+        !address ||
+        !contact
+      ) {
+
+        messageElement.innerText =
+          "Please fill in all fields.";
+
+        messageElement.className =
+          "text-center mt-3 mb-0 text-danger fw-bold";
+
+        return;
+
+      }
+
+
+
+      // Gmail validation
+
+      if (!gmail.endsWith("@gmail.com")) {
+
+        messageElement.innerText =
+          "Please enter a valid Gmail address (must end with @gmail.com).";
+
+        messageElement.className =
+          "text-center mt-3 mb-0 text-danger fw-bold";
+
+        return;
+
+      }
+
+
+
+      // Username check
+
+      if (localStorage.getItem(username)) {
+
+        messageElement.innerText =
+          "Username already exists!";
+
+        messageElement.className =
+          "text-center mt-3 mb-0 text-danger fw-bold";
+
+        return;
+
+      }
+
+
+
+      // User data
+
+      const userData = {
+
+        gmail,
+        password,
+        name,
+        age,
+        birthday,
+        sex,
+        address,
+        contact
+
+      };
+
+
+
+      // Save account
+
+      localStorage.setItem(
+        username,
+        JSON.stringify(userData)
+      );
+
+
+
+      messageElement.innerText =
+        "Account created successfully! You can now log in.";
+
+      messageElement.className =
+        "text-center mt-3 mb-0 text-success fw-bold";
+
+
+
+      // Clear fields
+
+      document.getElementById("regGmail").value = "";
+
+      document.getElementById("regUsername").value = "";
+
+      document.getElementById("regPassword").value = "";
+
+      document.getElementById("regName").value = "";
+
+      document.getElementById("regAge").value = "";
+
+      document.getElementById("regBirthday").value = "";
+
+      document.getElementById("regSex").value = "";
+
+      document.getElementById("regAddress").value = "";
+
+      document.getElementById("regContact").value = "";
+
+
+
+      showLogin();
+
+    }
+
+
+
+    // ===== LOGIN FUNCTION =====
+
+    function logIn() {
+
+      const username =
+        document.getElementById("loginUsername").value.trim();
+
+      const password =
+        document.getElementById("loginPassword").value.trim();
+
+      const storedUser =
+        localStorage.getItem(username);
+
+
+
+      if (!username || !password) {
+
+        messageElement.innerText =
+          "Please enter your username and password.";
+
+        messageElement.className =
+          "text-center mt-3 mb-0 text-danger fw-bold";
+
+        return;
+
+      }
+
+
+
+      if (!storedUser) {
+
+        messageElement.innerText =
+          "Username not found.";
+
+        messageElement.className =
+          "text-center mt-3 mb-0 text-danger fw-bold";
+
+        return;
+
+      }
+
+
+
+      const user =
+        JSON.parse(storedUser);
+
+
+
+      if (user.password === password) {
+
+        alert(
+          `Welcome back, ${user.name || username}!`
+        );
+
+        window.location.href =
+          "homepage.html";
+
+      } else {
+
+        messageElement.innerText =
+          "Incorrect password.";
+
+        messageElement.className =
+          "text-center mt-3 mb-0 text-danger fw-bold";
+
+      }
+
+    }
+
+
+
+    // ===== SHOW LOGIN =====
+
+    function showLogin() {
+
+      registrationForm.classList.add("d-none");
+
+      loginForm.classList.remove("d-none");
+
+      messageElement.innerText = "";
+
+    }
+
+
+
+    // ===== SHOW REGISTRATION =====
+
+    function showRegistration() {
+
+      loginForm.classList.add("d-none");
+
+      registrationForm.classList.remove("d-none");
+
+      messageElement.innerText = "";
+
+    }
+
+
+
+    // ===== INITIAL SETUP =====
+
+    showRegistration();
+
+  </script>
+
+
+</body>
+
+</html>
