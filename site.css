@@ -108,7 +108,7 @@ h1,h2,h3,h4,h5,h6{font-family:"Roboto",sans-serif;}
 
 /* footer */
 footer{background:var(--navy);color:#c7cce0;padding:60px 5% 24px;margin-top:70px;}
-footer h6{color:var(--gold);font-size:.78rem;letter-spacing:1px;font-weight:700;margin-bottom:18px;}
+footer h3{color:var(--gold);font-size:.78rem;letter-spacing:1px;font-weight:700;margin-bottom:18px;}
 footer .brand-title{color:#fff;font-size:1.3rem;font-weight:700;margin-bottom:14px;}
 footer p{font-size:.87rem;line-height:1.6;color:#9aa1bb;}
 footer ul{list-style:none;padding:0;margin:0;} footer ul li{margin-bottom:10px;}
