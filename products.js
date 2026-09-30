@@ -395,208 +395,445 @@ const PRODUCTS = [
 let currentCategory = 'household';
 let currentSubcat = null;
 
-/* initialize top category boxes */
-function renderTopCats(){
-  const cats = document.querySelectorAll('.cat-box');
-  cats.forEach(el=>{
-    el.classList.toggle('active', el.dataset.cat === currentCategory);
-    el.onclick = ()=>{
-      currentCategory = el.dataset.cat;
-      currentSubcat = null;
-      renderTopCats();
-      renderSubcats();
-      renderProducts();
-      scrollToTop();
-    };
-  });
+function renderTopCats() {
+    $('.cat-box').each(function () {
+        $(this).toggleClass(
+            'active',
+            $(this).data('cat') === currentCategory
+        );
+    });
 }
 
-/* build subcategory buttons from PRODUCTS for current category */
-function renderSubcats(){
-  const area = document.getElementById('subcat-area');
-  area.innerHTML = '';
-  const subs = [...new Set(PRODUCTS.filter(p=>p.category===currentCategory).map(p=>p.sub))];
-  if(subs.length===0) return;
-  const wrapper = document.createElement('div');
-  wrapper.className = 'subcats';
-  // "All" button
-  const allBtn = document.createElement('button');
-  allBtn.className = 'subcat-btn' + (currentSubcat===null ? ' active':'');
-  allBtn.textContent = 'All';
-  allBtn.onclick = ()=>{ currentSubcat = null; renderSubcats(); renderProducts(); };
-  wrapper.appendChild(allBtn);
-  subs.forEach(s=>{
-    const b = document.createElement('button');
-    b.className = 'subcat-btn' + (currentSubcat===s ? ' active':'');
-    b.textContent = s;
-    b.onclick = ()=>{ currentSubcat = s; renderSubcats(); renderProducts(); };
-    wrapper.appendChild(b);
-  });
-  area.appendChild(wrapper);
+function renderSubcats() {
+    const $area = $('#subcat-area');
+    $area.empty();
+
+    const subs = [
+        ...new Set(
+            PRODUCTS
+                .filter(p => p.category === currentCategory)
+                .map(p => p.sub)
+        )
+    ];
+
+    if (!subs.length) return;
+
+    const $wrapper = $('<div>').addClass('subcats');
+
+    $('<button>')
+        .addClass('subcat-btn')
+        .toggleClass('active', currentSubcat === null)
+        .attr('data-sub', '')
+        .text('All')
+        .appendTo($wrapper);
+
+    $.each(subs, function (_, sub) {
+        $('<button>')
+            .addClass('subcat-btn')
+            .toggleClass('active', currentSubcat === sub)
+            .attr('data-sub', sub)
+            .text(sub)
+            .appendTo($wrapper);
+    });
+
+    $area.append($wrapper);
 }
 
-/* render product cards for category & subcategory */
-function renderProducts(){
-  const grid = document.getElementById('product-grid');
-  grid.innerHTML = '';
-  const list = PRODUCTS.filter(p=> p.category===currentCategory && (currentSubcat ? p.sub===currentSubcat : true));
-  list.forEach(p=>{
-    const card = document.createElement('div');
-    card.className = 'product-card';
-    card.innerHTML = `
-      <div class="img"><img src="${p.img}" alt="${p.name}" onerror="this.style.display='none'"></div>
-      <div class="product-name">${p.name}</div>
-      <div class="product-price">₱${p.price.toLocaleString()}</div>
-      <div style="color:var(--muted); font-size:13px; margin-bottom:8px;">${p.sub}</div>
-<div class="product-actions">
-  <button class="btn-add" onclick="addToCart('${p.id}')">Add to Cart</button>
-  <button class="btn-buy" onclick="buyNow('${p.id}')">Buy Now</button>
-  <button class="btn-view" onclick="showDetails('${p.id}')">View Details</button>
-</div>
-    `;
-    grid.appendChild(card);
-  });
+function renderProducts() {
+    const $grid = $('#product-grid');
+
+    $grid.empty();
+
+    const list = PRODUCTS.filter(function (product) {
+        return (
+            product.category === currentCategory &&
+            (
+                currentSubcat === null ||
+                product.sub === currentSubcat
+            )
+        );
+    });
+
+    $.each(list, function (_, product) {
+        const card = `
+            <div class="product-card">
+                <div class="img">
+                    <img
+                        src="${product.img}"
+                        alt="${product.name}"
+                        onerror="this.style.display='none'"
+                    >
+                </div>
+
+                <div class="product-name">
+                    ${product.name}
+                </div>
+
+                <div class="product-price">
+                    ₱${product.price.toLocaleString()}
+                </div>
+
+                <div style="color:var(--muted);font-size:13px;margin-bottom:8px;">
+                    ${product.sub}
+                </div>
+
+                <div class="product-actions">
+                    <button
+                        class="btn-add"
+                        data-add="${product.id}"
+                    >
+                        Add to Cart
+                    </button>
+
+                    <button
+                        class="btn-buy"
+                        data-buy="${product.id}"
+                    >
+                        Buy Now
+                    </button>
+
+                    <button
+                        class="btn-view"
+                        data-view="${product.id}"
+                    >
+                        View Details
+                    </button>
+                </div>
+            </div>
+        `;
+
+        $grid.append(card);
+    });
 }
 
-/* ---------- CART LOGIC ---------- */
-/* cart: array of {id, name, price, qty, img} */
 let cart = JSON.parse(localStorage.getItem('st_cart')) || [];
 
-function saveCart(){ localStorage.setItem('st_cart', JSON.stringify(cart)); updateCartCount(); }
+function saveCart() {
+    localStorage.setItem(
+        'st_cart',
+        JSON.stringify(cart)
+    );
 
-function updateCartCount(){
-  const count = cart.reduce((s,i)=> s + (i.qty||1), 0);
-  document.getElementById('cart-count').textContent = count;
-}
-
-/* find product by id in PRODUCTS */
-function findProduct(id){ return PRODUCTS.find(p=>p.id===id); }
-
-/* addToCart by product id */
-function addToCart(id){
-  const p = findProduct(id);
-  if(!p) return alert('Product not found');
-  const idx = cart.findIndex(i=>i.id===id);
-  if(idx>-1) cart[idx].qty = (cart[idx].qty||1) + 1;
-  else cart.push({ id:p.id, name:p.name, price:p.price, qty:1, img:p.img });
-  saveCart(); renderCart();
-}
-
-/* buyNow: add then open cart/payment */
-function buyNow(id){
-  addToCart(id);
-  setTimeout(()=>{ scrollToCart(); openPayment(); }, 150);
-}
-
-/* render cart items under "Your Cart" */
-function renderCart(){
-  const container = document.getElementById('cart-items');
-  container.innerHTML = '';
-  if(cart.length===0){
-    container.innerHTML = '<p style="text-align:center;color:#777;">Your cart is empty.</p>';
-    document.getElementById('cart-total').textContent = 'Total: ₱0';
     updateCartCount();
-    return;
-  }
-  let total = 0;
-  cart.forEach((it, idx)=>{
-    total += it.price * it.qty;
-    const div = document.createElement('div');
-    div.className = 'cart-item';
-    div.innerHTML = `
-      <div class="cart-left">
-        <img src="${it.img}" alt="${it.name}" onerror="this.style.display='none'">
-        <div class="cart-meta">
-          <div style="font-weight:bold;">${it.name}</div>
-          <div style="color:var(--muted); font-size:13px;">₱${it.price.toLocaleString()}</div>
-        </div>
-      </div>
-      <div style="display:flex;align-items:center;gap:12px;">
-        <div class="qty-controls">
-          <button onclick="changeQty(${idx}, -1)">-</button>
-          <span id="qty-${idx}" style="min-width:24px; text-align:center;">${it.qty}</span>
-          <button onclick="changeQty(${idx}, 1)">+</button>
-        </div>
-        <div style="min-width:100px; text-align:right;">₱${(it.price*it.qty).toLocaleString()}</div>
-        <button class="remove-btn" onclick="removeItem(${idx})">Remove</button>
-      </div>
-    `;
-    container.appendChild(div);
-  });
-  document.getElementById('cart-total').textContent = 'Total: ₱' + total.toLocaleString();
-  updateCartCount();
 }
 
-/* change quantity */
-function changeQty(index, delta){
-  cart[index].qty = Math.max(1, (cart[index].qty||1) + delta);
-  saveCart(); renderCart();
+function updateCartCount() {
+    const count = cart.reduce(function (total, item) {
+        return total + (item.qty || 1);
+    }, 0);
+
+    $('#cart-count').text(count);
 }
 
-/* remove item */
-function removeItem(index){
-  if(!confirm('Remove this item?')) return;
-  cart.splice(index,1);
-  saveCart(); renderCart();
+function findProduct(id) {
+    return PRODUCTS.find(p => p.id === id);
 }
 
-/* clear cart */
-function clearCart(){
-  if(!confirm('Clear entire cart?')) return;
-  cart = []; saveCart(); renderCart();
-}
+function addToCart(id) {
+    const product = findProduct(id);
 
-/* scroll to cart */
-function scrollToCart(){ document.getElementById('cart-section').scrollIntoView({behavior:'smooth', block:'start'}); renderCart(); }
-
-/* scroll to top */
-function scrollToTop(){ window.scrollTo({top:0, behavior:'smooth'}); }
-
-/* ---------- PAYMENT UI ---------- */
-function openPayment(){
-  if(cart.length===0){ alert('Cart empty. Add items first.'); return; }
-  // populate payment items
-  const payItems = document.getElementById('pay-items');
-  payItems.innerHTML = '';
-  let total = 0;
-  cart.forEach(it => { total += it.price * it.qty; payItems.innerHTML += `<div style="padding:6px 0;">${it.name} x${it.qty} — ₱${(it.price*it.qty).toLocaleString()}</div>`; });
-  document.getElementById('pay-total').textContent = '₱' + total.toLocaleString();
-  document.getElementById('payment').style.display = 'block';
-  setTimeout(()=> document.getElementById('payment').scrollIntoView({behavior:'smooth', block:'start'}), 80);
-}
-
-/* hide payment */
-function closePayment(){ document.getElementById('payment').style.display = 'none'; }
-
-/* show card fields when Card is chosen */
-document.addEventListener('change', (e)=>{
-  if(e.target.name === 'paymethod'){
-    const val = document.querySelector('input[name="paymethod"]:checked')?.value;
-    document.getElementById('card-fields').style.display = (val==='Card') ? 'block' : 'none';
-  }
-});
-
-/* complete payment (simulated) */
-function completePayment(){
-    const address = document.getElementById('address').value.trim();
-    const method = document.querySelector('input[name="paymethod"]:checked')?.value;
-
-    if(!address) return alert('Please add delivery address.');
-    if(!method) return alert('Please choose a payment method.');
-
-    if(method === 'Card'){
-        const cn = document.getElementById('card-number').value.replace(/\s/g,'');
-        const nm = document.getElementById('card-name').value.trim();
-        const exp = document.getElementById('card-exp').value.trim();
-        const cvv = document.getElementById('card-cvv').value.trim();
-        if(!nm || !cn || !exp || !cvv) return alert('Please fill card details.');
-        if(cn.replace(/\D/g,'').length < 13) return alert('Enter a valid card number.');
+    if (!product) {
+        alert('Product not found');
+        return;
     }
 
-    // ------------- save order data for receipt.html -------------
+    const index = cart.findIndex(
+        item => item.id === id
+    );
+
+    if (index > -1) {
+        cart[index].qty =
+            (cart[index].qty || 1) + 1;
+    } else {
+        cart.push({
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            qty: 1,
+            img: product.img
+        });
+    }
+
+    saveCart();
+    renderCart();
+}
+
+function buyNow(id) {
+    addToCart(id);
+
+    setTimeout(function () {
+        scrollToCart();
+        openPayment();
+    }, 150);
+}
+
+function renderCart() {
+    const $container = $('#cart-items');
+
+    $container.empty();
+
+    if (!cart.length) {
+        $container.html(`
+            <p style="text-align:center;color:#777;">
+                Your cart is empty.
+            </p>
+        `);
+
+        $('#cart-total').text('Total: ₱0');
+
+        updateCartCount();
+
+        return;
+    }
+
+    let total = 0;
+
+    $.each(cart, function (index, item) {
+        total += item.price * item.qty;
+
+        const row = `
+            <div class="cart-item">
+
+                <div class="cart-left">
+
+                    <img
+                        src="${item.img}"
+                        alt="${item.name}"
+                        onerror="this.style.display='none'"
+                    >
+
+                    <div class="cart-meta">
+
+                        <div style="font-weight:bold;">
+                            ${item.name}
+                        </div>
+
+                        <div style="color:var(--muted);font-size:13px;">
+                            ₱${item.price.toLocaleString()}
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div style="display:flex;align-items:center;gap:12px;">
+
+                    <div class="qty-controls">
+
+                        <button
+                            class="qty-minus"
+                            data-index="${index}"
+                        >
+                            -
+                        </button>
+
+                        <span style="min-width:24px;text-align:center;">
+                            ${item.qty}
+                        </span>
+
+                        <button
+                            class="qty-plus"
+                            data-index="${index}"
+                        >
+                            +
+                        </button>
+
+                    </div>
+
+                    <div style="min-width:100px;text-align:right;">
+                        ₱${(
+                            item.price * item.qty
+                        ).toLocaleString()}
+                    </div>
+
+                    <button
+                        class="remove-btn"
+                        data-remove="${index}"
+                    >
+                        Remove
+                    </button>
+
+                </div>
+
+            </div>
+        `;
+
+        $container.append(row);
+    });
+
+    $('#cart-total').text(
+        'Total: ₱' + total.toLocaleString()
+    );
+
+    updateCartCount();
+}
+
+function changeQty(index, amount) {
+    cart[index].qty =
+        Math.max(
+            1,
+            (cart[index].qty || 1) + amount
+        );
+
+    saveCart();
+    renderCart();
+}
+
+function removeItem(index) {
+    if (!confirm('Remove this item?')) return;
+
+    cart.splice(index, 1);
+
+    saveCart();
+    renderCart();
+}
+
+function clearCart() {
+    if (!confirm('Clear entire cart?')) return;
+
+    cart = [];
+
+    saveCart();
+    renderCart();
+}
+
+function scrollToCart() {
+    renderCart();
+
+    const $cart = $('#cart-section');
+
+    if (!$cart.length) return;
+
+    $('html, body')
+        .stop(true)
+        .animate(
+            {
+                scrollTop:
+                    $cart.offset().top - 20
+            },
+            500
+        );
+}
+
+function scrollToTop() {
+    $('html, body')
+        .stop(true)
+        .animate(
+            {
+                scrollTop: 0
+            },
+            500
+        );
+}
+
+function openPayment() {
+    if (!cart.length) {
+        alert('Cart empty. Add items first.');
+        return;
+    }
+
+    const $payItems = $('#pay-items');
+
+    $payItems.empty();
+
+    let total = 0;
+
+    $.each(cart, function (_, item) {
+        total += item.price * item.qty;
+
+        $payItems.append(`
+            <div style="padding:6px 0;">
+                ${item.name}
+                x${item.qty}
+                —
+                ₱${(
+                    item.price * item.qty
+                ).toLocaleString()}
+            </div>
+        `);
+    });
+
+    $('#pay-total').text(
+        '₱' + total.toLocaleString()
+    );
+
+    $('#payment')
+        .stop(true, true)
+        .slideDown(400);
+
+    setTimeout(function () {
+        $('html, body')
+            .stop(true)
+            .animate(
+                {
+                    scrollTop:
+                        $('#payment').offset().top - 20
+                },
+                500
+            );
+    }, 150);
+}
+
+function closePayment() {
+    $('#payment')
+        .stop(true, true)
+        .slideUp(400);
+}
+
+function completePayment() {
+    const address =
+        $('#address').val().trim();
+
+    const method =
+        $('input[name="paymethod"]:checked').val();
+
+    if (!address) {
+        alert('Please add delivery address.');
+        return;
+    }
+
+    if (!method) {
+        alert('Please choose a payment method.');
+        return;
+    }
+
+    if (method === 'Card') {
+        const name =
+            $('#card-name').val().trim();
+
+        const cardNumber =
+            $('#card-number')
+                .val()
+                .replace(/\D/g, '');
+
+        const expiry =
+            $('#card-exp').val().trim();
+
+        const cvv =
+            $('#card-cvv').val().trim();
+
+        if (
+            !name ||
+            !cardNumber ||
+            !expiry ||
+            !cvv
+        ) {
+            alert('Please fill card details.');
+            return;
+        }
+
+        if (cardNumber.length < 13) {
+            alert('Enter a valid card number.');
+            return;
+        }
+    }
+
     let subtotal = 0;
-    const cartItems = cart.map(item => {
-        subtotal += item.price * item.qty;
+
+    const cartItems = cart.map(function (item) {
+        subtotal +=
+            item.price * item.qty;
+
         return {
             name: item.name,
             price: item.price,
@@ -605,81 +842,274 @@ function completePayment(){
     });
 
     const shippingFee = 150;
-    const grandTotal = subtotal + shippingFee;
+    const grandTotal =
+        subtotal + shippingFee;
 
     const orderData = {
-        orderNumber: "ORD-" + Math.floor(Math.random() * 900000 + 100000),
-        orderDate: new Date().toLocaleString(),
+        orderNumber:
+            'ORD-' +
+            Math.floor(
+                Math.random() * 900000 +
+                100000
+            ),
+
+        orderDate:
+            new Date().toLocaleString(),
+
         paymentMethod: method,
+
         address: address,
+
         cartItems: cartItems,
+
         subtotal: subtotal,
+
         grandTotal: grandTotal
     };
 
-    localStorage.setItem("lastOrder", JSON.stringify(orderData));
+    localStorage.setItem(
+        'lastOrder',
+        JSON.stringify(orderData)
+    );
 
-    // ----------- clear cart after checkout -----------
     cart = [];
+
     saveCart();
 
-    // ----------- redirect to receipt page -----------
-    window.location.href = "receipt.html";
+    window.location.href =
+        'receipt.html';
 }
-
-
-/* ---------- startup ---------- */
-function init(){
-  renderTopCats();
-  renderSubcats();
-  renderProducts();
-  renderCart();
-  updateCartCount();
-}
-
-/* hook up top-cat boxes */
-document.querySelectorAll('.cat-box').forEach(box=>{
-  box.addEventListener('click', ()=>{
-    currentCategory = box.dataset.cat;
-    currentSubcat = null;
-    renderTopCats();
-    renderSubcats();
-    renderProducts();
-    scrollToTop();
-  });
-});
 
 function showDetails(id) {
-  const p = PRODUCTS.find(pr => pr.id === id);
-  if (!p) return;
+    const product =
+        PRODUCTS.find(p => p.id === id);
 
-  const desc = p.desc;
-  document.getElementById('descContent').innerHTML = `
-    <img src="${p.img}" alt="${p.name}">
-    <h2>${p.name}</h2>
-    <p><strong>₱${p.price.toLocaleString()}</strong></p>
-    <p style="color:#555;">${p.sub}</p>
-    <div style="text-align:left; margin:10px auto; max-width:600px;">${desc}</div>
-    <div style="margin-top:15px;">
-      <button class="btn-add" onclick="addToCart('${p.id}')">Add to Cart</button>
-      <button class="btn-buy" onclick="buyNow('${p.id}')">Buy Now</button>
-    </div>
-  `;
+    if (!product) return;
 
-  document.getElementById('descOverlay').style.display = 'flex';
+    $('#descContent').html(`
+        <img
+            src="${product.img}"
+            alt="${product.name}"
+        >
+
+        <h2>
+            ${product.name}
+        </h2>
+
+        <p>
+            <strong>
+                ₱${product.price.toLocaleString()}
+            </strong>
+        </p>
+
+        <p style="color:#555;">
+            ${product.sub}
+        </p>
+
+        <div
+            style="
+                text-align:left;
+                margin:10px auto;
+                max-width:600px;
+            "
+        >
+            ${product.desc}
+        </div>
+
+        <div style="margin-top:15px;">
+
+            <button
+                class="btn-add"
+                data-add="${product.id}"
+            >
+                Add to Cart
+            </button>
+
+            <button
+                class="btn-buy"
+                data-buy="${product.id}"
+            >
+                Buy Now
+            </button>
+
+        </div>
+    `);
+
+    $('#descOverlay')
+        .css('display', 'flex')
+        .hide()
+        .fadeIn(300);
 }
 
 function closeOverlay() {
-  document.getElementById('descOverlay').style.display = 'none';
+    $('#descOverlay')
+        .stop(true, true)
+        .fadeOut(300);
 }
 
-/* Optional: close when clicking outside the content */
-window.addEventListener('click', e => {
-  const overlay = document.getElementById('descOverlay');
-  if (e.target === overlay) closeOverlay();
-});
-window.addEventListener('load', init);
+function init() {
+    renderTopCats();
+    renderSubcats();
+    renderProducts();
+    renderCart();
+    updateCartCount();
+}
 
+$(document).ready(function () {
+
+    init();
+
+    $('.cat-box').on('click', function () {
+        currentCategory =
+            $(this).data('cat');
+
+        currentSubcat = null;
+
+        renderTopCats();
+        renderSubcats();
+        renderProducts();
+        scrollToTop();
+    });
+
+
+    $(document).on(
+        'click',
+        '.subcat-btn',
+        function () {
+
+            const sub =
+                $(this).attr('data-sub');
+
+            currentSubcat =
+                sub === ''
+                    ? null
+                    : sub;
+
+            renderSubcats();
+            renderProducts();
+        }
+    );
+
+
+    $(document).on(
+        'click',
+        '.btn-add',
+        function () {
+
+            const id =
+                $(this).data('add');
+
+            addToCart(id);
+        }
+    );
+
+
+    $(document).on(
+        'click',
+        '.btn-buy',
+        function () {
+
+            const id =
+                $(this).data('buy');
+
+            buyNow(id);
+        }
+    );
+
+
+    $(document).on(
+        'click',
+        '.btn-view',
+        function () {
+
+            const id =
+                $(this).data('view');
+
+            showDetails(id);
+        }
+    );
+
+
+    $(document).on(
+        'click',
+        '.qty-minus',
+        function () {
+
+            const index =
+                Number(
+                    $(this).data('index')
+                );
+
+            changeQty(index, -1);
+        }
+    );
+
+
+    $(document).on(
+        'click',
+        '.qty-plus',
+        function () {
+
+            const index =
+                Number(
+                    $(this).data('index')
+                );
+
+            changeQty(index, 1);
+        }
+    );
+
+
+    $(document).on(
+        'click',
+        '.remove-btn',
+        function () {
+
+            const index =
+                Number(
+                    $(this).data('remove')
+                );
+
+            removeItem(index);
+        }
+    );
+
+
+    $('input[name="paymethod"]').on(
+        'change',
+        function () {
+
+            const method =
+                $(
+                    'input[name="paymethod"]:checked'
+                ).val();
+
+            if (method === 'Card') {
+                $('#card-fields')
+                    .stop(true, true)
+                    .slideDown(300);
+            } else {
+                $('#card-fields')
+                    .stop(true, true)
+                    .slideUp(300);
+            }
+        }
+    );
+
+
+    $('#descOverlay').on(
+        'click',
+        function (event) {
+
+            if (
+                event.target === this
+            ) {
+                closeOverlay();
+            }
+        }
+    );
+
+});
 
 
 

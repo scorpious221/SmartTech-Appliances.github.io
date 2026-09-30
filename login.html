@@ -1,191 +1,1092 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
 <title>SmartTech — Log In / Register</title>
+
 <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
 <style>
-  :root{
-    --navy:#101a33; --navy-2:#161f3d; --gold:#d9a441; --gold-2:#c88f2a;
-    --cream:#f7f5f0; --ink:#1b2033; --muted:#6b7280; --radius:14px;
-  }
-  *{box-sizing:border-box;}
-  html,body{min-height:100%;}
-  body{
-    font-family:"Roboto",sans-serif; color:var(--ink); margin:0;
-    background:linear-gradient(100deg,rgba(10,14,26,.85),rgba(10,14,26,.6)),
-               url('background.png') center/cover fixed, linear-gradient(135deg,#3a3227,#20242f 60%);
-    display:flex; flex-direction:column; min-height:100vh;
-  }
-  h1,h2,.display-font{font-family:"Roboto",sans-serif;}
-  a{text-decoration:none;}
 
-  /* navbar */
-  .st-navbar{padding:22px 5%; padding-top:calc(22px + env(safe-area-inset-top,0px));
-    display:flex; align-items:center; justify-content:space-between;}
-  .st-brand{display:flex;align-items:center;gap:10px;color:#fff;font-weight:700;font-size:1.25rem;}
-  .st-brand .logo-box{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;}
-.st-brand .logo-box img{width:100%;height:100%;object-fit:contain;}
-  .back-link{color:#eef0f5;font-weight:500;font-size:.95rem;opacity:.9;}
-  .back-link:hover{color:var(--gold);opacity:1;}
+:root{
+    --navy:#101a33;
+    --navy-2:#161f3d;
+    --gold:#d9a441;
+    --gold-2:#c88f2a;
+    --cream:#f7f5f0;
+    --ink:#1b2033;
+    --muted:#6b7280;
+    --radius:14px;
+}
 
-  /* card */
-  main{flex:1; display:flex; align-items:center; justify-content:center; padding:20px 12px 40px;}
-  .auth-card{
-    width:100%; max-width:680px; background:#fff; border-radius:var(--radius);
-    box-shadow:0 20px 50px rgba(0,0,0,.35); overflow:hidden;
-  }
-  .auth-head{background:var(--navy); color:#fff; text-align:center; padding:26px 20px;}
-  .auth-head h1{font-size:1.9rem; margin:0 0 4px; font-weight:600;}
-  .auth-head p{margin:0; color:#c7cce0; font-size:.92rem;}
-  .auth-body{padding:28px;}
-  .form-section-title{font-family:"Roboto",sans-serif; color:var(--navy);
-    font-size:1.15rem; font-weight:600; margin:0 0 14px; padding-bottom:6px; border-bottom:2px solid var(--gold);
-    display:inline-block;}
-  .form-label{font-weight:500; font-size:.9rem; color:var(--navy);}
-  .form-control,.form-select{border-radius:8px; padding:10px 12px; border:1px solid #d5d8e0;}
-  .form-control:focus,.form-select:focus{border-color:var(--gold-2); box-shadow:0 0 0 .2rem rgba(217,164,65,.25);}
-  .btn-gold{background:var(--gold); color:#241a05; border:0; font-weight:700; border-radius:8px; padding:11px;}
-  .btn-gold:hover{background:var(--gold-2); color:#241a05;}
-  .switch{color:var(--gold-2); font-weight:600; cursor:pointer;}
-  .switch:hover{text-decoration:underline;}
-  #message{font-weight:600; min-height:1.4em;}
+*{
+    box-sizing:border-box;
+}
 
-  footer{background:var(--navy); color:#8890ab; text-align:center; font-size:.8rem;
-    padding:18px 5%; padding-bottom:calc(18px + env(safe-area-inset-bottom,0px));}
+html,
+body{
+    min-height:100%;
+}
 
-  @media (max-width:575px){ .auth-body{padding:20px 16px;} .auth-head h1{font-size:1.5rem;} }
+body{
+    font-family:"Roboto",sans-serif;
+    color:var(--ink);
+    margin:0;
+
+    background:
+        linear-gradient(
+            100deg,
+            rgba(10,14,26,.85),
+            rgba(10,14,26,.6)
+        ),
+        url('background.png') center/cover fixed,
+        linear-gradient(
+            135deg,
+            #3a3227,
+            #20242f 60%
+        );
+
+    display:flex;
+    flex-direction:column;
+    min-height:100vh;
+}
+
+h1,
+h2,
+.display-font{
+    font-family:"Roboto",sans-serif;
+}
+
+a{
+    text-decoration:none;
+}
+
+.st-navbar{
+    padding:22px 5%;
+    padding-top:
+        calc(
+            22px +
+            env(safe-area-inset-top,0px)
+        );
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.st-brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:#fff;
+    font-weight:700;
+    font-size:1.25rem;
+}
+
+.st-brand .logo-box{
+    width:38px;
+    height:38px;
+    border-radius:8px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.st-brand .logo-box img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+}
+
+.back-link{
+    color:#eef0f5;
+    font-weight:500;
+    font-size:.95rem;
+    opacity:.9;
+}
+
+.back-link:hover{
+    color:var(--gold);
+    opacity:1;
+}
+
+main{
+    flex:1;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    padding:20px 12px 40px;
+}
+
+.auth-card{
+    width:100%;
+    max-width:680px;
+
+    background:#fff;
+    border-radius:var(--radius);
+
+    box-shadow:
+        0 20px 50px rgba(0,0,0,.35);
+
+    overflow:hidden;
+}
+
+.auth-head{
+    background:var(--navy);
+    color:#fff;
+    text-align:center;
+    padding:26px 20px;
+}
+
+.auth-head h1{
+    font-size:1.9rem;
+    margin:0 0 4px;
+    font-weight:600;
+}
+
+.auth-head p{
+    margin:0;
+    color:#c7cce0;
+    font-size:.92rem;
+}
+
+.auth-body{
+    padding:28px;
+}
+
+.form-section-title{
+    font-family:"Roboto",sans-serif;
+    color:var(--navy);
+
+    font-size:1.15rem;
+    font-weight:600;
+
+    margin:0 0 14px;
+    padding-bottom:6px;
+
+    border-bottom:2px solid var(--gold);
+
+    display:inline-block;
+}
+
+.form-label{
+    font-weight:500;
+    font-size:.9rem;
+    color:var(--navy);
+}
+
+.form-control,
+.form-select{
+    border-radius:8px;
+    padding:10px 12px;
+    border:1px solid #d5d8e0;
+}
+
+.form-control:focus,
+.form-select:focus{
+    border-color:var(--gold-2);
+
+    box-shadow:
+        0 0 0 .2rem rgba(217,164,65,.25);
+}
+
+.btn-gold{
+    background:var(--gold);
+    color:#241a05;
+    border:0;
+
+    font-weight:700;
+
+    border-radius:8px;
+    padding:11px;
+}
+
+.btn-gold:hover{
+    background:var(--gold-2);
+    color:#241a05;
+}
+
+.switch{
+    color:var(--gold-2);
+    font-weight:600;
+    cursor:pointer;
+}
+
+.switch:hover{
+    text-decoration:underline;
+}
+
+#message{
+    font-weight:600;
+    min-height:1.4em;
+}
+
+footer{
+    background:var(--navy);
+    color:#8890ab;
+
+    text-align:center;
+    font-size:.8rem;
+
+    padding:18px 5%;
+
+    padding-bottom:
+        calc(
+            18px +
+            env(safe-area-inset-bottom,0px)
+        );
+}
+
+@media (max-width:575px){
+
+    .auth-body{
+        padding:20px 16px;
+    }
+
+    .auth-head h1{
+        font-size:1.5rem;
+    }
+
+}
+
 </style>
+
 </head>
+
 <body>
 
+
 <nav class="st-navbar">
-  <a href="index.html" class="st-brand">
-    <span class="logo-box"><img src="images/smarttechlogowhite.png" alt="SmartTech Logo"></span>SmartTech
-  </a>
-  <a href="index.html" class="back-link"><i class="fa-solid fa-arrow-left me-1"></i> Back to Home</a>
+
+    <a
+        href="index.html"
+        class="st-brand"
+    >
+
+        <span class="logo-box">
+
+            <img
+                src="images/smarttechlogowhite.png"
+                alt="SmartTech Logo"
+            >
+
+        </span>
+
+        SmartTech
+
+    </a>
+
+
+    <a
+        href="index.html"
+        class="back-link"
+    >
+
+        <i class="fa-solid fa-arrow-left me-1"></i>
+
+        Back to Home
+
+    </a>
+
 </nav>
 
+
+
 <main>
-  <div class="auth-card">
 
-    <!-- REGISTRATION -->
-    <div id="registrationForm">
-      <div class="auth-head">
-        <h1>Create Account</h1>
-        <p>Register your SmartTech Appliances account</p>
-      </div>
-      <div class="auth-body">
-        <h2 class="form-section-title">Account Information</h2>
+<div class="auth-card">
+
+
+<div id="registrationForm">
+
+    <div class="auth-head">
+
+        <h1>
+            Create Account
+        </h1>
+
+        <p>
+            Register your SmartTech Appliances account
+        </p>
+
+    </div>
+
+
+    <div class="auth-body">
+
+        <h2 class="form-section-title">
+            Account Information
+        </h2>
+
+
         <div class="row g-3 mb-4">
-          <div class="col-md-4"><label for="regGmail" class="form-label">Gmail</label>
-            <input type="email" id="regGmail" class="form-control" placeholder="Enter Gmail"></div>
-          <div class="col-md-4"><label for="regUsername" class="form-label">Username</label>
-            <input type="text" id="regUsername" class="form-control" placeholder="Create Username"></div>
-          <div class="col-md-4"><label for="regPassword" class="form-label">Password</label>
-            <input type="password" id="regPassword" class="form-control" placeholder="Create Password"></div>
+
+
+            <div class="col-md-4">
+
+                <label
+                    for="regGmail"
+                    class="form-label"
+                >
+                    Gmail
+                </label>
+
+                <input
+                    type="email"
+                    id="regGmail"
+                    class="form-control"
+                    placeholder="Enter Gmail"
+                >
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <label
+                    for="regUsername"
+                    class="form-label"
+                >
+                    Username
+                </label>
+
+                <input
+                    type="text"
+                    id="regUsername"
+                    class="form-control"
+                    placeholder="Create Username"
+                >
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <label
+                    for="regPassword"
+                    class="form-label"
+                >
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    id="regPassword"
+                    class="form-control"
+                    placeholder="Create Password"
+                >
+
+            </div>
+
+
         </div>
 
-        <h2 class="form-section-title">Customer Details</h2>
+
+
+        <h2 class="form-section-title">
+            Customer Details
+        </h2>
+
+
         <div class="row g-3">
-          <div class="col-md-6"><label for="regName" class="form-label">Full Name</label>
-            <input type="text" id="regName" class="form-control" placeholder="Full Name"></div>
-          <div class="col-md-3 col-6"><label for="regAge" class="form-label">Age</label>
-            <input type="number" id="regAge" class="form-control" placeholder="Age" min="1"></div>
-          <div class="col-md-3 col-6"><label for="regSex" class="form-label">Sex</label>
-            <select id="regSex" class="form-select">
-              <option value="" disabled selected>Select</option>
-              <option>Male</option><option>Female</option><option>Other</option>
-            </select></div>
-          <div class="col-md-6"><label for="regBirthday" class="form-label">Birthday</label>
-            <input type="date" id="regBirthday" class="form-control"></div>
-          <div class="col-md-6"><label for="regContact" class="form-label">Contact Number</label>
-            <input type="tel" id="regContact" class="form-control" placeholder="09123456789"></div>
-          <div class="col-12"><label for="regAddress" class="form-label">Address</label>
-            <input type="text" id="regAddress" class="form-control" placeholder="Enter your address"></div>
+
+
+            <div class="col-md-6">
+
+                <label
+                    for="regName"
+                    class="form-label"
+                >
+                    Full Name
+                </label>
+
+                <input
+                    type="text"
+                    id="regName"
+                    class="form-control"
+                    placeholder="Full Name"
+                >
+
+            </div>
+
+
+            <div class="col-md-3 col-6">
+
+                <label
+                    for="regAge"
+                    class="form-label"
+                >
+                    Age
+                </label>
+
+                <input
+                    type="number"
+                    id="regAge"
+                    class="form-control"
+                    placeholder="Age"
+                    min="1"
+                >
+
+            </div>
+
+
+            <div class="col-md-3 col-6">
+
+                <label
+                    for="regSex"
+                    class="form-label"
+                >
+                    Sex
+                </label>
+
+                <select
+                    id="regSex"
+                    class="form-select"
+                >
+
+                    <option
+                        value=""
+                        disabled
+                        selected
+                    >
+                        Select
+                    </option>
+
+                    <option>Male</option>
+                    <option>Female</option>
+                    <option>Other</option>
+
+                </select>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <label
+                    for="regBirthday"
+                    class="form-label"
+                >
+                    Birthday
+                </label>
+
+                <input
+                    type="date"
+                    id="regBirthday"
+                    class="form-control"
+                >
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <label
+                    for="regContact"
+                    class="form-label"
+                >
+                    Contact Number
+                </label>
+
+                <input
+                    type="tel"
+                    id="regContact"
+                    class="form-control"
+                    placeholder="09123456789"
+                >
+
+            </div>
+
+
+            <div class="col-12">
+
+                <label
+                    for="regAddress"
+                    class="form-label"
+                >
+                    Address
+                </label>
+
+                <input
+                    type="text"
+                    id="regAddress"
+                    class="form-control"
+                    placeholder="Enter your address"
+                >
+
+            </div>
+
+
         </div>
 
-        <button type="button" class="btn btn-gold w-100 mt-4" onclick="register()">Register</button>
-        <p class="text-center mt-3 mb-0 text-secondary">Already have an account?
-          <span class="switch" onclick="showLogin()">Log In</span></p>
-      </div>
+
+        <button
+            type="button"
+            id="registerBtn"
+            class="btn btn-gold w-100 mt-4"
+        >
+            Register
+        </button>
+
+
+        <p class="text-center mt-3 mb-0 text-secondary">
+
+            Already have an account?
+
+            <span
+                class="switch"
+                id="showLogin"
+            >
+                Log In
+            </span>
+
+        </p>
+
     </div>
 
-    <!-- LOGIN -->
-    <div id="loginForm" class="d-none">
-      <div class="auth-head">
-        <h1>Welcome Back</h1>
-        <p>Log in to your SmartTech Appliances account</p>
-      </div>
-      <div class="auth-body mx-auto" style="max-width:460px">
-        <div class="mb-3"><label for="loginUsername" class="form-label">Username</label>
-          <input type="text" id="loginUsername" class="form-control" placeholder="Username"></div>
-        <div class="mb-3"><label for="loginPassword" class="form-label">Password</label>
-          <input type="password" id="loginPassword" class="form-control" placeholder="Password"></div>
-        <button type="button" class="btn btn-gold w-100 mt-2" onclick="logIn()">Log In</button>
-        <p class="text-center mt-3 mb-0 text-secondary">Don't have an account?
-          <span class="switch" onclick="showRegistration()">Register</span></p>
-      </div>
+</div>
+
+
+
+<div
+    id="loginForm"
+    class="d-none"
+>
+
+    <div class="auth-head">
+
+        <h1>
+            Welcome Back
+        </h1>
+
+        <p>
+            Log in to your SmartTech Appliances account
+        </p>
+
     </div>
 
-    <p id="message" class="text-center px-3 pb-3 mb-0"></p>
-  </div>
+
+    <div
+        class="auth-body mx-auto"
+        style="max-width:460px"
+    >
+
+        <div class="mb-3">
+
+            <label
+                for="loginUsername"
+                class="form-label"
+            >
+                Username
+            </label>
+
+            <input
+                type="text"
+                id="loginUsername"
+                class="form-control"
+                placeholder="Username"
+            >
+
+        </div>
+
+
+        <div class="mb-3">
+
+            <label
+                for="loginPassword"
+                class="form-label"
+            >
+                Password
+            </label>
+
+            <input
+                type="password"
+                id="loginPassword"
+                class="form-control"
+                placeholder="Password"
+            >
+
+        </div>
+
+
+        <button
+            type="button"
+            id="loginBtn"
+            class="btn btn-gold w-100 mt-2"
+        >
+            Log In
+        </button>
+
+
+        <p class="text-center mt-3 mb-0 text-secondary">
+
+            Don't have an account?
+
+            <span
+                class="switch"
+                id="showRegistration"
+            >
+                Register
+            </span>
+
+        </p>
+
+    </div>
+
+</div>
+
+
+
+<p
+    id="message"
+    class="text-center px-3 pb-3 mb-0"
+></p>
+
+
+</div>
+
 </main>
 
-<footer>© 2026 SmartTech Appliances. All Rights Reserved.</footer>
+
+
+<footer>
+
+    © 2026 SmartTech Appliances.
+    All Rights Reserved.
+
+</footer>
+
+
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+
 <script>
-  const HOME = "index.html";   // change this if you rename your home page
-  // accounts are saved in localStorage under the username (same as your original login.html)
 
-  const registrationForm = document.getElementById("registrationForm");
-  const loginForm = document.getElementById("loginForm");
-  const msg = document.getElementById("message");
-  const v = id => document.getElementById(id).value.trim();
+$(document).ready(function () {
 
-  function say(text, ok){
-    msg.innerText = text;
-    msg.className = "text-center px-3 pb-3 mb-0 fw-bold " + (ok ? "text-success" : "text-danger");
-  }
+    const HOME = 'index.html';
 
-  function register(){
-    const username = v("regUsername");
-    const d = { gmail:v("regGmail"), password:v("regPassword"), name:v("regName"), age:v("regAge"),
-                birthday:v("regBirthday"), sex:document.getElementById("regSex").value,
-                address:v("regAddress"), contact:v("regContact") };
 
-    if(!username || Object.values(d).some(x => !x)) return say("Please fill in all fields.");
-    if(!d.gmail.toLowerCase().endsWith("@gmail.com")) return say("Please enter a valid Gmail address (must end with @gmail.com).");
-    if(localStorage.getItem(username)) return say("Username already exists!");
+    function showMessage(text, success = false) {
 
-    localStorage.setItem(username, JSON.stringify(d));
-    ["regGmail","regUsername","regPassword","regName","regAge","regBirthday","regSex","regAddress","regContact"]
-      .forEach(id => document.getElementById(id).value = "");
-    showLogin();
-    say("Account created successfully! You can now log in.", true);
-  }
+        $('#message')
+            .stop(true, true)
+            .removeClass(
+                'text-success text-danger'
+            )
+            .addClass(
+                success
+                    ? 'text-success'
+                    : 'text-danger'
+            )
+            .hide()
+            .text(text)
+            .fadeIn(300);
 
-  function logIn(){
-    const username = v("loginUsername"), password = v("loginPassword");
-    if(!username || !password) return say("Please enter your username and password.");
-    const stored = localStorage.getItem(username);
-    if(!stored) return say("Username not found.");
-    const user = JSON.parse(stored);
-    if(user.password !== password) return say("Incorrect password.");
+    }
 
-    localStorage.setItem("st_session", username);
-    alert("Welcome back, " + (user.name || username) + "!");
-    window.location.href = HOME;
-  }
 
-  function showLogin(){ registrationForm.classList.add("d-none"); loginForm.classList.remove("d-none"); msg.innerText = ""; }
-  function showRegistration(){ loginForm.classList.add("d-none"); registrationForm.classList.remove("d-none"); msg.innerText = ""; }
+    function clearMessage() {
+
+        $('#message')
+            .stop(true, true)
+            .fadeOut(150, function () {
+
+                $(this)
+                    .text('')
+                    .removeClass(
+                        'text-success text-danger'
+                    )
+                    .show();
+
+            });
+
+    }
+
+
+    function showLogin() {
+
+        clearMessage();
+
+        $('#registrationForm')
+            .stop(true, true)
+            .fadeOut(200, function () {
+
+                $(this).addClass('d-none');
+
+                $('#loginForm')
+                    .removeClass('d-none')
+                    .hide()
+                    .fadeIn(300);
+
+            });
+
+    }
+
+
+    function showRegistration() {
+
+        clearMessage();
+
+        $('#loginForm')
+            .stop(true, true)
+            .fadeOut(200, function () {
+
+                $(this).addClass('d-none');
+
+                $('#registrationForm')
+                    .removeClass('d-none')
+                    .hide()
+                    .fadeIn(300);
+
+            });
+
+    }
+
+
+    function register() {
+
+        const gmail =
+            $('#regGmail')
+                .val()
+                .trim();
+
+        const username =
+            $('#regUsername')
+                .val()
+                .trim();
+
+        const password =
+            $('#regPassword')
+                .val()
+                .trim();
+
+        const name =
+            $('#regName')
+                .val()
+                .trim();
+
+        const age =
+            $('#regAge')
+                .val()
+                .trim();
+
+        const sex =
+            $('#regSex')
+                .val();
+
+        const birthday =
+            $('#regBirthday')
+                .val();
+
+        const contact =
+            $('#regContact')
+                .val()
+                .trim();
+
+        const address =
+            $('#regAddress')
+                .val()
+                .trim();
+
+
+        const user = {
+            gmail: gmail,
+            password: password,
+            name: name,
+            age: age,
+            birthday: birthday,
+            sex: sex,
+            address: address,
+            contact: contact
+        };
+
+
+        if (
+            !gmail ||
+            !username ||
+            !password ||
+            !name ||
+            !age ||
+            !sex ||
+            !birthday ||
+            !contact ||
+            !address
+        ) {
+
+            showMessage(
+                'Please fill in all fields.'
+            );
+
+            return;
+        }
+
+
+        if (
+            !gmail
+                .toLowerCase()
+                .endsWith('@gmail.com')
+        ) {
+
+            showMessage(
+                'Please enter a valid Gmail address (must end with @gmail.com).'
+            );
+
+            return;
+        }
+
+
+        if (
+            localStorage.getItem(username)
+        ) {
+
+            showMessage(
+                'Username already exists!'
+            );
+
+            return;
+        }
+
+
+        localStorage.setItem(
+            username,
+            JSON.stringify(user)
+        );
+
+
+        $('#regGmail').val('');
+        $('#regUsername').val('');
+        $('#regPassword').val('');
+        $('#regName').val('');
+        $('#regAge').val('');
+        $('#regSex').val('');
+        $('#regBirthday').val('');
+        $('#regContact').val('');
+        $('#regAddress').val('');
+
+
+        $('#registrationForm')
+            .stop(true, true)
+            .fadeOut(200, function () {
+
+                $(this)
+                    .addClass('d-none');
+
+                $('#loginForm')
+                    .removeClass('d-none')
+                    .hide()
+                    .fadeIn(300);
+
+                showMessage(
+                    'Account created successfully! You can now log in.',
+                    true
+                );
+
+            });
+
+    }
+
+
+    function logIn() {
+
+        const username =
+            $('#loginUsername')
+                .val()
+                .trim();
+
+        const password =
+            $('#loginPassword')
+                .val()
+                .trim();
+
+
+        if (
+            !username ||
+            !password
+        ) {
+
+            showMessage(
+                'Please enter your username and password.'
+            );
+
+            return;
+        }
+
+
+        const stored =
+            localStorage.getItem(username);
+
+
+        if (!stored) {
+
+            showMessage(
+                'Username not found.'
+            );
+
+            return;
+        }
+
+
+        const user =
+            JSON.parse(stored);
+
+
+        if (
+            user.password !== password
+        ) {
+
+            showMessage(
+                'Incorrect password.'
+            );
+
+            return;
+        }
+
+
+        localStorage.setItem(
+            'st_session',
+            username
+        );
+
+
+        showMessage(
+            'Login successful! Welcome back, ' +
+            (user.name || username) +
+            '!',
+            true
+        );
+
+
+        $('#loginBtn')
+            .prop('disabled', true)
+            .text('Logging in...');
+
+
+        setTimeout(function () {
+
+            window.location.href = HOME;
+
+        }, 800);
+
+    }
+
+
+    $('#showLogin').on(
+        'click',
+        function () {
+
+            showLogin();
+
+        }
+    );
+
+
+    $('#showRegistration').on(
+        'click',
+        function () {
+
+            showRegistration();
+
+        }
+    );
+
+
+    $('#registerBtn').on(
+        'click',
+        function () {
+
+            register();
+
+        }
+    );
+
+
+    $('#loginBtn').on(
+        'click',
+        function () {
+
+            logIn();
+
+        }
+    );
+
+
+    $('#registrationForm input, #registrationForm select')
+        .on('focus', function () {
+
+            $(this)
+                .addClass('border-warning');
+
+        })
+        .on('blur', function () {
+
+            $(this)
+                .removeClass('border-warning');
+
+        });
+
+
+    $('#loginForm input')
+        .on('focus', function () {
+
+            $(this)
+                .addClass('border-warning');
+
+        })
+        .on('blur', function () {
+
+            $(this)
+                .removeClass('border-warning');
+
+        });
+
+
+    $('#loginUsername, #loginPassword')
+        .on('keypress', function (event) {
+
+            if (event.which === 13) {
+
+                logIn();
+
+            }
+
+        });
+
+
+    $('#regContact').on(
+        'input',
+        function () {
+
+            const value =
+                $(this)
+                    .val()
+                    .replace(/\D/g, '');
+
+            $(this).val(value);
+
+        }
+    );
+
+});
+
 </script>
+
+
 </body>
 </html>
