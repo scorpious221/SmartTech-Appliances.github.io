@@ -1,829 +1,115 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>SmartTech Appliances - Products</title>
-
-
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  >
-
-  <link rel="stylesheet" href="style.css">
-
-  <style>
-
-    :root {
-      --accent: #1A2333;
-      --accent-2: #1A2333;
-      --muted: #6b7280;
-      --card-bg: #fff;
-      --page-bg: #F7F8FA;
-      --text: #0F1419;
-    }
-
-
-    body {
-      color: var(--text);
-    }
-
-
-    .cart-btn {
-      background: #1A2333;
-      color: #fff;
-      padding: 8px 12px;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-
-    /* container box for content */
-
-    .container {
-      max-width: 1200px;
-      margin: 24px auto;
-      padding: 0 16px;
-    }
-
-
-    /* big category boxes */
-
-    .top-cats {
-      display: flex;
-      gap: 18px;
-      padding: 18px;
-      justify-content: center;
-      background: transparent;
-      margin-bottom: 18px;
-    }
-
-
-    .cat-box {
-      color: white;
-      background: #1A2333;
-      padding: 16px 22px;
-      font-weight: bold;
-      text-decoration: underline;
-      cursor: pointer;
-      border-radius: 20px;
-      min-width: 200px;
-      text-align: center;
-      box-shadow: 0 2px 0 rgba(0, 0, 0, 0.05);
-    }
-
-
-    .cat-box.active {
-      background: #e8eaee;
-      color: #0F1419;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-      transform: translateY(-2px);
-    }
-
-
-    /* subcategory buttons */
-
-    .subcats {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin: 12px 0 18px;
-    }
-
-
-    .subcat-btn {
-      border: 3px solid #1A2333;
-      background: #F7F8FA;
-      color: #0F1419;
-      padding: 8px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-
-    .subcat-btn.active {
-      background: #1A2333;
-      color: #fff;
-      transform: translateY(-2px);
-    }
-
-
-    .product-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 30px;
-    }
-
-
-    .product-card {
-      background: var(--card-bg);
-      border-radius: 10px;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      height: 100%;
-      border: 1px solid #ddd;
-    }
-
-
-    .product-card .img {
-      width: 100%;
-      height: 150px;
-      background: #f6f6f6;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      margin-bottom: 10px;
-      padding: 6px;
-    }
-
-
-    .product-card img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      background-color: #fff;
-    }
-
-
-    .product-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: auto;
-    }
-
-
-    .btn-add,
-    .btn-buy {
-      border: none;
-      padding: 8px 12px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-
-    .btn-add {
-      background: #1A2333;
-      color: #fff;
-    }
-
-
-    .btn-buy {
-      background: #e8eaee;
-      color: #0F1419;
-    }
-
-
-    /* Cart section */
-
-    #cart-section {
-      background: #fff;
-      border-top: 6px solid #1A2333;
-      padding: 28px;
-      margin-top: 32px;
-    }
-
-
-    #cart-section h2 {
-      margin-top: 0;
-      color: #0F1419;
-    }
-
-
-    .cart-items {
-      max-width: 1100px;
-      margin: 14px auto;
-    }
-
-
-    .cart-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      border-bottom: 1px solid #eee;
-      padding: 10px 0;
-    }
-
-
-    .cart-left {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      min-width: 360px;
-    }
-
-
-    .cart-left img {
-      width: 64px;
-      height: 64px;
-      object-fit: cover;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-
-
-    .cart-meta {
-      font-weight: bold;
-    }
-
-
-    .qty-controls {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-    }
-
-
-    .qty-controls button {
-      padding: 6px 8px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      background: #e8eaee;
-      cursor: pointer;
-    }
-
-
-    .remove-btn {
-      background: #ff4d4d;
-      color: #fff;
-      border: none;
-      padding: 6px 10px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-
-    .cart-summary {
-      text-align: center;
-      margin-top: 14px;
-      font-weight: bold;
-      font-size: 18px;
-      color: #0F1419;
-    }
-
-
-    .cart-actions {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      margin-top: 14px;
-      flex-wrap: wrap;
-    }
-
-
-    .primary {
-      background: #1A2333;
-      color: #fff;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-
-    .secondary {
-      background: #e8eaee;
-      color: #0F1419;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-
-    /* Payment area */
-
-    #payment {
-      display: none;
-      background: #F7F8FA;
-      padding: 20px;
-      border-top: 4px solid #ddd;
-      margin-top: 18px;
-      border-radius: 6px;
-    }
-
-
-    .payment-inner {
-      max-width: 640px;
-      margin: 0 auto;
-    }
-
-
-    .payment-inner label {
-      display: block;
-      margin: 10px 0 6px;
-      font-weight: bold;
-      color: #0F1419;
-    }
-
-
-    .card-fields {
-      display: none;
-      margin-top: 10px;
-    }
-
-
-    /* RESPONSIVE OVERRIDES */
-    @media (max-width: 991px) {
-      .container { width: 100%; max-width: 100%; margin: 18px auto; padding-left: 16px; padding-right: 16px; }
-      .top-cats { gap: 10px; padding: 12px 0; }
-      .cat-box { flex: 1 1 220px; min-width: 0; }
-      .product-grid { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 18px; }
-      #cart-section { padding: 22px 18px; }
-      .cart-left { min-width: 0; }
-      .overlay-content { width: 92%; }
-    }
-
-    @media (max-width: 767px) {
-      header { padding: 12px 16px; gap: 12px; }
-      header .header-left { justify-content: center; flex-wrap: wrap; width: 100%; }
-      header > .text-end { width: 100%; text-align: center !important; }
-      .logo { height: 60px; }
-      .title { min-height: 120px; padding: 20px 16px; }
-      .title h1 { font-size: clamp(34px, 10vw, 48px); }
-
-      .container { width: 100%; margin: 14px auto; padding-left: 12px; padding-right: 12px; }
-      .top-cats { padding: 8px 0; gap: 8px; }
-      .cat-box { width: 100%; flex: 1 1 100%; padding: 12px 14px; font-size: 16px; }
-      .subcats { gap: 8px; }
-      .subcat-btn { flex: 1 1 calc(50% - 8px); min-width: 0; padding: 8px 10px; font-size: 14px; }
-      .product-grid { grid-template-columns: 1fr; gap: 16px; }
-      .product-card .img { height: 190px; }
-      .product-actions { flex-wrap: wrap; }
-      .product-actions button { flex: 1 1 calc(50% - 4px); min-width: 0; }
-
-      #cart-section { padding: 18px 12px; margin-top: 20px; }
-      .cart-item { flex-direction: column; align-items: stretch; gap: 10px; }
-      .cart-left { min-width: 0; width: 100%; }
-      .cart-item > div:last-child { display: flex !important; flex-wrap: wrap; align-items: center; gap: 8px !important; }
-      .cart-item > div:last-child > div:not(.qty-controls) { min-width: 0 !important; }
-      .qty-controls { flex-shrink: 0; }
-      .remove-btn { margin-left: auto; }
-      .cart-actions { flex-direction: column; }
-      .cart-actions button { width: 100%; }
-      #payment { padding: 16px 12px; }
-      .payment-inner { width: 100%; }
-      .payment-inner .mt-3 { flex-wrap: wrap; }
-      .payment-inner .mt-3 button { flex: 1 1 100%; }
-      .overlay-content { width: calc(100% - 20px); max-height: 88vh; padding: 16px; }
-      .overlay-content img { max-width: 100%; }
-      footer { font-size: 12px; padding: 10px 12px; }
-    }
-
-    @media (max-width: 400px) {
-      .product-card .img { height: 160px; }
-      .product-actions button { flex: 1 1 100%; }
-      .subcat-btn { flex: 1 1 100%; }
-    }
-
-  </style>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SmartTech Appliances — Products</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="site.css">
 </head>
+<body>
+<nav class="st-navbar">
+  <a href="homelandingpage.html" class="st-brand"><span class="logo-box"><img src="images/smarttechlogowhite.png" alt="SmartTech Logo"></span>SmartTech</a>
+  <ul class="st-nav-links">
+    <li><a href="homelandingpage.html">Home</a></li>
+    <li><a href="products.html" class="active">Shop</a></li>
+    <li><a href="aboutus.html">About Us</a></li>
+  </ul>
+  <div class="st-icons">
+    <a class="icon-wrap" href="#cart-section" aria-label="Cart" onclick="scrollToCart();return false;"><i class="fa-solid fa-bag-shopping"></i><span class="st-badge" id="cart-count">0</span></a>
+    <a class="icon-wrap" href="login.html" aria-label="Account"><i class="fa-regular fa-user"></i></a>
+  </div>
+</nav>
+<section class="page-hero"><h1>Products</h1><p>"Where Innovation Meets Everyday Living."</p></section>
 
+<main class="st-section">
 
-<body style="background-color:#F7F8FA; color:#0F1419;">
+  <div class="top-cats" id="top-cats">
+    <div class="cat-box" data-cat="household">Household Appliances</div>
+    <div class="cat-box" data-cat="entertainment">Entertainment Appliances</div>
+    <div class="cat-box" data-cat="kitchen">Kitchen Appliances</div>
+  </div>
 
-  <!-- Header now uses Bootstrap's flex utilities alongside your existing header styles -->
+  <div id="subcat-area"></div>
 
-  <header class="d-flex justify-content-between align-items-center flex-wrap">
+  <div id="products-area"><div class="product-grid" id="product-grid"></div></div>
 
-    <div class="header-left d-flex align-items-center gap-3">
+  <!-- CART -->
+  <section id="cart-section">
+    <h2>Your Cart</h2>
+    <div class="cart-items" id="cart-items"></div>
+    <p class="cart-summary" id="cart-total">Total: ₱0</p>
+    <div class="cart-actions">
+      <button class="secondary" onclick="scrollToTop()">Continue Shopping</button>
+      <button class="secondary" onclick="clearCart()">Clear Cart</button>
+      <button class="primary" onclick="openPayment()">Proceed to Payment</button>
+    </div>
 
-      <a href="homepage.html">
-
-        <img
-          src="images/logo.svg"
-          class="logo"
-          alt="SmartTech Appliances Logo"
-        >
-
-      </a>
-
-
-      <!-- FIXED: Removed button inside a -->
-
-      <a
-        href="homepage.html"
-        class="home-btn btn"
-      >
-
-        Home Page
-
-      </a>
-
-
-      <div>
-          <h2 class="m-0 text-white">SmartTech Appliances</h2>
-          <small class="text-white">"Where Innovation Meets Everyday Living."</small>
+    <!-- PAYMENT -->
+    <div id="payment"><div class="payment-inner">
+      <h3>Checkout</h3>
+      <label>Items</label>
+      <div id="pay-items" class="bg-white p-2 rounded border" style="max-height:200px; overflow:auto;"></div>
+      <label>Total</label>
+      <p id="pay-total" class="fw-bold">₱0</p>
+      <label>Delivery Address</label>
+      <textarea id="address" class="form-control" rows="3" placeholder="Enter your delivery address"></textarea>
+      <label class="mt-3">Mode of Payment</label>
+      <div class="bg-white p-2 rounded border">
+        <div class="form-check"><input class="form-check-input" type="radio" name="paymethod" value="Cash on Delivery" id="pay-cod"><label class="form-check-label" for="pay-cod">Cash on Delivery</label></div>
+        <div class="form-check"><input class="form-check-input" type="radio" name="paymethod" value="GCash" id="pay-gcash"><label class="form-check-label" for="pay-gcash">GCash</label></div>
+        <div class="form-check"><input class="form-check-input" type="radio" name="paymethod" value="Card" id="pay-card"><label class="form-check-label" for="pay-card">Credit/Debit Card</label></div>
       </div>
-
-    </div>
-
-
-    <div class="header-right">
-
-      <button
-        class="cart-btn"
-        onclick="scrollToCart()"
-      >
-
-        Go to Cart (<span id="cart-count">0</span>)
-
-      </button>
-
-    </div>
-
-  </header>
-
-
-
-  <!-- Title -->
-
-  <section class="title">
-
-    <h1>Products</h1>
-
+      <div class="card-fields" id="card-fields">
+        <label>Cardholder Name</label><input id="card-name" type="text" class="form-control" placeholder="Name on card">
+        <label>Card Number</label><input id="card-number" type="text" class="form-control" placeholder="xxxx-xxxx-xxxx-xxxx" maxlength="19">
+        <label>Expiry (MM/YY)</label><input id="card-exp" type="text" class="form-control" maxlength="5" placeholder="MM/YY">
+        <label>CVV</label><input id="card-cvv" type="number" class="form-control" placeholder="CVV">
+      </div>
+      <div class="mt-3 d-flex gap-2 flex-wrap">
+        <button class="primary" onclick="completePayment()">Pay Now</button>
+        <button class="secondary" onclick="closePayment()">Cancel</button>
+      </div>
+    </div></div>
   </section>
+</main>
 
-
-
-  <div class="container">
-
-    <div
-      class="top-cats d-flex gap-3 flex-wrap justify-content-center"
-      id="top-cats"
-    >
-
-      <div
-        class="cat-box"
-        data-cat="household"
-      >
-
-        Household Appliances
-
-      </div>
-
-
-      <div
-        class="cat-box"
-        data-cat="entertainment"
-      >
-
-        Entertainment Appliances
-
-      </div>
-
-
-      <div
-        class="cat-box"
-        data-cat="kitchen"
-      >
-
-        Kitchen Appliances
-
-      </div>
-
-    </div>
-
+<div id="descOverlay" class="overlay">
+  <div class="overlay-content">
+    <span class="close-btn" onclick="closeOverlay()">&times;</span>
+    <div id="descContent"></div>
   </div>
-
-
-
-  <!-- content container -->
-
-  <div class="container">
-
-    <!-- SUBCATEGORIES area -->
-
-    <div id="subcat-area"></div>
-
-
-    <div
-      id="products-area"
-      class="mt-2"
-    >
-
-      <div
-        class="product-grid"
-        id="product-grid"
-      ></div>
-
-    </div>
-
-
-
-    <!-- CART SECTION -->
-
-    <section
-      id="cart-section"
-      class="rounded"
-    >
-
-      <h2>Your Cart</h2>
-
-      <div
-        class="cart-items"
-        id="cart-items"
-      ></div>
-
-      <p
-        class="cart-summary"
-        id="cart-total"
-      >
-
-        Total: ₱0
-
-      </p>
-
-
-      <div class="cart-actions">
-
-        <button
-          class="primary"
-          onclick="openPayment()"
-        >
-
-          Proceed to Payment
-
-        </button>
-
-
-        <button
-          class="secondary"
-          onclick="clearCart()"
-        >
-
-          Clear Cart
-
-        </button>
-
-
-        <button
-          class="secondary"
-          onclick="scrollToTop()"
-        >
-
-          Continue Shopping
-
-        </button>
-
-      </div>
-
-
-
-      <!-- PAYMENT -->
-
-      <div id="payment">
-
-        <div class="payment-inner">
-
-          <h3>Checkout</h3>
-
-
-          <label>Items</label>
-
-          <div
-            id="pay-items"
-            class="bg-white p-2 rounded border"
-            style="max-height:200px; overflow:auto;"
-          ></div>
-
-
-          <label>Total</label>
-
-          <p
-            id="pay-total"
-            class="fw-bold"
-          >
-
-            ₱0
-
-          </p>
-
-
-          <label>Delivery Address</label>
-
-          <textarea
-            id="address"
-            class="form-control"
-            rows="3"
-            placeholder="Enter your delivery address"
-          ></textarea>
-
-
-          <label class="mt-3">Mode of Payment</label>
-
-          <div class="bg-white p-2 rounded border">
-
-            <div class="form-check">
-
-              <input
-                class="form-check-input"
-                type="radio"
-                name="paymethod"
-                value="Cash on Delivery"
-                id="pay-cod"
-              >
-
-              <label
-                class="form-check-label"
-                for="pay-cod"
-              >
-
-                Cash on Delivery
-
-              </label>
-
-            </div>
-
-
-            <div class="form-check">
-
-              <input
-                class="form-check-input"
-                type="radio"
-                name="paymethod"
-                value="GCash"
-                id="pay-gcash"
-              >
-
-              <label
-                class="form-check-label"
-                for="pay-gcash"
-              >
-
-                GCash
-
-              </label>
-
-            </div>
-
-
-            <div class="form-check">
-
-              <input
-                class="form-check-input"
-                type="radio"
-                name="paymethod"
-                value="Card"
-                id="pay-card"
-              >
-
-              <label
-                class="form-check-label"
-                for="pay-card"
-              >
-
-                Credit/Debit Card
-
-              </label>
-
-            </div>
-
-          </div>
-
-
-
-          <div
-            class="card-fields"
-            id="card-fields"
-          >
-
-            <label>Cardholder Name</label>
-
-            <input
-              id="card-name"
-              type="text"
-              class="form-control"
-              placeholder="Name on card"
-            >
-
-
-            <label>Card Number</label>
-
-            <input
-              id="card-number"
-              type="text"
-              class="form-control"
-              placeholder="xxxx-xxxx-xxxx-xxxx"
-              maxlength="19"
-            >
-
-
-            <label>Expiry (MM/YY)</label>
-
-            <input
-              id="card-exp"
-              type="text"
-              class="form-control"
-              maxlength="5"
-              placeholder="MM/YY"
-            >
-
-
-            <label>CVV</label>
-
-            <input
-              id="card-cvv"
-              type="number"
-              class="form-control"
-              placeholder="CVV"
-            >
-
-          </div>
-
-
-
-          <div class="mt-3 d-flex gap-2">
-
-            <button
-              class="primary"
-              onclick="completePayment()"
-            >
-
-              Pay Now
-
-            </button>
-
-
-            <button
-              class="secondary"
-              onclick="closePayment()"
-            >
-
-              Cancel
-
-            </button>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </section>
-
+</div>
+
+<footer>
+  <div class="row g-4">
+    <div class="col-lg-4 col-md-6"><div class="brand-title">SmartTech Appliances</div><p>Where innovation meets everyday living. Smart, reliable appliances for your home, with installation and warranty support.</p></div>
+    <div class="col-lg-2 col-md-6 col-6"><h6>PRODUCTS</h6><ul><li><a href="products.html?cat=household">Household</a></li><li><a href="products.html?cat=entertainment">Entertainment</a></li><li><a href="products.html?cat=kitchen">Kitchen</a></li></ul></div>
+    <div class="col-lg-3 col-md-6 col-6"><h6>COMPANY</h6><ul><li><a href="homelandingpage.html">Home</a></li><li><a href="aboutus.html#background">Company Background</a></li><li><a href="aboutus.html#team">Our Team</a></li><li><a href="aboutus.html#location">Our Location</a></li></ul></div>
+    <div class="col-lg-3 col-md-6"><h6>SUPPORT</h6><ul><li><a href="aboutus.html#contact">Contact Us</a></li><li><a href="login.html">Log In / Register</a></li><li><a href="products.html">Shop</a></li></ul></div>
   </div>
+  <div class="footer-bottom"><span>© 2026 SmartTech Appliances. All Rights Reserved.</span></div>
+</footer>
 
-
-
-  <div
-    id="descOverlay"
-    class="overlay"
-  >
-
-    <div class="overlay-content">
-
-      <span
-        class="close-btn"
-        onclick="closeOverlay()"
-      >
-
-        &times;
-
-      </span>
-
-      <div id="descContent"></div>
-
-    </div>
-
-  </div>
-
-
-
-  <script src="products.js"></script>
-
-
-  <script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-  ></script>
-
-
-
-  <!-- Footer -->
-
-  <footer>
-
-    © 2026 SmartTech Appliances. All rights reserved.
-
-  </footer>
-
-
+<script src="products.js" onerror="document.getElementById('product-grid').innerHTML='<p class=&quot;text-danger fw-semibold&quot;>products.js was not found. Put products.js in the same folder as products.html, then open this page from that folder.</p>'"></script>
+<script>
+  // extras: open a category from ?cat=..., prefill address from the logged-in user
+  window.addEventListener('load', () => {
+    const c = new URLSearchParams(location.search).get('cat');
+    if (['household','entertainment','kitchen'].includes(c)) {
+      currentCategory = c; currentSubcat = null; renderTopCats(); renderSubcats(); renderProducts();
+    }
+    try {
+      const u = localStorage.getItem('st_session'), d = u && JSON.parse(localStorage.getItem(u));
+      if (d && d.address) document.getElementById('address').value = d.address;
+    } catch (e) {}
+    if (location.hash === '#cart-section') scrollToCart();
+  });
+</script>
+<script src="search.js"></script>
 </body>
-
 </html>

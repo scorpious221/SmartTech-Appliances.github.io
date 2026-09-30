@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PATCHWORKS — Modular synthesizers &amp; eurorack</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#14121A;
+    --void-2:#1B1822;
+    --paper:#EDEAE3;
+    --brass:#C9A15A;
+    --wire:#4D7FFF;
+    --line: rgba(237,234,227,0.14);
+    --serif-fallback: Georgia, serif;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-padding-top: env(safe-area-inset-top, 0px);}
+  body{
+    background:var(--void);
+    color:var(--paper);
+    font-family:'Inter', system-ui, sans-serif;
+    line-height:1.5;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,.display{
+    font-family:'Space Grotesk', system-ui, sans-serif;
+    font-weight:600;
+    letter-spacing:-0.01em;
+  }
+  a{color:inherit; text-decoration:none;}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 28px;}
+
+  /* ---------- NAV ---------- */
+  nav{
+    position:sticky; top:0; z-index:20;
+    background:rgba(20,18,26,0.86);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  nav .wrap{display:flex; align-items:center; justify-content:space-between; height:64px;}
+  .brand{font-size:19px; font-weight:700; display:flex; align-items:center; gap:8px;}
+  .brand svg{width:20px; height:20px;}
+  .navlinks{display:flex; gap:28px; font-size:14px; color:rgba(237,234,227,0.72);}
+  .navlinks a:hover{color:var(--paper);}
+  .navcta{border:1px solid var(--brass); color:var(--brass); padding:8px 16px; border-radius:2px; font-size:13px;}
+  @media(max-width:720px){.navlinks{display:none;}}
+
+  /* ---------- HERO ---------- */
+  .hero{padding:72px 0 56px; position:relative;}
+  .hero .wrap{display:grid; grid-template-columns:1.1fr 0.9fr; gap:40px; align-items:center;}
+  @media(max-width:860px){.hero .wrap{grid-template-columns:1fr;}}
+  .kicker{color:var(--wire); font-size:14px; margin-bottom:18px;}
+  .hero h1{font-size:clamp(38px,5.6vw,64px); line-height:1.03;}
+  .hero p.lede{margin-top:22px; max-width:46ch; color:rgba(237,234,227,0.78); font-size:17px;}
+  .hero-cta{margin-top:32px; display:flex; gap:14px; flex-wrap:wrap;}
+  .btn{padding:13px 22px; border-radius:2px; font-size:14px; font-weight:500; display:inline-flex; align-items:center; gap:8px;}
+  .btn-primary{background:var(--brass); color:var(--void);}
+  .btn-primary:hover{background:#DBB471;}
+  .btn-ghost{border:1px solid var(--line); color:var(--paper);}
+  .btn-ghost:hover{border-color:rgba(237,234,227,0.4);}
+
+  .scope{
+    background:var(--void-2);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:22px;
+  }
+  .scope-head{display:flex; justify-content:space-between; font-size:12px; color:rgba(237,234,227,0.5); margin-bottom:12px;}
+  .scope svg{width:100%; height:auto; display:block;}
+  .scope-path{stroke:var(--wire); stroke-width:2; fill:none; stroke-dasharray:900; stroke-dashoffset:900; animation:draw 3.2s ease-in-out infinite alternate;}
+  @keyframes draw{ to{ stroke-dashoffset:0; } }
+  @media (prefers-reduced-motion: reduce){ .scope-path{animation:none; stroke-dashoffset:0;} }
+
+  /* ---------- SIGNAL CHAIN / PRODUCTS ---------- */
+  .chain{padding:72px 0;}
+  .chain-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:36px; gap:20px; flex-wrap:wrap;}
+  .chain-head h2{font-size:30px;}
+  .chain-head p{color:rgba(237,234,227,0.6); font-size:14px; max-width:34ch;}
+
+  .modules{position:relative; display:grid; grid-template-columns:repeat(3,1fr); gap:0;}
+  @media(max-width:860px){.modules{grid-template-columns:1fr; gap:36px;}}
+
+  .cable-row{display:none;}
+  @media(min-width:861px){
+    .cable-row{display:block; grid-column:1/-1; height:34px; margin-bottom:-6px;}
+    .cable-row svg{width:100%; height:34px;}
+    .cable-row path{stroke:var(--brass); stroke-width:2; fill:none; opacity:0.55;}
+  }
+
+  .module{
+    background:var(--void-2);
+    border:1px solid var(--line);
+    padding:26px 22px 22px;
+    position:relative;
+  }
+  .module + .module{border-left:none;}
+  @media(max-width:860px){ .module{border-left:1px solid var(--line);} }
+  .jack{width:14px; height:14px; border-radius:50%; background:#0B0A0E; border:2px solid var(--brass); position:absolute; top:-8px; left:26px;}
+  .module-panel{aspect-ratio:4/3; border:1px solid var(--line); border-radius:2px; margin-bottom:18px; position:relative; overflow:hidden;
+    background:
+      radial-gradient(circle at 25% 30%, rgba(201,161,90,0.18), transparent 40%),
+      radial-gradient(circle at 75% 70%, rgba(77,127,255,0.16), transparent 42%),
+      #17141D;
+  }
+  .knob{width:34px; height:34px; border-radius:50%; border:1px solid rgba(237,234,227,0.3); position:absolute; background:#221E29;}
+  .knob::after{content:''; position:absolute; top:4px; left:50%; width:2px; height:12px; background:var(--brass); transform:translateX(-50%) rotate(35deg); transform-origin:bottom;}
+  .k1{top:22px; left:22px;} .k2{top:22px; right:22px;} .k3{bottom:20px; left:22px;} .k4{bottom:20px; right:22px; transform:scale(0.8);}
+  .module h3{font-size:17px; margin-bottom:6px;}
+  .module .spec{font-size:12.5px; color:rgba(237,234,227,0.55); margin-bottom:14px;}
+  .module .price{display:flex; justify-content:space-between; align-items:center; font-size:15px;}
+  .module .price .add{font-size:13px; color:var(--wire);}
+
+  /* ---------- STORY STRIP ---------- */
+  .story{border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:60px 0;}
+  .story .wrap{display:grid; grid-template-columns:1fr 1fr; gap:50px; align-items:center;}
+  @media(max-width:780px){.story .wrap{grid-template-columns:1fr;}}
+  .story h2{font-size:26px; margin-bottom:16px; max-width:16ch;}
+  .story p{color:rgba(237,234,227,0.72); font-size:15.5px; max-width:48ch;}
+  .story-figures{display:flex; gap:36px; margin-top:26px;}
+  .fig-num{font-size:28px; font-weight:700; color:var(--brass);}
+  .fig-label{font-size:12.5px; color:rgba(237,234,227,0.55); margin-top:2px;}
+
+  /* ---------- DROP / SIGNUP ---------- */
+  .drop{padding:76px 0;}
+  .drop-box{
+    background:var(--void-2); border:1px solid var(--line); border-radius:4px;
+    padding:44px; display:grid; grid-template-columns:1.2fr 1fr; gap:36px; align-items:center;
+  }
+  @media(max-width:780px){.drop-box{grid-template-columns:1fr;}}
+  .drop-box h2{font-size:26px; margin-bottom:10px;}
+  .drop-box p{color:rgba(237,234,227,0.65); font-size:15px; max-width:42ch;}
+  .signup{display:flex; gap:10px; margin-top:22px; flex-wrap:wrap;}
+  .signup input{
+    flex:1; min-width:180px; background:transparent; border:1px solid var(--line); color:var(--paper);
+    padding:13px 14px; border-radius:2px; font-size:14px; font-family:inherit;
+  }
+  .signup input::placeholder{color:rgba(237,234,227,0.4);}
+  .signup input:focus{outline:2px solid var(--wire); outline-offset:1px; border-color:transparent;}
+
+  /* ---------- FOOTER ---------- */
+  footer{padding:44px 0 56px; border-top:1px solid var(--line);}
+  footer .wrap{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; font-size:13px; color:rgba(237,234,227,0.5);}
+  footer .flinks{display:flex; gap:22px;}
+  a:focus-visible, button:focus-visible, input:focus-visible{outline:2px solid var(--wire); outline-offset:2px;}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="brand">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="#C9A15A" stroke-width="2"/><path d="M6 12h4l2-6 2 12 2-6h2" fill="none" stroke="#4D7FFF" stroke-width="1.6"/></svg>
+      PATCHWORKS
+    </div>
+    <div class="navlinks">
+      <a href="#">Modules</a>
+      <a href="#">Racks</a>
+      <a href="#">Cables</a>
+      <a href="#">Journal</a>
+    </div>
+    <a href="#" class="navcta">Cart (0)</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div>
+      <div class="kicker display">EURORACK · SEMI-MODULAR · CASES</div>
+      <h1>Build the instrument<br>that doesn't exist yet.</h1>
+      <p class="lede">Hand-tested modules from independent makers, shipped calibrated and ready to patch. No presets. No menus. Just voltage doing what you tell it to.</p>
+      <div class="hero-cta">
+        <a href="#" class="btn btn-primary">Shop modules</a>
+        <a href="#" class="btn btn-ghost">Plan a rack →</a>
+      </div>
+    </div>
+    <div class="scope">
+      <div class="scope-head"><span>CH.1 OUTPUT</span><span>2.4V PK-PK</span></div>
+      <svg viewBox="0 0 360 140" xmlns="http://www.w3.org/2000/svg">
+        <path class="scope-path" d="M0 70 Q 20 20, 40 70 T 80 70 Q 100 120, 120 70 T 160 70 Q 180 20, 200 70 T 240 70 Q 260 120, 280 70 T 320 70 Q 340 20, 360 70"/>
+      </svg>
+    </div>
+  </div>
+</header>
+
+<section class="chain">
+  <div class="wrap">
+    <div class="chain-head">
+      <h2>This week's signal chain</h2>
+      <p>Three modules, patched in series. Buy the set or pick one to start.</p>
+    </div>
+
+    <div class="modules">
+      <div class="cable-row">
+        <svg viewBox="0 0 900 34" preserveAspectRatio="none"><path d="M170 4 C 260 34, 340 34, 430 4"/><path d="M580 4 C 670 34, 750 34, 840 4"/></svg>
+      </div>
+
+      <div class="module">
+        <div class="jack"></div>
+        <div class="module-panel"><div class="knob k1"></div><div class="knob k2"></div><div class="knob k3"></div><div class="knob k4"></div></div>
+        <h3>DRIFT · Triple VCO</h3>
+        <div class="spec">3 osc · sync · thru-zero FM · 10HP</div>
+        <div class="price"><span>$249</span><span class="add">Add to rack</span></div>
+      </div>
+
+      <div class="module">
+        <div class="jack"></div>
+        <div class="module-panel"><div class="knob k1"></div><div class="knob k2"></div><div class="knob k3"></div></div>
+        <h3>MARROW · State Filter</h3>
+        <div class="spec">LP/BP/HP · self-osc · CV depth · 8HP</div>
+        <div class="price"><span>$189</span><span class="add">Add to rack</span></div>
+      </div>
+
+      <div class="module">
+        <div class="jack"></div>
+        <div class="module-panel"><div class="knob k1"></div><div class="knob k4"></div></div>
+        <h3>SILT · Dual Envelope</h3>
+        <div class="spec">AD/AR · loop mode · 0.5ms–12s · 6HP</div>
+        <div class="price"><span>$139</span><span class="add">Add to rack</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="story">
+  <div class="wrap">
+    <div>
+      <h2>Every module leaves the bench in someone's own handwriting.</h2>
+      <p>We work with twelve small manufacturers, most of them one or two people building in a garage or spare room. Every unit is burned in for 48 hours and calibrated by hand before it ships — we log the tech's initials on the panel underside.</p>
+      <div class="story-figures">
+        <div><div class="fig-num">12</div><div class="fig-label">independent makers</div></div>
+        <div><div class="fig-num">48h</div><div class="fig-label">burn-in per unit</div></div>
+        <div><div class="fig-num">3yr</div><div class="fig-label">calibration warranty</div></div>
+      </div>
+    </div>
+    <div class="scope" style="transform:scaleY(-1)">
+      <svg viewBox="0 0 360 140" xmlns="http://www.w3.org/2000/svg" style="transform:scaleY(-1)">
+        <path class="scope-path" style="animation-duration:4.1s" d="M0 90 L 30 90 L 30 30 L 60 30 L 60 100 L 100 100 L 100 50 L 140 50 L 140 90 L 180 90 L 180 20 L 220 20 L 220 110 L 260 110 L 260 60 L 300 60 L 300 90 L 360 90"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section class="drop">
+  <div class="wrap">
+    <div class="drop-box">
+      <div>
+        <h2>Next drop: Friday, 10am</h2>
+        <p>A four-module percussion voice from a maker we've been chasing for a year. Sixty units. They will not last the morning.</p>
+        <div class="signup">
+          <input type="email" placeholder="you@yourdomain.com" aria-label="Email for drop alert">
+          <a href="#" class="btn btn-primary">Notify me</a>
+        </div>
+      </div>
+      <div class="scope" style="padding:16px;">
+        <div class="scope-head"><span>DROP TIMER</span><span>ARMED</span></div>
+        <svg viewBox="0 0 360 100" xmlns="http://www.w3.org/2000/svg">
+          <path class="scope-path" style="animation-duration:2.4s" d="M0 50 Q 45 5, 90 50 T 180 50 T 270 50 T 360 50"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>© 2026 Patchworks. Assembled with a soldering iron in Portland, OR.</div>
+    <div class="flinks">
+      <a href="#">Shipping</a>
+      <a href="#">Warranty</a>
+      <a href="#">Contact</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SmartTech Appliances</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900;1,400&display=swap" rel="stylesheet">
+<link href="styles.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-custom py-3 nav-pill">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center text-white fw-bold" href="#">
+      <span class="brand-logo"><i class="fa-solid fa-tv" style="color:var(--navy)"></i></span>
+      SmartTech <span class="fw-normal ms-1">Appliances</span>
+    </a>
+    <button class="navbar-toggler bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav mx-auto gap-3">
+        <li class="nav-item"><a class="nav-link active" href="#">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Shop</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">About Us</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Contact</a></li>
+      </ul>
+      <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0">
+        <input class="search-box" type="text" placeholder="Search audio &amp; gear...">
+        <span class="icon-pill"><i class="fa-solid fa-cart-shopping"></i></span>
+        <span class="icon-pill"><i class="fa-solid fa-user"></i></span>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero py-5">
+  <div class="container py-4">
+    <div class="row align-items-center">
+      <div class="col-lg-6">
+        <span class="badge-trust">TRUSTED SINCE 2026</span>
+        <h1 class="mt-3">RELIABLE APPLIANCES, SMARTER LIVING. DELIVERED TO YOUR DOOR.</h1>
+        <p class="mt-3" style="color:#c3cbe6;max-width:480px;">"From kitchen essentials to home security, SmartTech Appliances brings trusted, innovative devices to every home — browse, order, and track delivery all online."</p>
+        <div class="d-flex align-items-center gap-4 mt-4">
+          <button class="btn btn-gold px-4 py-2">Shop Now <i class="fa-solid fa-arrow-right ms-1"></i></button>
+          <a href="#" class="text-white text-decoration-none">Learn More <i class="fa-solid fa-chevron-right small"></i></a>
+        </div>
+      </div>
+      <div class="col-lg-6 mt-5 mt-lg-0">
+        <div class="d-flex align-items-center justify-content-center gap-3">
+          <button class="slide-arrow"><i class="fa-solid fa-chevron-left"></i></button>
+          <div class="tv-frame" style="max-width:420px;">
+            <div class="tv-screen"></div>
+          </div>
+          <button class="slide-arrow"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+        <div class="tv-stand mt-1"></div>
+        <div class="tv-base"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Categories -->
+<section class="py-5">
+  <div class="container">
+    <h2 class="section-title mb-4">Browse by Categories</h2>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <div class="cat-card"><span class="cat-icon"><i class="fa-solid fa-blender"></i></span><span class="fw-semibold">Household Appliances</span></div>
+      </div>
+      <div class="col-md-4">
+        <div class="cat-card"><span class="cat-icon"><i class="fa-solid fa-fan"></i></span><span class="fw-semibold">Household Appliances</span></div>
+      </div>
+      <div class="col-md-4">
+        <div class="cat-card"><span class="cat-icon"><i class="fa-solid fa-plug"></i></span><span class="fw-semibold">Household Appliances</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Products -->
+<section class="py-4">
+  <div class="container">
+    <h2 class="section-title mb-4">Featured Products</h2>
+    <div class="row g-4" id="productRow">
+      <div class="col-md-4">
+        <div class="card product-card">
+          <div class="product-img"><i class="fa-solid fa-desktop"></i></div>
+          <div class="p-3">
+            <div class="product-title mb-2">Computer Monitor</div>
+            <div class="d-flex gap-2 flex-wrap">
+              <button class="btn btn-buy btn-sm add-buy"><i class="fa-solid fa-bag-shopping me-1"></i>Buy</button>
+              <button class="btn btn-cart btn-sm add-cart"><i class="fa-regular fa-square-plus me-1"></i>Add to Cart</button>
+              <button class="btn btn-view btn-sm">View Details</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card product-card">
+          <div class="product-img"><i class="fa-solid fa-bell"></i></div>
+          <div class="p-3">
+            <div class="product-title mb-2">Smoke Detector</div>
+            <div class="d-flex gap-2 flex-wrap">
+              <button class="btn btn-buy btn-sm add-buy"><i class="fa-solid fa-bag-shopping me-1"></i>Buy</button>
+              <button class="btn btn-cart btn-sm add-cart"><i class="fa-regular fa-square-plus me-1"></i>Add to Cart</button>
+              <button class="btn btn-view btn-sm">View Details</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card product-card">
+          <div class="product-img"><i class="fa-solid fa-gamepad"></i></div>
+          <div class="p-3">
+            <div class="product-title mb-2">Game Console</div>
+            <div class="d-flex gap-2 flex-wrap">
+              <button class="btn btn-buy btn-sm add-buy"><i class="fa-solid fa-bag-shopping me-1"></i>Buy</button>
+              <button class="btn btn-cart btn-sm add-cart"><i class="fa-regular fa-square-plus me-1"></i>Add to Cart</button>
+              <button class="btn btn-view btn-sm">View Details</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Services -->
+<section class="py-5 mt-3">
+  <div class="container">
+    <h2 class="service-title mb-4">Service Offered</h2>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <div class="service-card">
+          <span class="service-icon"><i class="fa-solid fa-screwdriver-wrench"></i></span>
+          <div><h6 class="fw-bold mb-1">Home Service</h6><p class="mb-0 small" style="color:#c3cbe6;">Professional installation, repair, and maintenance right at your doorstep.</p></div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="service-card">
+          <span class="service-icon"><i class="fa-solid fa-shield-halved"></i></span>
+          <div><h6 class="fw-bold mb-1">Warranty</h6><p class="mb-0 small" style="color:#c3cbe6;">We offer product warranty and customer support for replacements or repairs.</p></div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="service-card">
+          <span class="service-icon"><i class="fa-solid fa-lock"></i></span>
+          <div><h6 class="fw-bold mb-1">Secure Checkout</h6><p class="mb-0 small" style="color:#c3cbe6;">Enjoy safe and flexible payment through credit/debit cards, e-wallets, or Cash on Delivery.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Promo banners -->
+<section class="py-4">
+  <div class="container">
+    <div class="row g-3">
+      <div class="col-lg-6">
+        <div class="promo-tile promo-1" style="min-height:400px;">
+          <div>
+            <h2 class="fw-bold mb-1"><span style="color:var(--gold)">BER</span> MONTHS</h2>
+            <h4 class="fw-bold mb-0">Up to 50% OFF</h4>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="row g-3">
+          <div class="col-12">
+            <div class="promo-tile promo-2">
+              <div>
+                <div class="fw-bold" style="color:var(--gold);font-size:1.6rem;">SALE!</div>
+                <a href="#" class="text-white small">Explore Studio Gear <i class="fa-solid fa-arrow-right"></i></a>
+              </div>
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="promo-tile promo-3"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="pt-5 pb-3 mt-5">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <h6>SmartTech Appliances</h6>
+        <p class="small">Laboratory-grade spatial audio, high-precision peripherals, and minimalist design systems engineered for those who demand physical perfection.</p>
+      </div>
+      <div class="col-lg-2 col-6">
+        <h6>Products</h6>
+        <ul class="list-unstyled d-flex flex-column gap-2">
+          <li><a href="#">Aether Series</a></li>
+          <li><a href="#">Acoustics</a></li>
+          <li><a href="#">Desk Accessories</a></li>
+          <li><a href="#">Custom Casts</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-2 col-6">
+        <h6>Company</h6>
+        <ul class="list-unstyled d-flex flex-column gap-2">
+          <li><a href="#">Our Philosophy</a></li>
+          <li><a href="#">Technology Stack</a></li>
+          <li><a href="#">Journal</a></li>
+          <li><a href="#">Careers</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-2 col-6">
+        <h6>Support</h6>
+        <ul class="list-unstyled d-flex flex-column gap-2">
+          <li><a href="#">Track Order</a></li>
+          <li><a href="#">Warranty &amp; Returns</a></li>
+          <li><a href="#">User Manuals</a></li>
+          <li><a href="#">Direct Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <hr class="mt-4" style="border-color:#2a3568;">
+    <div class="d-flex flex-column flex-md-row justify-content-between small">
+      <span>&copy; 2026 SmartTech Appliances Inc. All Rights Reserved.</span>
+      <span><a href="#">Privacy Policy</a> &nbsp; <a href="#">Terms of Use</a> &nbsp; <a href="#">Regulatory Standards</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+<script>
+$(function(){
+  var cartCount = 0;
+  $('.add-cart').on('click', function(){
+    cartCount++;
+    $(this).html('<i class="fa-solid fa-check me-1"></i>Added');
+    var $btn = $(this);
+    setTimeout(function(){ $btn.html('<i class="fa-regular fa-square-plus me-1"></i>Add to Cart'); }, 1200);
+  });
+  $('.add-buy').on('click', function(){
+    alert('Proceeding to checkout...');
+  });
+});
+</script>
+</body>
+</html>

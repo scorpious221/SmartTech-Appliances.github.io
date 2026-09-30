@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GIRA — Appliances that don't shout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --stone:#EDE7DA;
+    --stone-2:#E2DBCA;
+    --ink:#26221C;
+    --ink-soft: rgba(38,34,28,0.62);
+    --sage:#5C6B4F;
+    --rust:#A2472B;
+    --gold:#D8A93E;
+    --line: rgba(38,34,28,0.14);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-padding-top: env(safe-area-inset-top, 0px);}
+  body{
+    background:var(--stone); color:var(--ink);
+    font-family:'Inter', system-ui, sans-serif;
+    line-height:1.5; overflow-x:hidden;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  h1,h2,h3{font-family:'Zilla Slab', Georgia, serif; font-weight:600; line-height:1.05;}
+  a{color:inherit; text-decoration:none;}
+  .wrap{max-width:1160px; margin:0 auto; padding:0 28px;}
+  .gasket{border-top:2px dashed var(--line); position:relative;}
+
+  /* NAV */
+  nav{position:sticky; top:0; z-index:20; background:rgba(237,231,218,0.88); backdrop-filter:blur(8px); border-bottom:1px solid var(--line); padding-top:env(safe-area-inset-top,0px);}
+  nav .wrap{display:flex; align-items:center; justify-content:space-between; height:66px;}
+  .brand{font-family:'Zilla Slab',serif; font-weight:700; font-size:21px; display:flex; align-items:center; gap:9px;}
+  .brand svg{width:22px; height:22px;}
+  .navlinks{display:flex; gap:26px; font-size:14px; color:var(--ink-soft);}
+  .navlinks a:hover{color:var(--ink);}
+  .navcta{border:1.5px solid var(--rust); color:var(--rust); padding:8px 16px; border-radius:2px; font-size:13px;}
+  @media(max-width:720px){.navlinks{display:none;}}
+
+  /* HERO */
+  .hero{padding:64px 0 52px;}
+  .hero .wrap{display:grid; grid-template-columns:1.05fr 0.95fr; gap:44px; align-items:center;}
+  @media(max-width:860px){.hero .wrap{grid-template-columns:1fr;}}
+  .kicker{color:var(--rust); font-size:14px; margin-bottom:16px;}
+  .hero h1{font-size:clamp(36px,5.4vw,58px);}
+  .hero p.lede{margin-top:20px; max-width:44ch; color:var(--ink-soft); font-size:17px;}
+  .hero-cta{margin-top:30px; display:flex; gap:14px; flex-wrap:wrap;}
+  .btn{padding:13px 22px; border-radius:2px; font-size:14px; font-weight:600;}
+  .btn-primary{background:var(--ink); color:var(--stone);}
+  .btn-primary:hover{background:#3a342a;}
+  .btn-ghost{border:1.5px solid var(--line); color:var(--ink);}
+  .btn-ghost:hover{border-color:var(--ink);}
+
+  /* DIAL */
+  .dial-card{background:var(--stone-2); border:1px solid var(--line); border-radius:4px; padding:26px; display:flex; flex-direction:column; align-items:center;}
+  .dial-label{align-self:flex-start; font-size:12px; letter-spacing:0.02em; color:var(--ink-soft); margin-bottom:6px;}
+  .dial svg{width:220px; height:220px;}
+  .dial-ring{fill:none; stroke:var(--line); stroke-width:10;}
+  .dial-fill{fill:none; stroke:var(--rust); stroke-width:10; stroke-linecap:round; stroke-dasharray:565; stroke-dashoffset:565; animation:fill 2.6s ease-out forwards;}
+  @keyframes fill{ to{ stroke-dashoffset:140; } }
+  @media (prefers-reduced-motion: reduce){ .dial-fill{animation:none; stroke-dashoffset:140;} }
+  .dial-num{font-family:'Zilla Slab',serif; font-size:15px; fill:var(--ink);}
+  .dial-caption{margin-top:14px; text-align:center;}
+  .dial-caption .big{font-family:'Zilla Slab',serif; font-size:22px;}
+  .dial-caption .small{font-size:12.5px; color:var(--ink-soft);}
+
+  /* SWATCHES */
+  .swatches{padding:56px 0 60px;}
+  .swatch-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:30px; gap:20px; flex-wrap:wrap;}
+  .swatch-head h2{font-size:27px;}
+  .swatch-head p{color:var(--ink-soft); font-size:14px; max-width:32ch;}
+  .swatch-row{display:flex; gap:18px; flex-wrap:wrap;}
+  .swatch{display:flex; flex-direction:column; align-items:center; gap:9px; font-size:12.5px; color:var(--ink-soft);}
+  .swatch .chip{width:56px; height:56px; border-radius:50%; border:3px solid var(--stone); box-shadow:0 0 0 1.5px var(--line);}
+  .swatch.selected .chip{box-shadow:0 0 0 2px var(--ink);}
+  .swatch.selected{color:var(--ink); font-weight:600;}
+  .c1{background:var(--sage);} .c2{background:var(--rust);} .c3{background:var(--gold);} .c4{background:#3B3A35;} .c5{background:#C7BFA9;}
+
+  /* PRODUCTS */
+  .products{padding:0 0 68px;}
+  .grid{display:grid; grid-template-columns:repeat(3,1fr); gap:22px; margin-top:6px;}
+  @media(max-width:860px){.grid{grid-template-columns:1fr;}}
+  .card{background:var(--stone-2); border:1px solid var(--line); border-radius:4px; padding:22px; position:relative;}
+  .card-top{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px;}
+  .swatch-dot{width:16px; height:16px; border-radius:50%; margin-top:4px;}
+  .card-image{aspect-ratio:1/0.82; border-radius:3px; margin-bottom:16px;
+    background: radial-gradient(circle at 32% 28%, rgba(255,255,255,0.35), transparent 45%), var(--ink);
+    position:relative; overflow:hidden;
+  }
+  .card-image .body-shape{position:absolute; inset:18% 22%; border-radius:14px; background:var(--card-color, var(--sage)); opacity:0.92;}
+  .card h3{font-size:17px; margin-bottom:5px;}
+  .card .spec{font-size:12.5px; color:var(--ink-soft); margin-bottom:14px;}
+  .card .price-row{display:flex; justify-content:space-between; align-items:center; font-size:15px; font-weight:600;}
+  .card .price-row .add{font-size:13px; font-weight:400; color:var(--rust);}
+
+  /* STORY STATS */
+  .story{padding:58px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
+  .story .wrap{display:grid; grid-template-columns:1fr 1fr; gap:50px; align-items:center;}
+  @media(max-width:780px){.story .wrap{grid-template-columns:1fr;}}
+  .story h2{font-size:25px; max-width:17ch; margin-bottom:14px;}
+  .story p{color:var(--ink-soft); font-size:15.5px; max-width:48ch;}
+  .figs{display:flex; gap:34px; margin-top:24px; flex-wrap:wrap;}
+  .fig-num{font-family:'Zilla Slab',serif; font-size:27px; color:var(--rust);}
+  .fig-label{font-size:12.5px; color:var(--ink-soft); margin-top:2px;}
+  .exploded{display:flex; flex-direction:column; gap:10px;}
+  .exp-row{display:flex; align-items:center; gap:12px; font-size:12.5px; color:var(--ink-soft);}
+  .exp-line{flex:1; height:1px; background:var(--line);}
+  .exp-dot{width:8px; height:8px; border-radius:50%; background:var(--rust);}
+
+  /* RESTOCK */
+  .restock{padding:70px 0;}
+  .restock-box{background:var(--ink); color:var(--stone); border-radius:4px; padding:42px; display:grid; grid-template-columns:1.2fr 1fr; gap:34px; align-items:center;}
+  @media(max-width:780px){.restock-box{grid-template-columns:1fr;}}
+  .restock-box h2{font-size:25px; margin-bottom:10px; color:var(--stone);}
+  .restock-box p{color:rgba(237,231,218,0.65); font-size:15px; max-width:40ch;}
+  .signup{display:flex; gap:10px; margin-top:20px; flex-wrap:wrap;}
+  .signup input{flex:1; min-width:180px; background:transparent; border:1px solid rgba(237,231,218,0.3); color:var(--stone); padding:13px 14px; border-radius:2px; font-size:14px; font-family:inherit;}
+  .signup input::placeholder{color:rgba(237,231,218,0.45);}
+  .signup input:focus{outline:2px solid var(--gold); outline-offset:1px; border-color:transparent;}
+  .restock .dial-fill{stroke:var(--gold);}
+  .restock .dial-ring{stroke:rgba(237,231,218,0.16);}
+  .restock .dial-num{fill:var(--stone);}
+  .restock .dial-card{background:rgba(237,231,218,0.05); border-color:rgba(237,231,218,0.18);}
+  .restock .dial-label,.restock .dial-caption .small{color:rgba(237,231,218,0.55);}
+  .restock .dial-caption .big{color:var(--stone);}
+
+  footer{padding:40px 0 56px;}
+  footer .wrap{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; font-size:13px; color:var(--ink-soft);}
+  footer .flinks{display:flex; gap:22px;}
+  a:focus-visible, input:focus-visible{outline:2px solid var(--rust); outline-offset:2px;}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="brand">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="#A2472B" stroke-width="2"/><line x1="12" y1="12" x2="12" y2="6" stroke="#26221C" stroke-width="2" stroke-linecap="round"/></svg>
+      GIRA
+    </div>
+    <div class="navlinks">
+      <a href="#">Kitchen</a>
+      <a href="#">Laundry</a>
+      <a href="#">Parts &amp; care</a>
+      <a href="#">Journal</a>
+    </div>
+    <a href="#" class="navcta">Cart (0)</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div>
+      <div class="kicker">SMALL APPLIANCES, PROPERLY ENGINEERED</div>
+      <h1>Appliances that don't shout.</h1>
+      <p class="lede">Quiet motors, enamel finishes, parts you can actually replace. We build for the counter you'll still be using in fifteen years, not the one you'll photograph once.</p>
+      <div class="hero-cta">
+        <a href="#" class="btn btn-primary">Shop the range</a>
+        <a href="#" class="btn btn-ghost">Compare models →</a>
+      </div>
+    </div>
+    <div class="dial-card">
+      <div class="dial-label">NOISE RATING · KETTLE K1</div>
+      <div class="dial">
+        <svg viewBox="0 0 220 220">
+          <circle class="dial-ring" cx="110" cy="110" r="90"/>
+          <circle class="dial-fill" cx="110" cy="110" r="90" transform="rotate(-90 110 110)"/>
+          <text class="dial-num" x="30" y="205">0dB</text>
+          <text class="dial-num" x="178" y="205">80dB</text>
+        </svg>
+      </div>
+      <div class="dial-caption"><div class="big">38 dB</div><div class="small">quieter than a library</div></div>
+    </div>
+  </div>
+</header>
+
+<section class="swatches gasket">
+  <div class="wrap">
+    <div class="swatch-head">
+      <h2>Five finishes, one enamel line</h2>
+      <p>Fired at 800°C onto pressed steel. Chips are covered for the life of the warranty.</p>
+    </div>
+    <div class="swatch-row">
+      <div class="swatch selected"><div class="chip c1"></div>Sage</div>
+      <div class="swatch"><div class="chip c2"></div>Rust</div>
+      <div class="swatch"><div class="chip c3"></div>Harvest</div>
+      <div class="swatch"><div class="chip c4"></div>Graphite</div>
+      <div class="swatch"><div class="chip c5"></div>Bone</div>
+    </div>
+  </div>
+</section>
+
+<section class="products">
+  <div class="wrap">
+    <div class="grid">
+      <div class="card">
+        <div class="card-top"><h3 style="margin:0;">Kettle K1</h3><div class="swatch-dot" style="background:var(--sage)"></div></div>
+        <div class="card-image"><div class="body-shape" style="--card-color:var(--sage); border-radius:50% 50% 20px 20px;"></div></div>
+        <div class="spec">1.2L · 38dB · 3-year warranty</div>
+        <div class="price-row"><span>$129</span><span class="add">Add to cart</span></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 style="margin:0;">Stand Mixer M4</h3><div class="swatch-dot" style="background:var(--rust)"></div></div>
+        <div class="card-image"><div class="body-shape" style="--card-color:var(--rust); border-radius:40% 40% 18px 18px;"></div></div>
+        <div class="spec">400W direct-drive · 42dB · 5-year warranty</div>
+        <div class="price-row"><span>$389</span><span class="add">Add to cart</span></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 style="margin:0;">Drip Brewer B2</h3><div class="swatch-dot" style="background:var(--gold)"></div></div>
+        <div class="card-image"><div class="body-shape" style="--card-color:var(--gold); border-radius:18px 18px 30% 30%;"></div></div>
+        <div class="spec">1L carafe · 34dB · 3-year warranty</div>
+        <div class="price-row"><span>$159</span><span class="add">Add to cart</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="story">
+  <div class="wrap">
+    <div>
+      <h2>Every part has a number, and every number has a replacement.</h2>
+      <p>Motors, gaskets, and switches are catalogued and stocked for a decade. If something wears out, you order the part — not a new appliance.</p>
+      <div class="figs">
+        <div><div class="fig-num">180+</div><div class="fig-label">stocked spare parts</div></div>
+        <div><div class="fig-num">10yr</div><div class="fig-label">parts availability</div></div>
+        <div><div class="fig-num">4.2k</div><div class="fig-label">repairs completed</div></div>
+      </div>
+    </div>
+    <div class="exploded">
+      <div class="exp-row"><span>Enamel shell</span><div class="exp-line"></div><span class="exp-dot"></span></div>
+      <div class="exp-row"><span>Direct-drive motor</span><div class="exp-line"></div><span class="exp-dot"></span></div>
+      <div class="exp-row"><span>Thermal fuse</span><div class="exp-line"></div><span class="exp-dot"></span></div>
+      <div class="exp-row"><span>Door gasket</span><div class="exp-line"></div><span class="exp-dot"></span></div>
+      <div class="exp-row"><span>Control dial</span><div class="exp-line"></div><span class="exp-dot"></span></div>
+    </div>
+  </div>
+</section>
+
+<section class="restock">
+  <div class="wrap">
+    <div class="restock-box">
+      <div>
+        <h2>Kettle K1 restocks Thursday</h2>
+        <p>Last batch sold out in nine hours. Get an alert the moment the next one lands, before it's on the site.</p>
+        <div class="signup">
+          <input type="email" placeholder="you@yourdomain.com" aria-label="Email for restock alert">
+          <a href="#" class="btn btn-primary" style="background:var(--gold); color:var(--ink);">Notify me</a>
+        </div>
+      </div>
+      <div class="dial-card">
+        <div class="dial-label">UNITS REMAINING</div>
+        <div class="dial">
+          <svg viewBox="0 0 220 220">
+            <circle class="dial-ring" cx="110" cy="110" r="90"/>
+            <circle class="dial-fill" cx="110" cy="110" r="90" transform="rotate(-90 110 110)" style="animation-delay:0.3s;"/>
+            <text class="dial-num" x="24" y="205">0</text>
+            <text class="dial-num" x="178" y="205">200</text>
+          </svg>
+        </div>
+        <div class="dial-caption"><div class="big">12 left</div><div class="small">of 200 made</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>© 2026 Gira Appliance Co. Serviced and repaired, not replaced.</div>
+    <div class="flinks">
+      <a href="#">Warranty</a>
+      <a href="#">Spare parts</a>
+      <a href="#">Contact</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
