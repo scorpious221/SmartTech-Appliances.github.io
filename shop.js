@@ -46,9 +46,14 @@
     clearTimeout(toastTimer); toastTimer = setTimeout(() => $('#toast').removeClass('show'), 4000);
   }
   const _add = window.addToCart, _buy = window.buyNow, _open = window.openPayment;
-  window.addToCart = function (id) { _add(id); const p = findProduct(id); if (p && !quiet) toast(p); };
-  window.buyNow = function (id) { quiet = true; _buy(id); quiet = false; };
-  window.openPayment = function () { _open(); $('#pay-grand').text('₱' + (cart.reduce((t, i) => t + i.price * i.qty, 0) + 150).toLocaleString()); };
+  window.addToCart = function (id) { if (needLogin()) return; _add(id); const p = findProduct(id); if (p && !quiet) toast(p); };
+window.buyNow = function (id) { if (needLogin()) return; quiet = true; _buy(id); quiet = false; };
+  window.openPayment = function () {
+  _open();
+  const sub = cart.reduce((t, i) => t + i.price * i.qty, 0), ship = shippingFor(sub);
+  $('#pay-ship').text(ship ? '₱' + ship : 'Free');
+  $('#pay-grand').text('₱' + (sub + ship).toLocaleString());
+};
 
   function setSort(v) {
     sortMode = v; $('#sortLabel').text(SORTS[v]);
@@ -58,8 +63,14 @@
 
   $(function () {
     const q = new URLSearchParams(location.search);
-    if (CATNAMES[q.get('cat')]) { currentCategory = q.get('cat'); currentSubcat = null; renderTopCats(); renderSubcats(); }
-    renderProducts();
+if (CATNAMES[q.get('cat')]) { currentCategory = q.get('cat'); currentSubcat = null; }
+const pid = q.get('product'), found = pid && findProduct(pid);
+if (found) { currentCategory = found.category; currentSubcat = null; }
+const sub = q.get('sub');
+if (sub && PRODUCTS.some(p => p.category === currentCategory && p.sub === sub)) currentSubcat = sub;
+renderTopCats(); renderSubcats();
+renderProducts();
+if (found) showDetails(pid);
 
     $('#sortBtn').on('click', e => { e.stopPropagation(); toggleSort($('#sortList').prop('hidden')); });
     $('#sortList').on('click', 'li', function () { setSort(this.dataset.v); toggleSort(false); renderProducts(); })
@@ -74,7 +85,7 @@
     });
     $(document).on('click', '.card-link', function (e) { if (DETAILS_PAGE) return; e.preventDefault(); showDetails($(this).closest('.product-card').data('id')); });
     $(document).on('click', '#reset-filters', function () { currentSubcat = null; setSort('featured'); renderSubcats(); renderProducts(); });
-    $(document).on('click', '#toast-cart', function () { $('#toast').removeClass('show'); scrollToCart(); });
+   $(document).on('click', '#toast-cart', function () { location.href = 'cart.html'; });
     $(document).on('click', '#toast-x', () => $('#toast').removeClass('show'));
 
     const openSearch = () => { const b = document.querySelector('.stq-btn'); if (b) b.click(); };

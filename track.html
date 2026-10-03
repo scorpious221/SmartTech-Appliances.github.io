@@ -8,7 +8,7 @@
 <link href="styles.css" rel="stylesheet"><link href="shop.css" rel="stylesheet"><link href="pages.css" rel="stylesheet">
 </head><body data-page="track">
 <main id="main" class="container-xxl px-lg-5 pg">
-  <h1>Track my order</h1><p class="sub">I-type ang order number mula sa resibo mo (hal. ORD-123456).</p>
+  <h1>Track my order</h1><p class="sub">Enter the order number from your receipt (e.g. ORD-123456).</p>
   <div class="panel" style="max-width:640px">
     <form id="f" novalidate><label class="field">Order number<input id="ord" placeholder="ORD-123456" autocomplete="off"></label>
     <p id="msg" class="msg" role="status" aria-live="polite"></p><button class="btn-clay" type="submit">Track order</button></form>
@@ -26,12 +26,12 @@
     e.preventDefault();
     const v = $('#ord').value.trim().toUpperCase();
     if (!v) { $('#msg').className = 'msg err'; $('#msg').textContent = 'Enter your order number.'; return; }
-    if (!last || last.orderNumber !== v) { $('#msg').className = 'msg err'; $('#msg').textContent = 'Hindi namin mahanap ang order na ito sa browser na ito. Check ang number o makipag-ugnayan sa amin.'; $('#result').innerHTML = ''; return; }
+    if (!last || last.orderNumber !== v) { $('#msg').className = 'msg err'; $('#msg').textContent = 'We couldn’t find this order in this browser. Check the number or contact us.'; $('#result').innerHTML = ''; return; }
     $('#msg').textContent = '';
     /* Demo: status batay sa oras mula nang um-order. Palitan ng totoong data kapag may backend. */
     const hrs = (Date.now() - new Date(last.orderDate).getTime()) / 36e5, st = hrs < 2 ? 0 : hrs < 24 ? 1 : hrs < 72 ? 2 : 3;
-    const S = [['Order placed','Natanggap na namin ang order mo.'],['Packed','Inihahanda na ang mga item.'],['Out for delivery','Papunta na sa address mo.'],['Delivered','Naihatid na.']];
-    $('#result').innerHTML = `<div class="panel"><b>${esc(last.orderNumber)}</b> · ${esc(last.paymentMethod)} · ₱${Number(last.grandTotal).toLocaleString()}<ol class="steps">${S.map((s, i) => `<li class="${i <= st ? 'done' : ''}"><b>${s[0]}</b>${s[1]}</li>`).join('')}</ol><small style="color:var(--st-ink-2)">Ihahatid sa: ${esc(last.address)}</small></div>`;
+    const S = [['Order placed','We have received your order.'],['Packed','Your items are being prepared.'],['Out for delivery','On its way to your address.'],['Delivered','Your order has been delivered.']];
+    $('#result').innerHTML = `<div class="panel"><b>${esc(last.orderNumber)}</b> · ${esc(last.paymentMethod)} · ₱${Number(last.grandTotal).toLocaleString()}<ol class="steps">${S.map((s, i) => `<li class="${i <= st ? 'done' : ''}"><b>${s[0]}</b>${s[1]}</li>`).join('')}</ol><small style="color:var(--st-ink-2)">Delivering to: ${esc(last.address)}</small></div>`;
   };
 })();
 </script>

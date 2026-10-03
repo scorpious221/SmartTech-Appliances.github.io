@@ -44,7 +44,7 @@
     ['oven','Oven',89995,'oven.jpg','kitchen','Cooking Appliances'],
     ['toaster','Toaster',1475,'toaster.jpg','kitchen','Cooking Appliances'],
     ['blender','Blender',3085,'blender.jpg','kitchen','Food Preparation'],
-    ['fprocessor','Food Processor',285,'fprocessor.jpg','kitchen','Food Preparation'],
+    ['fprocessor','Food Processor',2850,'fprocessor.jpg','kitchen','Food Preparation'],
     ['mgrinder','Meat Grinder',8790,'mgrinder.jpg','kitchen','Food Preparation'],
     ['cgrinder','Coffee Grinder',8790,'cgrinder.jpg','kitchen','Food Preparation'],
     ['smixer','Stand Mixer',8790,'mixer.jpg','kitchen','Food Preparation']

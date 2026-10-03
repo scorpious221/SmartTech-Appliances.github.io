@@ -58,13 +58,13 @@
   const root = document.getElementById('rc');
   const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const peso = n => '₱' + Number(n).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  const PAY = { COD: 'Cash on Delivery', GCash: 'GCash', Card: 'Credit / Debit Card' };
+  const PAY = { COD: 'Cash on Delivery', GCash: 'GCash', Maya: 'Maya', Card: 'Credit / Debit Card' };
 
   let d = null;
   try { d = JSON.parse(localStorage.getItem('lastOrder')); } catch (e) {}
 
   if (!d || !Array.isArray(d.cartItems)) {
-    root.innerHTML = `<div class="rc-card rc-empty"><i class="bi bi-receipt" aria-hidden="true"></i><h2>No order found</h2><p>Wala kaming nakitang order sa browser na ito. Mag-order muna para lumabas ang resibo mo.</p><a class="btn-clay" style="padding:0 28px;height:48px" href="products.html">Go shopping</a></div>`;
+    root.innerHTML = `<div class="rc-card rc-empty"><i class="bi bi-receipt" aria-hidden="true"></i><h2>No order found</h2><p>We couldn’t find an order in this browser. Place an order first to see your receipt.</p><a class="btn-clay" style="padding:0 28px;height:48px" href="products.html">Go shopping</a></div>`;
     return;
   }
 
@@ -75,7 +75,7 @@
   <div class="rc-hero">
     <div class="rc-check"><i class="bi bi-check-lg" aria-hidden="true"></i></div>
     <h1>Order confirmed</h1>
-    <p>Salamat sa pag-order! Itago ang resibong ito para sa warranty at pag-track.</p>
+    <p>Thank you for your order! Keep this receipt for your warranty and order tracking.</p>
   </div>
   <article class="rc-card" aria-label="Receipt">
     <header class="rc-top">
@@ -94,15 +94,15 @@
       <ul class="rc-items">${d.cartItems.map(i => `<li><b>${esc(i.name)}</b><span class="amt">${peso(i.price * i.quantity)}</span><small>${i.quantity} × ${peso(i.price)}</small></li>`).join('')}</ul>
       <div class="rc-sum">
         <div class="rc-row"><span>Subtotal</span><span>${peso(d.subtotal)}</span></div>
-        <div class="rc-row"><span>Shipping</span><span>${peso(shipping)}</span></div>
+        <div class="rc-row"><span>Shipping</span><span>${shipping ? peso(shipping) : 'Free'}</span></div>
         <div class="rc-row total"><span>Total paid${d.paymentMethod === 'COD' ? ' on delivery' : ''}</span><span>${peso(d.grandTotal)}</span></div>
       </div>
       <div class="rc-next">
-        <div><i class="bi bi-box-seam" aria-hidden="true"></i><b>We pack it</b>Ihahanda ang order mo sa loob ng 1–2 araw.</div>
-        <div><i class="bi bi-truck" aria-hidden="true"></i><b>We deliver</b>Darating sa loob ng 3–5 araw.</div>
-        <div><i class="bi bi-shield-check" aria-hidden="true"></i><b>1-year warranty</b>Sakop ng warranty ang bawat item.</div>
+        <div><i class="bi bi-box-seam" aria-hidden="true"></i><b>We pack it</b>Your order is prepared within 1–2 days.</div>
+        <div><i class="bi bi-truck" aria-hidden="true"></i><b>We deliver</b>Arrives in 2–5 days (Metro Manila) or 5–10 days (provinces).</div>
+        <div><i class="bi bi-shield-check" aria-hidden="true"></i><b>1-year warranty</b>Every item is covered by warranty.</div>
       </div>
-      <p class="rc-note">All sales final · Items ship within 3–5 days · Salamat sa pagpili sa SmartTech</p>
+      <p class="rc-note">30-day returns · 1-year warranty · Thank you for choosing SmartTech</p>
     </div>
   </article>
   <div class="rc-actions">

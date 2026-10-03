@@ -11,7 +11,7 @@ ${logo}
 <div class="d-flex gap-2 order-2 order-lg-3 ms-lg-4">
 <button class="st-icon-btn d-lg-none" type="button" aria-label="Search" onclick="document.querySelector('.stq-btn')?.click()"><i class="bi bi-search"></i></button>
 <a class="st-icon-btn d-none d-lg-inline-grid" href="wishlist.html" aria-label="Wishlist"><i class="bi bi-heart"></i></a>
-<a class="st-icon-btn st-cart-btn" href="products.html#cart-section" aria-label="Cart"><i class="bi bi-bag"></i><span class="st-count" id="cart-count">0</span></a>
+<a class="st-icon-btn st-cart-btn" href="cart.html" aria-label="Cart"><i class="bi bi-bag"></i><span class="st-count" id="cart-count">0</span></a>
 <a class="st-icon-btn d-none d-lg-inline-grid" href="login.html" aria-label="Account"><i class="bi bi-person"></i></a></div>
 <div class="collapse navbar-collapse order-3 order-lg-2" id="nav"><ul class="navbar-nav me-lg-4 gap-lg-3 pt-2 pt-lg-0">${nav.map(([l,h]) => `<li class="nav-item"><a class="nav-link" href="${h}">${l}</a></li>`).join('')}</ul>
 <form class="st-search ms-lg-auto flex-grow-1 my-3 my-lg-0" role="search" onsubmit="return false"><i class="bi bi-search" aria-hidden="true"></i><input type="search" class="form-control" placeholder="Search appliances" aria-label="Search products" readonly></form></div>
@@ -25,7 +25,7 @@ ${logo}
 <nav aria-label="Your SmartTech"><h3>Your SmartTech</h3><ul><li><a href="login.html">My account</a></li><li><a href="track.html">Track my order</a></li><li><a href="wishlist.html">My wishlist</a></li><li><a href="about.html#contact">Contact us</a></li></ul></nav></div></div>
 <div class="sf-bottom"><div class="sf-legal"><small>© 2026 SmartTech Appliances. Concept design.</small><small><a href="#">Privacy policy</a> &nbsp;•&nbsp; <a href="#">Terms &amp; conditions</a></small></div>
 <div class="sf-pay"><small>PAY YOUR WAY</small><ul aria-label="Accepted payments"><li>GCash</li><li>Maya</li><li>COD</li><li>VISA</li></ul></div></div></div></footer>
-<nav class="st-bottomnav d-lg-none" aria-label="Quick navigation">${[['homelandingpage.html','house','Home','home'],['products.html','shop','Shop','shop'],['wishlist.html','heart','Wishlist','wishlist'],['products.html#cart-section','bag','Cart','cart'],['login.html','person','Account','login']].map(([h,i,l,k]) => `<a href="${h}"${k===page?' class="active" aria-current="page"':''}><i class="bi bi-${i}" aria-hidden="true"></i><span>${l}</span></a>`).join('')}</nav>`;
+<nav class="st-bottomnav d-lg-none" aria-label="Quick navigation">${[['homelandingpage.html','house','Home','home'],['products.html','shop','Shop','shop'],['wishlist.html','heart','Wishlist','wishlist'],['cart.html','bag','Cart','cart'],['login.html','person','Account','login']].map(([h,i,l,k]) => `<a href="${h}"${k===page?' class="active" aria-current="page"':''}><i class="bi bi-${i}" aria-hidden="true"></i><span>${l}</span></a>`).join('')}</nav>`;
   document.body.insertAdjacentHTML('afterbegin', head);
   document.body.insertAdjacentHTML('beforeend', foot);
   const main = document.getElementById('main'); if (main) document.body.insertBefore(main, document.querySelector('.st-footer'));

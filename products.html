@@ -27,7 +27,7 @@
     <div class="d-flex gap-2 order-2 order-lg-3 ms-lg-4">
       <button class="st-icon-btn d-lg-none" type="button" aria-label="Search" onclick="document.querySelector('.stq-btn')?.click()"><i class="bi bi-search"></i></button>
       <a class="st-icon-btn d-none d-lg-inline-grid" href="wishlist.html" aria-label="Wishlist"><i class="bi bi-heart"></i></a>
-      <a class="st-icon-btn st-cart-btn" href="#cart-section" onclick="scrollToCart();return false" aria-label="Cart"><i class="bi bi-bag"></i><span class="st-count" id="cart-count">0</span></a>
+     <a class="st-icon-btn st-cart-btn" href="cart.html" aria-label="Cart"><i class="bi bi-bag"></i><span class="st-count" id="cart-count">0</span></a>
       <a class="st-icon-btn d-none d-lg-inline-grid" href="login.html" aria-label="Account"><i class="bi bi-person"></i></a>
     </div>
     <div class="collapse navbar-collapse order-3 order-lg-2" id="nav">
@@ -97,6 +97,7 @@
       <fieldset class="mb-2"><legend class="fs-6 fw-bold">Payment method</legend>
         <label class="pay-opt"><input type="radio" name="paymethod" value="COD" checked> Cash on Delivery</label>
         <label class="pay-opt"><input type="radio" name="paymethod" value="GCash"> GCash</label>
+        <label class="pay-opt"><input type="radio" name="paymethod" value="Maya"> Maya</label>
         <label class="pay-opt"><input type="radio" name="paymethod" value="Card"> Credit/Debit Card</label>
       </fieldset>
       <div id="card-fields">
@@ -105,7 +106,7 @@
         <div class="d-flex gap-2"><input type="text" id="card-exp" placeholder="MM/YY" inputmode="numeric" autocomplete="cc-exp"><input type="text" id="card-cvv" placeholder="CVV" inputmode="numeric" autocomplete="cc-csc"></div>
       </div>
       <div class="pay-row"><span>Subtotal</span><span id="pay-total">₱0</span></div>
-      <div class="pay-row"><span>Shipping</span><span>₱150</span></div>
+      <div class="pay-row"><span>Shipping</span><span id="pay-ship">₱150</span></div>
       <div class="pay-row total"><span>Grand total</span><span id="pay-grand">₱0</span></div>
       <div class="pay-actions"><button class="btn-clay" type="button" onclick="completePayment()">Pay Now</button><button class="btn-link" type="button" onclick="closePayment()">Cancel</button></div>
     </div>
@@ -137,7 +138,7 @@
   <a href="homelandingpage.html"><i class="bi bi-house" aria-hidden="true"></i><span>Home</span></a>
   <a href="products.html" class="active" aria-current="page"><i class="bi bi-shop" aria-hidden="true"></i><span>Shop</span></a>
   <a href="wishlist.html"><i class="bi bi-heart" aria-hidden="true"></i><span>Wishlist</span></a>
-  <a href="#cart-section" onclick="scrollToCart();return false"><i class="bi bi-bag" aria-hidden="true"></i><span>Cart</span></a>
+  <a href="cart.html"><i class="bi bi-bag" aria-hidden="true"></i><span>Cart</span></a>
   <a href="login.html"><i class="bi bi-person" aria-hidden="true"></i><span>Account</span></a>
 </nav>
 
@@ -148,9 +149,11 @@
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="products-data.js"></script>
 <script src="products.js"></script>
 <script src="shop.js"></script>
 <script src="search.js"></script>
+
 <script>
 /* Sinusundan ng nav highlight ang kasalukuyang category (Household / Entertainment / Kitchen) */
 (function () {

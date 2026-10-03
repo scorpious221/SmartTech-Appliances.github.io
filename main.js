@@ -15,13 +15,14 @@ const TILES = [
  ['display','Monitors','See every detail','','MonitorsCategory.png',shop('entertainment','Televisions & Displays')],
  ['speaker','Audio','Sound worth feeling','','AudioCategory.png',shop('entertainment','Audio & Music')],
  ['camera-video','Security','Protect what matters','wide','SecurityCategory.png',shop('household','Security Devices')]];
-const PRODUCTS = [
-{id:'airfryer',n:'Air Fryer',s:4.9,c:328,p:2599,o:2999,b:'Best seller',t:['best'],i:'afryer.jpg'},
-{id:'cctv',n:'CCTV Camera',s:4.8,c:181,p:8900,o:9900,b:'New',t:['new'],i:'cctv.jpg'},
-{id:'oled',n:'OLED TV',s:4.7,c:96,p:17988,o:21988,b:'18% off',t:['sale'],i:'oled.jpg'},
-{id:'doorbell',n:'Video Doorbell',s:4.8,c:244,p:13500,o:15500,b:'Hot',t:['best','sale'],i:'vidbell.jpg'},
-{id:'generator',n:'Portable Generator',s:4.6,c:137,p:10000,o:12000,b:'Sold out',t:['new'],i:'portablegen.jpg',out:1}
+const FEATURED = [
+{id:'airfryer',s:4.9,c:328,o:2999,b:'Best seller',t:['best']},
+{id:'cctv',s:4.8,c:181,o:9900,b:'New',t:['new']},
+{id:'oled',s:4.7,c:96,o:21988,b:'18% off',t:['sale']},
+{id:'doorbell',s:4.8,c:244,o:15500,b:'Hot',t:['best','sale']},
+{id:'generator',s:4.6,c:137,o:12000,b:'New',t:['new']}
 ];
+const CARDS = FEATURED.map(f => { const b = PRODUCTS.find(p => p.id === f.id); return { ...f, n: b.name, p: b.price, i: b.img.replace('images/', '') }; });
 const TABS = [['all','Best Sellers'],['new','New'],['sale','On Sale']];
 const BUNDLES = [['Smart Kitchen Set','Air fryer · Rice cooker · Blender',7499,8333,'afryer.jpg',shop('kitchen','Cooking Appliances')],['Gamer Setup','Computer monitor · Controller · Headphones',31990,34569,'computermonitor.jpg',shop('entertainment','Gaming Gadgets')],['Security Kit','CCTV camera · Video doorbell · Smoke detector',22900,24900,'cctv.jpg',shop('household','Security Devices')]];
 const BRANDS = ['SAMSUNG','LG','SONY','XIAOMI','JBL','DYSON','TP-Link'];
@@ -50,7 +51,7 @@ function card(p) {
   ${p.low?`<p class="st-low">Only ${p.low} left — order soon</p>`:''}<div class="st-price"><strong>${peso(p.p)}</strong><s class="st-old">${peso(p.o)}</s></div><button class="st-cart${p.out?' alt':''}" data-id="${p.id}"${p.out?' data-out="1"':''}>${p.out?'Notify Me':'Add to Cart'}</button></div></article>`;
 }
 function renderProducts(tab) {
-  const list = tab === 'all' ? PRODUCTS : PRODUCTS.filter((p) => p.t.includes(tab));
+  const list = tab === 'all' ? CARDS : CARDS.filter((p) => p.t.includes(tab));
   set('#rail', list.map(card).join(''));
   if (drawProg) { $('#rail').scrollLeft = 0; drawProg(); }
 }
@@ -65,7 +66,7 @@ function cartCount() {
   set('#cart-count', c.reduce((t, i) => t + (i.qty || 1), 0));
 }
 function cartAdd(id) {
-  const p = PRODUCTS.find(x => x.id === id); if (!p) return;
+  const p = CARDS.find(x => x.id === id); if (!p) return;
   let c = []; try { c = JSON.parse(localStorage.getItem('st_cart')) || []; } catch (e) {}
   const it = c.find(x => x.id === id);
   it ? it.qty = (it.qty || 1) + 1 : c.push({ id, name: p.n, price: p.p, qty: 1, img: IMG + p.i });
@@ -83,7 +84,9 @@ $('#rail').addEventListener('click', (e) => {
     return;
   }
   const b = e.target.closest('.st-cart');
-  if (b && !b.dataset.out) { cartAdd(b.dataset.id); b.textContent = 'Added ✓'; setTimeout(() => b.textContent = 'Add to Cart', 1200); }
+  if (b && !b.dataset.out)
+    if (!localStorage.getItem('st_session')) { location.href = 'login.html?next=homelandingpage.html'; return; }
+   { cartAdd(b.dataset.id); b.textContent = 'Added ✓'; setTimeout(() => b.textContent = 'Add to Cart', 1200); }
 });
 cartCount();
 $('#railNext').addEventListener('click', () => $('#rail').scrollBy({ left: 306, behavior: 'smooth' }));

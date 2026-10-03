@@ -197,7 +197,7 @@ a{color:inherit} img{max-width:100%;height:auto}
 .st-hero{
   background:
     linear-gradient(90deg, rgba(10,31,26,.9) 0%, rgba(10,31,26,.25) 100%),
-    url("../../images/Hero.png") center / cover no-repeat,
+    url("images/Hero.png") center / cover no-repeat,
     var(--st-ink);
 }
 
@@ -237,3 +237,72 @@ a{color:inherit} img{max-width:100%;height:auto}
 /* Active link sa navbar (para sa home, dahil nasa shop.css lang ito dati) */
 .navbar .nav-link.active{position:relative;color:#fff;font-weight:700}
 @media(min-width:992px){.navbar .nav-link.active::after{content:"";position:absolute;left:0;right:0;bottom:-8px;height:2px;background:var(--st-clay-2)}}
+/* Header: kapareho ng shop at ng ibang page (desktop) */
+@media(min-width:992px){
+  .st-topbar{font-size:12px;font-weight:500;padding:0;height:36px;display:flex;align-items:center;justify-content:center}
+  .st-header{padding:0}
+  .st-header .navbar{height:96px}
+  .st-header .navbar-brand{margin-right:48px!important}
+  .st-header .navbar-nav{gap:28px!important}
+  .navbar .nav-link{font-size:14px;font-weight:500;height:48px}
+  .navbar .nav-link.active{font-weight:700}
+  .navbar .nav-link.active::after{bottom:0}
+  .st-search{max-width:256px;margin-right:8px}
+  .st-search input{height:50px;font-size:13px}
+  .st-header .d-flex.gap-2{gap:8px!important}
+  .st-icon-btn{width:44px;height:44px}
+}
+/* Floating cards sa hero: clickable, walang underline */
+a.st-float,
+a.st-float:hover,
+a.st-float:focus,
+a.st-float *{text-decoration:none!important}
+a.st-float{color:var(--st-ink);cursor:pointer;transition:transform .2s,box-shadow .2s}
+@media(hover:hover){a.st-float:hover{transform:translateY(-3px);box-shadow:0 16px 36px rgba(0,0,0,.3)}}
+/* Bottom nav (mobile) */
+@media(max-width:991.98px){
+  body{padding-bottom:76px}
+  .st-bottomnav{display:flex!important;position:fixed!important;left:0;right:0;bottom:0;z-index:1040;justify-content:space-evenly;padding:10px 20px calc(12px + env(safe-area-inset-bottom,0px));background:var(--st-cream);border-top:1px solid var(--st-sand)}
+  .st-bottomnav a{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:54px;font-size:9px;font-weight:500;text-decoration:none;color:var(--st-ink-2)}
+  .st-bottomnav a i{font-size:20px;line-height:1}
+  .st-bottomnav a.active{color:var(--st-clay);font-weight:700}
+}
+/* Bottom nav: iisang sukat sa lahat ng page */
+@media(max-width:991.98px){
+  .st-bottomnav{box-sizing:border-box;height:auto;min-height:0;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));gap:0}
+  .st-bottomnav a{flex:1;min-width:0;gap:4px;font-size:10px;line-height:1.2;padding:0}
+  .st-bottomnav a i{font-size:20px;line-height:1}
+  .st-bottomnav a span{line-height:1.2}
+  body{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))}
+}
+/* ===== Shared footer (kapareho ng products.html) ===== */
+.sf-top{display:grid;grid-template-columns:306px 1fr;gap:48px;padding-bottom:32px}
+.sf-blurb{color:var(--st-mist);font-size:15px;line-height:1.55;margin:0 0 24px}
+.sf-contact{display:flex;flex-direction:column;gap:7px}.sf-contact b{font-size:12px;font-weight:800;color:#fff}
+.sf-contact a{display:flex;gap:8px;align-items:center}
+.sf-contact small,.sf-legal small,.sf-pay small{font-size:11px;color:var(--st-mist)}
+.sf-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:32px}
+.sf-cols h3{font-size:13px;font-weight:800;margin:0 0 8px}.sf-cols ul{margin:0}.sf-cols li{margin:0}
+.sf-cols a{display:flex;align-items:center;min-height:44px}
+.sf-bottom{display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;border-top:1px solid var(--st-line);padding-top:24px}
+.sf-legal{display:flex;flex-direction:column;gap:4px}.sf-legal a{font-size:11px}
+.sf-pay small{display:block;letter-spacing:.1em;font-weight:600;margin-bottom:8px}
+.sf-pay ul{display:flex;gap:8px;margin:0;padding:0;list-style:none}
+.sf-pay li{height:30px;padding:0 12px;border-radius:6px;background:#fff;color:var(--st-ink);font-size:11px;font-weight:800;display:flex;align-items:center}
+.st-footer .st-logo{font-size:23px}
+@media(max-width:991.98px){
+  .sf-top{grid-template-columns:1fr;gap:32px}
+  .sf-cols{grid-template-columns:1fr 1fr;gap:0 24px}
+  .sf-cols nav:last-child{grid-column:1/-1;margin-top:24px}
+  .sf-bottom{flex-direction:column;align-items:flex-start;gap:24px}
+}
+/* Gamitin ang sariling logo (smarttechappliances.svg) sa mobile, hindi ang orange na house icon */
+.st-logo .st-mark{display:none!important}
+.st-logo img.d-none{display:block!important}
+@media(max-width:991.98px){
+  .st-logo img{width:48px;height:auto}
+}
+/* SmartTech Care cards: pantay ang "Learn more" sa ilalim */
+.st-svc{display:flex;flex-direction:column}
+.st-svc p{flex:1 1 auto;margin-bottom:20px}
+.st-svc a{align-self:flex-start;margin-top:auto}

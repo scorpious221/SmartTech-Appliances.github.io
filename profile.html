@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>My profile — SmartTech Appliances</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="styles.css" rel="stylesheet"><link href="shop.css" rel="stylesheet"><link href="pages.css" rel="stylesheet">
+<style>
+.pf-top{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:24px}
+.pf-av{width:72px;height:72px;border-radius:50%;background:var(--st-ink);color:var(--st-cream);display:grid;place-items:center;font-size:28px;font-weight:800;flex:none}
+.pf-top h1{font-size:30px;margin:0}.pf-top small{color:var(--st-ink-2);font-size:14px}
+.pf{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:start}
+.pf-nav{padding:12px;display:flex;flex-direction:column;gap:4px}
+.pf-nav button,.pf-nav a{display:flex;align-items:center;gap:12px;min-height:48px;padding:0 14px;border:0;border-radius:12px;background:none;font-size:14px;font-weight:600;color:var(--st-ink);text-decoration:none;text-align:left;white-space:nowrap}
+.pf-nav button:hover,.pf-nav a:hover{background:var(--st-cream)}
+.pf-nav button[aria-selected=true]{background:var(--st-cream);font-weight:800;color:var(--st-clay)}
+.pf-nav .out{color:#A3321A}
+.pf-sec h2{font-size:22px;margin:0 0 20px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}.g2 .full{grid-column:1/-1}
+.field select{display:block;width:100%;margin-top:6px;border:1px solid var(--st-sand);border-radius:12px;padding:14px;font-size:15px;font-weight:400;background:#fff}
+.field input[readonly]{background:var(--st-cream);color:var(--st-ink-2)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
+.stats a{display:block;padding:16px;border:1px solid var(--st-sand);border-radius:16px;text-decoration:none;background:var(--st-cream)}
+.stats b{display:block;font-size:26px;font-weight:800}.stats span{font-size:12px;color:var(--st-ink-2)}
+.ord{border:1px solid var(--st-sand);border-radius:16px;padding:20px}
+.ord-h{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}.ord-h small{color:var(--st-ink-2)}
+.ord ul{list-style:none;margin:0 0 14px;padding:0}.ord li{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--st-sand);font-size:14px}
+.ord-f{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.ord-f strong{font-size:20px}
+.ord-f .btn-buy{display:inline-flex;align-items:center;text-decoration:none;padding:0 20px}
+.empty-s{text-align:center;padding:40px 16px;color:var(--st-ink-2)}.empty-s i{font-size:36px;color:var(--st-clay)}
+.pf .btn-clay{padding:0 28px}
+@media(max-width:991.98px){
+  .pf{grid-template-columns:1fr}.pf-nav{flex-direction:row;overflow-x:auto;scrollbar-width:none;padding:8px}
+  .g2{grid-template-columns:1fr}.stats b{font-size:22px}.pf-top h1{font-size:24px}
+}
+</style></head>
+<body data-page="login">
+<main id="main" class="container-xxl px-lg-5 pg"><div id="pf"></div></main>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="layout.js"></script>
+<script>
+(function () {
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const peso = n => '₱' + Number(n).toLocaleString('en-PH');
+  const read = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
+  const me = localStorage.getItem('st_session'), KEY = 'st_user:' + me;
+  let u = me && (read(KEY) || (read(me) && read(me).password ? read(me) : null));
+  if (!u) { location.replace('login.html?next=profile.html'); return; }
+  u.username = u.username || me;
+
+  const cartN = (read('st_cart') || []).reduce((t, i) => t + (i.qty || 1), 0);
+  const wishN = (read('st_wishlist') || []).length;
+  let o = read('lastOrder'); if (o && o.user && o.user !== me) o = null;
+  const sel = (v) => ['Male', 'Female', 'Other'].map(x => `<option${u.sex === x ? ' selected' : ''}>${x}</option>`).join('');
+
+  $('#pf').innerHTML = `
+  <div class="pf-top"><span class="pf-av" aria-hidden="true">${esc((u.name || me)[0].toUpperCase())}</span>
+    <div><h1 id="hn">${esc(u.name || me)}</h1><small>@${esc(u.username)} · ${esc(u.gmail)}</small></div></div>
+  <div class="pf">
+    <nav class="panel pf-nav" aria-label="Account" role="tablist">
+      <button type="button" role="tab" data-t="info" aria-selected="true"><i class="bi bi-person" aria-hidden="true"></i>My profile</button>
+      <button type="button" role="tab" data-t="orders" aria-selected="false"><i class="bi bi-receipt" aria-hidden="true"></i>My orders</button>
+      <button type="button" role="tab" data-t="sec" aria-selected="false"><i class="bi bi-shield-lock" aria-hidden="true"></i>Password</button>
+      <a href="wishlist.html"><i class="bi bi-heart" aria-hidden="true"></i>Wishlist</a>
+      <button type="button" class="out" id="out"><i class="bi bi-box-arrow-right" aria-hidden="true"></i>Log out</button>
+    </nav>
+    <div class="panel">
+      <section class="pf-sec" id="info">
+        <div class="stats"><a href="cart.html"><b>${cartN}</b><span>In your cart</span></a><a href="wishlist.html"><b>${wishN}</b><span>In your wishlist</span></a><a href="track.html"><b>${o ? 1 : 0}</b><span>Recent order</span></a></div>
+        <h2>My profile</h2>
+        <form id="fi" novalidate><div class="g2">
+          <label class="field">Username<input value="${esc(u.username)}" readonly></label>
+          <label class="field">Email<input id="e" type="email" value="${esc(u.gmail)}" autocomplete="email"></label>
+          <label class="field full">Full name<input id="n" value="${esc(u.name)}" autocomplete="name"></label>
+          <label class="field">Age<input id="a" type="number" min="1" max="120" value="${esc(u.age)}"></label>
+          <label class="field">Sex<select id="x">${sel()}</select></label>
+          <label class="field">Birthday<input id="b" type="date" value="${esc(u.birthday)}"></label>
+          <label class="field">Contact number<input id="c" type="tel" inputmode="numeric" value="${esc(u.contact)}" autocomplete="tel"></label>
+          <label class="field full">Address<input id="d" value="${esc(u.address)}" autocomplete="street-address"></label></div>
+          <p class="msg" id="mi" role="status" aria-live="polite"></p><button class="btn-clay" type="submit">Save changes</button></form>
+      </section>
+      <section class="pf-sec" id="orders" hidden>
+        <h2>My orders</h2>
+        ${o ? `<div class="ord"><div class="ord-h"><div><b>${esc(o.orderNumber)}</b><br><small>${esc(o.orderDate)} · ${esc(o.paymentMethod)}</small></div><small>Ship to: ${esc(o.address)}</small></div>
+          <ul>${o.cartItems.map(i => `<li><span>${esc(i.name)} × ${i.quantity}</span><b>${peso(i.price * i.quantity)}</b></li>`).join('')}</ul>
+          <div class="ord-f"><strong>${peso(o.grandTotal)}</strong><span class="d-flex gap-2 flex-wrap"><a class="btn-buy" href="receipt.html">View receipt</a><a class="btn-buy" href="track.html">Track order</a></span></div></div>`
+        : '<div class="empty-s"><i class="bi bi-receipt" aria-hidden="true"></i><p>You have no orders yet..</p><a class="btn-clay d-inline-grid align-items-center text-decoration-none" href="products.html">Go shopping</a></div>'}
+      </section>
+      <section class="pf-sec" id="sec" hidden>
+        <h2>Change password</h2>
+        <form id="fp" novalidate style="max-width:420px">
+          <label class="field">Current password<input id="p0" type="password" autocomplete="current-password"></label>
+          <label class="field">New password<input id="p1" type="password" autocomplete="new-password"></label>
+          <label class="field">Confirm new password<input id="p2" type="password" autocomplete="new-password"></label>
+          <p class="msg" id="mp" role="status" aria-live="polite"></p><button class="btn-clay" type="submit">Update password</button></form>
+      </section>
+    </div>
+  </div>`;
+
+  const tabs = [...document.querySelectorAll('[data-t]')];
+  function show(t) { tabs.forEach(b => b.setAttribute('aria-selected', b.dataset.t === t)); ['info', 'orders', 'sec'].forEach(i => { $('#' + i).hidden = i !== t; }); }
+  tabs.forEach(b => b.onclick = () => { show(b.dataset.t); history.replaceState(null, '', '#' + b.dataset.t); });
+  const h = location.hash.slice(1); if (['orders', 'sec'].includes(h)) show(h);
+
+  const say = (id, t, ok) => { const m = $(id); m.textContent = t; m.className = 'msg ' + (ok ? 'ok' : 'err'); };
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(u)); return true; } catch (e) { return false; } };
+
+  $('#fi').onsubmit = e => {
+    e.preventDefault();
+    const v = { gmail: $('#e').value.trim(), name: $('#n').value.trim(), age: $('#a').value.trim(), sex: $('#x').value, birthday: $('#b').value, contact: $('#c').value.replace(/\D/g, ''), address: $('#d').value.trim() };
+    if (Object.values(v).some(x => !x)) return say('#mi', 'Please fill in all fields.');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.gmail)) return say('#mi', 'Enter a valid email address.');
+    if (v.contact.length < 10) return say('#mi', 'Enter a valid contact number.');
+    Object.assign(u, v);
+    if (!save()) return say('#mi', 'Could not save. Please try again.');
+    $('#hn').textContent = u.name; say('#mi', 'Profile updated.', true);
+  };
+  $('#fp').onsubmit = e => {
+    e.preventDefault();
+    const a = $('#p0').value, b = $('#p1').value, c = $('#p2').value;
+    if (a !== u.password) return say('#mp', 'Current password is incorrect.');
+    if (b.length < 6) return say('#mp', 'New password must be at least 6 characters.');
+    if (b !== c) return say('#mp', 'Passwords do not match.');
+    u.password = b; if (!save()) return say('#mp', 'Hindi ma-save. Subukan ulit.');
+    $('#fp').reset(); say('#mp', 'Password updated.', true);
+  };
+  $('#c').addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 11); });
+  $('#out').onclick = () => { localStorage.removeItem('st_session'); location.href = 'login.html'; };
+})();
+</script>
+<script src="search.js"></script>
+</body></html>
