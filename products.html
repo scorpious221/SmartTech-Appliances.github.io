@@ -1,115 +1,170 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>SmartTech Appliances — Products</title>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shop — SmartTech Appliances</title>
+<meta name="description" content="Browse household, entertainment and kitchen appliances. Free delivery over ₱3,000, 1-year warranty, GCash, Maya and COD.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<link rel="stylesheet" href="site.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="styles.css" rel="stylesheet">
+<link href="shop.css" rel="stylesheet">
 </head>
 <body>
-<nav class="st-navbar">
-  <a href="index.html" class="st-brand"><span class="logo-box"><img src="images/smarttechlogowhite.png" alt="SmartTech Logo"></span>SmartTech</a>
-  <ul class="st-nav-links">
-    <li><a href="index.html">Home</a></li>
-    <li><a href="products.html" class="active">Shop</a></li>
-    <li><a href="aboutus.html">About Us</a></li>
-  </ul>
-  <div class="st-icons">
-    <a class="icon-wrap" href="#cart-section" aria-label="Cart" onclick="scrollToCart();return false;"><i class="fa-solid fa-bag-shopping"></i><span class="st-badge" id="cart-count">0</span></a>
-    <a class="icon-wrap" href="login.html" aria-label="Account"><i class="fa-regular fa-user"></i></a>
-  </div>
-</nav>
-<section class="page-hero"><h1>Products</h1><p>"Where Innovation Meets Everyday Living."</p></section>
+<a class="visually-hidden-focusable st-skip" href="#main">Skip to content</a>
 
-<main class="st-section">
+<div class="st-topbar text-center">Free delivery over ₱3,000 • 1-Year Warranty • GCash, Maya, COD</div>
 
-  <div class="top-cats" id="top-cats">
-    <div class="cat-box" data-cat="household">Household Appliances</div>
-    <div class="cat-box" data-cat="entertainment">Entertainment Appliances</div>
-    <div class="cat-box" data-cat="kitchen">Kitchen Appliances</div>
-  </div>
+<!-- Header: kapareho ng homelandingpage.html -->
+<header class="st-header sticky-top">
+  <nav class="navbar navbar-expand-lg navbar-dark container-xxl px-lg-5" aria-label="Primary">
+    <a class="navbar-brand st-logo order-1 me-auto" href="homelandingpage.html" aria-label="SmartTech home">
+      <span class="st-mark d-lg-none"><i class="bi bi-house" aria-hidden="true"></i></span><img class="d-none d-lg-block" src="images/smarttechappliances.svg" alt="" width="60" height="49"><span>SmartTech</span>
+    </a>
+    <div class="d-flex gap-2 order-2 order-lg-3 ms-lg-4">
+      <button class="st-icon-btn d-lg-none" type="button" aria-label="Search" onclick="document.querySelector('.stq-btn')?.click()"><i class="bi bi-search"></i></button>
+      <a class="st-icon-btn d-none d-lg-inline-grid" href="wishlist.html" aria-label="Wishlist"><i class="bi bi-heart"></i></a>
+      <a class="st-icon-btn st-cart-btn" href="#cart-section" onclick="scrollToCart();return false" aria-label="Cart"><i class="bi bi-bag"></i><span class="st-count" id="cart-count">0</span></a>
+      <a class="st-icon-btn d-none d-lg-inline-grid" href="login.html" aria-label="Account"><i class="bi bi-person"></i></a>
+    </div>
+    <div class="collapse navbar-collapse order-3 order-lg-2" id="nav">
+      <ul class="navbar-nav me-lg-4 gap-lg-3 pt-2 pt-lg-0" id="navList">
+        <li class="nav-item"><a class="nav-link" href="homelandingpage.html">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="products.html?cat=household" data-cat="household">Household</a></li>
+        <li class="nav-item"><a class="nav-link" href="products.html?cat=entertainment" data-cat="entertainment">Entertainment</a></li>
+        <li class="nav-item"><a class="nav-link" href="products.html?cat=kitchen" data-cat="kitchen">Kitchen</a></li>
+      </ul>
+      <form class="st-search ms-lg-auto flex-grow-1 my-3 my-lg-0" role="search" onsubmit="return false">
+        <i class="bi bi-search" aria-hidden="true"></i>
+        <input type="search" class="form-control" placeholder="Search appliances" aria-label="Search products" readonly>
+      </form>
+    </div>
+  </nav>
+</header>
+<span class="st-icons" hidden></span><!-- dito ilalagay ng search.js ang search button -->
 
-  <div id="subcat-area"></div>
-
-  <div id="products-area"><div class="product-grid" id="product-grid"></div></div>
-
-  <!-- CART -->
-  <section id="cart-section">
-    <h2>Your Cart</h2>
-    <div class="cart-items" id="cart-items"></div>
-    <p class="cart-summary" id="cart-total">Total: ₱0</p>
-    <div class="cart-actions">
-      <button class="secondary" onclick="scrollToTop()">Continue Shopping</button>
-      <button class="secondary" onclick="clearCart()">Clear Cart</button>
-      <button class="primary" onclick="openPayment()">Proceed to Payment</button>
+<main id="main">
+  <section class="container-xxl px-lg-5 shop-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="homelandingpage.html">Home</a><i class="bi bi-chevron-right" aria-hidden="true"></i><b aria-current="page">Shop</b></nav>
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-4">
+      <div>
+        <span class="shop-pill">MADE FOR EVERYDAY LIVING</span>
+        <h1>Shop smarter. Live better.</h1>
+        <p class="sub">Thoughtful essentials for a more comfortable, connected home.</p>
+      </div>
+      <div class="shop-assure"><i class="bi bi-patch-check" aria-hidden="true"></i><div><b>Peace of mind, included.</b><small>1-year warranty on every item</small></div></div>
     </div>
 
-    <!-- PAYMENT -->
-    <div id="payment"><div class="payment-inner">
-      <h3>Checkout</h3>
-      <label>Items</label>
-      <div id="pay-items" class="bg-white p-2 rounded border" style="max-height:200px; overflow:auto;"></div>
-      <label>Total</label>
-      <p id="pay-total" class="fw-bold">₱0</p>
-      <label>Delivery Address</label>
-      <textarea id="address" class="form-control" rows="3" placeholder="Enter your delivery address"></textarea>
-      <label class="mt-3">Mode of Payment</label>
-      <div class="bg-white p-2 rounded border">
-        <div class="form-check"><input class="form-check-input" type="radio" name="paymethod" value="Cash on Delivery" id="pay-cod"><label class="form-check-label" for="pay-cod">Cash on Delivery</label></div>
-        <div class="form-check"><input class="form-check-input" type="radio" name="paymethod" value="GCash" id="pay-gcash"><label class="form-check-label" for="pay-gcash">GCash</label></div>
-        <div class="form-check"><input class="form-check-input" type="radio" name="paymethod" value="Card" id="pay-card"><label class="form-check-label" for="pay-card">Credit/Debit Card</label></div>
-      </div>
-      <div class="card-fields" id="card-fields">
-        <label>Cardholder Name</label><input id="card-name" type="text" class="form-control" placeholder="Name on card">
-        <label>Card Number</label><input id="card-number" type="text" class="form-control" placeholder="xxxx-xxxx-xxxx-xxxx" maxlength="19">
-        <label>Expiry (MM/YY)</label><input id="card-exp" type="text" class="form-control" maxlength="5" placeholder="MM/YY">
-        <label>CVV</label><input id="card-cvv" type="number" class="form-control" placeholder="CVV">
-      </div>
-      <div class="mt-3 d-flex gap-2 flex-wrap">
-        <button class="primary" onclick="completePayment()">Pay Now</button>
-        <button class="secondary" onclick="closePayment()">Cancel</button>
-      </div>
-    </div></div>
+    <div class="cat-tabs" role="tablist" aria-label="Categories">
+      <div class="cat-box active" data-cat="household" role="tab" tabindex="0">Household</div>
+      <div class="cat-box" data-cat="entertainment" role="tab" tabindex="0">Entertainment</div>
+      <div class="cat-box" data-cat="kitchen" role="tab" tabindex="0">Kitchen</div>
+    </div>
+    <div id="subcat-area"></div>
+
+    <div class="toolbar">
+      <div><strong id="result-count">0 products</strong><small id="result-path"></small></div>
+      <div class="st-sort"><button class="st-sort-btn" id="sortBtn" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="sortList"><span><span class="d-none d-lg-inline">Sort by: </span><span class="d-lg-none">Sort: </span><span id="sortLabel">Featured</span></span><i class="bi bi-chevron-down" aria-hidden="true"></i></button>
+        <ul id="sortList" role="listbox" aria-label="Sort products" hidden>
+          <li role="option" tabindex="0" data-v="featured" aria-selected="true">Featured<i class="bi bi-check2"></i></li>
+          <li role="option" tabindex="0" data-v="asc" aria-selected="false">Price: low to high<i class="bi bi-check2"></i></li>
+          <li role="option" tabindex="0" data-v="desc" aria-selected="false">Price: high to low<i class="bi bi-check2"></i></li></ul></div>
+    </div>
+
+    <div id="product-grid" aria-live="polite"></div>
+    <p class="end-note" id="end-note"><b></b>Everyday essentials. All backed by a 1-year warranty.</p>
   </section>
+
+  <!-- Cart at Checkout: pansamantala dito hanggang magkaroon ng hiwalay na page -->
+  <section id="cart-section" class="container-xxl px-lg-5">
+    <h2>Your Cart</h2>
+    <div id="cart-items"></div>
+    <div class="cart-foot">
+      <strong id="cart-total">Total: ₱0</strong>
+      <div class="d-flex align-items-center gap-3"><button class="btn-link" type="button" onclick="clearCart()">Clear Cart</button><button class="btn-clay" type="button" onclick="openPayment()">Proceed to Checkout</button></div>
+    </div>
+  </section>
+
+  <div id="payment" class="container-xxl px-lg-5">
+    <div class="pay-card">
+      <h2>Checkout</h2>
+      <div id="pay-items" class="mb-3"></div>
+      <label for="address" class="fw-bold mb-1">Delivery address</label>
+      <textarea id="address" rows="3" placeholder="House no., street, barangay, city"></textarea>
+      <fieldset class="mb-2"><legend class="fs-6 fw-bold">Payment method</legend>
+        <label class="pay-opt"><input type="radio" name="paymethod" value="COD" checked> Cash on Delivery</label>
+        <label class="pay-opt"><input type="radio" name="paymethod" value="GCash"> GCash</label>
+        <label class="pay-opt"><input type="radio" name="paymethod" value="Card"> Credit/Debit Card</label>
+      </fieldset>
+      <div id="card-fields">
+        <input type="text" id="card-name" placeholder="Cardholder name" autocomplete="cc-name">
+        <input type="text" id="card-number" placeholder="Card number" inputmode="numeric" autocomplete="cc-number">
+        <div class="d-flex gap-2"><input type="text" id="card-exp" placeholder="MM/YY" inputmode="numeric" autocomplete="cc-exp"><input type="text" id="card-cvv" placeholder="CVV" inputmode="numeric" autocomplete="cc-csc"></div>
+      </div>
+      <div class="pay-row"><span>Subtotal</span><span id="pay-total">₱0</span></div>
+      <div class="pay-row"><span>Shipping</span><span>₱150</span></div>
+      <div class="pay-row total"><span>Grand total</span><span id="pay-grand">₱0</span></div>
+      <div class="pay-actions"><button class="btn-clay" type="button" onclick="completePayment()">Pay Now</button><button class="btn-link" type="button" onclick="closePayment()">Cancel</button></div>
+    </div>
+  </div>
+
+  <section class="assure" aria-labelledby="assureTitle"><div class="container-xxl px-lg-5">
+    <h2 id="assureTitle">Good choices. Zero worries.</h2>
+    <ul>
+      <li><span><i class="bi bi-truck" aria-hidden="true"></i></span><div><b>Delivered to your doorstep</b>Free delivery on orders over ₱3,000.</div></li>
+      <li><span><i class="bi bi-shield-check" aria-hidden="true"></i></span><div><b>A full year of confidence</b>1-year warranty on every product.</div></li>
+      <li><span><i class="bi bi-wallet2" aria-hidden="true"></i></span><div><b>Pay your way</b>GCash, Maya or cash on delivery.</div></li>
+    </ul>
+  </div></section>
 </main>
 
-<div id="descOverlay" class="overlay">
-  <div class="overlay-content">
-    <span class="close-btn" onclick="closeOverlay()">&times;</span>
-    <div id="descContent"></div>
+<!-- Footer -->
+<footer class="st-footer"><div class="container-xxl px-lg-5">
+  <div class="sf-top">
+    <div class="sf-info"><a class="st-logo mb-3" href="homelandingpage.html"><span class="st-mark d-lg-none"><i class="bi bi-house" aria-hidden="true"></i></span><img class="d-none d-lg-block" src="images/smarttechappliances.svg" alt="" width="60" height="49"><span>SmartTech</span></a>
+      <p class="sf-blurb">Smarter essentials for Filipino homes. Bringing comfort, convenience and a little more ease to every day.</p>
+      <div class="sf-contact"><b>LET’S TALK</b><a href="mailto:hello@smarttech.example"><i class="bi bi-envelope" aria-hidden="true"></i>hello@smarttech.example</a><small>Concept store • illustrative contact only</small></div></div>
+    <div class="sf-cols"><nav aria-label="Explore"><h3>Explore</h3><ul><li><a href="products.html?cat=household">Household</a></li><li><a href="products.html?cat=entertainment">Entertainment</a></li><li><a href="products.html?cat=kitchen">Kitchen</a></li><li><a href="about.html">About Us</a></li></ul></nav><nav aria-label="Customer care"><h3>Customer care</h3><ul><li><a href="help.html#delivery">Delivery information</a></li><li><a href="help.html#returns">Returns &amp; warranty</a></li><li><a href="help.html#payment">Payment options</a></li><li><a href="help.html#faq">FAQs</a></li></ul></nav><nav aria-label="Your SmartTech"><h3>Your SmartTech</h3><ul><li><a href="login.html">My account</a></li><li><a href="track.html">Track my order</a></li><li><a href="wishlist.html">My wishlist</a></li><li><a href="about.html#contact">Contact us</a></li></ul></nav></div>
   </div>
-</div>
+  <div class="sf-bottom"><div class="sf-legal"><small>© 2026 SmartTech Appliances. Concept design.</small><small><a href="#">Privacy policy</a> &nbsp;•&nbsp; <a href="#">Terms &amp; conditions</a></small></div>
+    <div class="sf-pay"><small>PAY YOUR WAY</small><ul aria-label="Accepted payments"><li>GCash</li><li>Maya</li><li>COD</li><li>VISA</li></ul></div></div>
+</div></footer>
 
-<footer>
-  <div class="row g-4">
-    <div class="col-lg-4 col-md-6"><div class="brand-title">SmartTech Appliances</div><p>Where innovation meets everyday living. Smart, reliable appliances for your home, with installation and warranty support.</p></div>
-    <div class="col-lg-2 col-md-6 col-6"><h3>PRODUCTS</h3><ul><li><a href="products.html?cat=household">Household</a></li><li><a href="products.html?cat=entertainment">Entertainment</a></li><li><a href="products.html?cat=kitchen">Kitchen</a></li></ul></div>
-    <div class="col-lg-3 col-md-6 col-6"><h3>COMPANY</h3><ul><li><a href="index.html">Home</a></li><li><a href="aboutus.html#background">Company Background</a></li><li><a href="aboutus.html#team">Our Team</a></li><li><a href="aboutus.html#location">Our Location</a></li></ul></div>
-    <div class="col-lg-3 col-md-6"><h3>SUPPORT</h3><ul><li><a href="aboutus.html#contact">Contact Us</a></li><li><a href="login.html">Log In / Register</a></li><li><a href="products.html">Shop</a></li></ul></div>
-  </div>
-  <div class="footer-bottom"><span>© 2026 SmartTech Appliances. All Rights Reserved.</span></div>
-</footer>
+<nav class="st-bottomnav d-lg-none" aria-label="Quick navigation">
+  <a href="homelandingpage.html"><i class="bi bi-house" aria-hidden="true"></i><span>Home</span></a>
+  <a href="products.html" class="active" aria-current="page"><i class="bi bi-shop" aria-hidden="true"></i><span>Shop</span></a>
+  <a href="wishlist.html"><i class="bi bi-heart" aria-hidden="true"></i><span>Wishlist</span></a>
+  <a href="#cart-section" onclick="scrollToCart();return false"><i class="bi bi-bag" aria-hidden="true"></i><span>Cart</span></a>
+  <a href="login.html"><i class="bi bi-person" aria-hidden="true"></i><span>Account</span></a>
+</nav>
+
+<!-- Product details modal (ginagamit ng showDetails sa products.js) -->
+<div id="descOverlay" role="dialog" aria-modal="true" aria-label="Product details"><div class="desc-box"><button class="desc-close" type="button" onclick="closeOverlay()" aria-label="Close">&times;</button><div id="descContent"></div></div></div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="products.js" onerror="document.getElementById('product-grid').innerHTML='<p class=&quot;text-danger fw-semibold&quot;>products.js was not found. Put products.js in the same folder as products.html, then open this page from that folder.</p>'"></script>
-<script>
-  // extras: open a category from ?cat=..., prefill address from the logged-in user
-  window.addEventListener('load', () => {
-    const c = new URLSearchParams(location.search).get('cat');
-    if (['household','entertainment','kitchen'].includes(c)) {
-      currentCategory = c; currentSubcat = null; renderTopCats(); renderSubcats(); renderProducts();
-    }
-    try {
-      const u = localStorage.getItem('st_session'), d = u && JSON.parse(localStorage.getItem(u));
-      if (d && d.address) document.getElementById('address').value = d.address;
-    } catch (e) {}
-    if (location.hash === '#cart-section') scrollToCart();
-  });
-</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="products.js"></script>
+<script src="shop.js"></script>
 <script src="search.js"></script>
+<script>
+/* Sinusundan ng nav highlight ang kasalukuyang category (Household / Entertainment / Kitchen) */
+(function () {
+  function sync() {
+    document.querySelectorAll('#navList a[data-cat]').forEach(function (a) {
+      var on = a.dataset.cat === currentCategory;
+      a.classList.toggle('active', on);
+      on ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current');
+    });
+  }
+  var base = window.renderTopCats;
+  window.renderTopCats = function () { base(); sync(); };
+  sync();
+})();
+</script>
 </body>
 </html>
