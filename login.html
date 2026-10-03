@@ -67,7 +67,7 @@ body.au-page{
   const read = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
   const find = u => read(K(u)) || (read(u) && read(u).password ? read(u) : null); /* legacy accounts */
   let next = new URLSearchParams(location.search).get('next');
-  if (!/^[\w-]+\.html$/.test(next || '')) next = 'homelandingpage.html';
+  if (!/^[\w-]+\.html$/.test(next || '')) next = 'index.html';
 
   const s = localStorage.getItem('st_session');
   if (s && find(s)) { location.replace('profile.html'); return; }

@@ -4,7 +4,7 @@ const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 const shop = (cat, sub) => 'products.html' + (cat ? '?cat=' + cat : '') + (sub ? '&sub=' + encodeURIComponent(sub) : '');
-const NAV = [['Home','homelandingpage.html',1],['Household',shop('household')],['Entertainment',shop('entertainment')],['Kitchen',shop('kitchen')]];
+const NAV = [['Home','index.html',1],['Household',shop('household')],['Entertainment',shop('entertainment')],['Kitchen',shop('kitchen')]];
 const TRUST = [['truck','Free Delivery','Orders over ₱3,000','Over ₱3,000'],['shield-check','1-Year Warranty','Official local warranty','Official local warranty'],['credit-card','Secure Payment','GCash, Maya, cards, COD','GCash, Maya, COD'],['headset','24/7 Support','Real people, always ready','Always ready']];
 const REVIEWS = [['Delivery to Cebu was quicker than expected, and the camera setup was genuinely easy.','Mika R.','Cebu City'],['The team helped me pick the right aircon size and installed it the next day. No surprises.','Paolo D.','Quezon City'],['My gaming monitor arrived well packed and exactly on time. SmartTech is now my go-to.','Andre S.','Davao City']];
 var drawProg;
@@ -85,7 +85,7 @@ $('#rail').addEventListener('click', (e) => {
   }
   const b = e.target.closest('.st-cart');
   if (b && !b.dataset.out)
-    if (!localStorage.getItem('st_session')) { location.href = 'login.html?next=homelandingpage.html'; return; }
+    if (!localStorage.getItem('st_session')) { location.href = 'login.html?next=index.html'; return; }
    { cartAdd(b.dataset.id); b.textContent = 'Added ✓'; setTimeout(() => b.textContent = 'Add to Cart', 1200); }
 });
 cartCount();
