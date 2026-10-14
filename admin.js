@@ -1,796 +1,600 @@
 $(function(){
 
-if(sessionStorage.getItem('st_admin_session')!=='1'){
-location.replace('login.html');
-return;
-}
-
 const PAGE_SIZE=6;
 let productPage=1;
-let editingId=null;
+let editingProduct=null;
+
+const products=Array.isArray(window.DB_PRODUCTS)?window.DB_PRODUCTS:[];
+const customers=Array.isArray(window.DB_CUSTOMERS)?window.DB_CUSTOMERS:[];
+const orders=Array.isArray(window.DB_ORDERS)?window.DB_ORDERS:[];
 
 const titles={
-dashboard:['Dashboard','Quick summary of your SmartTech store.'],
-products:['Products & Stock','Add, edit, delete and manage product inventory.'],
-orders:['Orders','Review orders and update their delivery status.'],
-customers:['Customers','Registered SmartTech customer accounts.']
+    dashboard:['Dashboard','Quick summary of your SmartTech store.'],
+    products:['Products & Stock','Add, edit, delete and manage product inventory.'],
+    orders:['Orders','Review orders and update their delivery status.'],
+    customers:['Customers','Registered SmartTech customer accounts.']
 };
 
 function esc(s){
-return String(s==null?'':s).replace(/[&<>"']/g,function(c){
-return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
-});
+    return String(s==null?'':s).replace(/[&<>"']/g,c=>({
+        '&':'&amp;',
+        '<':'&lt;',
+        '>':'&gt;',
+        '"':'&quot;',
+        "'":'&#39;'
+    }[c]));
 }
 
 function peso(n){
-return '₱'+Number(n||0).toLocaleString('en-PH',{maximumFractionDigits:2});
-}
-
-function read(key,fallback){
-try{
-const value=JSON.parse(localStorage.getItem(key));
-return value==null?fallback:value;
-}catch(e){
-return fallback;
-}
-}
-
-function write(key,value){
-localStorage.setItem(key,JSON.stringify(value));
-}
-
-function getOrders(){
-let list=read('st_orders',[]);
-const last=read('lastOrder',null);
-
-if(last&&last.orderNumber&&!list.some(function(o){
-return o.orderNumber===last.orderNumber;
-})){
-list.push({
-...last,
-status:last.status||'Pending',
-orderTs:last.orderTs||Date.now()
-});
-
-write('st_orders',list);
-}
-
-return list;
-}
-
-function getCustomers(){
-const list=[];
-
-for(let i=0;i<localStorage.length;i++){
-
-const key=localStorage.key(i);
-
-if(!key||!key.startsWith('st_user:'))continue;
-
-const user=read(key,null);
-
-if(user)list.push(user);
-}
-
-return list.sort(function(a,b){
-return String(a.name||a.username).localeCompare(String(b.name||b.username));
-});
-}
-
-function statusClass(status){
-return String(status||'').toLowerCase().replace(/\s+/g,'-');
+    return '₱'+Number(n||0).toLocaleString('en-PH',{
+        minimumFractionDigits:2,
+        maximumFractionDigits:2
+    });
 }
 
 function stockClass(stock){
-if(stock<=0)return 'out';
-if(stock<=9)return 'low';
-return 'in';
+    if(Number(stock)<=0)return 'out';
+    if(Number(stock)<=9)return 'low';
+    return 'in';
+}
+
+function stockText(stock){
+    if(Number(stock)<=0)return 'Out of Stock';
+    if(Number(stock)<=9)return 'Low Stock';
+    return 'In Stock';
+}
+
+function statusClass(status){
+    return String(status||'').toLowerCase().replace(/\s+/g,'-');
 }
 
 function orderBadge(status){
-return '<span class="ad-status '+statusClass(status)+'">'+esc(status)+'</span>';
+    return `<span class="ad-status ${statusClass(status)}">${esc(status)}</span>`;
 }
 
-function makeId(name){
+function formatDate(value){
+    if(!value)return '';
 
-const base=String(name)
-.toLowerCase()
-.trim()
-.replace(/[^a-z0-9]+/g,'-')
-.replace(/^-|-$/g,'')||'product';
+    const date=new Date(String(value).replace(' ','T'));
 
-let id=base;
-let number=2;
+    if(Number.isNaN(date.getTime()))return value;
 
-while(STCatalog.find(id)){
-id=base+'-'+number++;
+    return date.toLocaleString('en-PH',{
+        year:'numeric',
+        month:'short',
+        day:'numeric',
+        hour:'numeric',
+        minute:'2-digit'
+    });
 }
 
-return id;
+function makeProductCode(name){
+    let base=String(name)
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g,'-')
+        .replace(/^-|-$/g,'')||'product';
+
+    let code=base;
+    let number=2;
+
+    while(products.some(p=>p.id===code)){
+        code=base+'-'+number++;
+    }
+
+    return code;
+}
+
+function phpPost(action,values){
+    const form=$('<form>',{
+        method:'POST',
+        action:action
+    });
+
+    $.each(values,function(name,value){
+        $('<input>',{
+            type:'hidden',
+            name:name,
+            value:value
+        }).appendTo(form);
+    });
+
+    form.appendTo('body').trigger('submit');
 }
 
 function go(page){
+    if(!titles[page])page='dashboard';
 
-$('.ad-nav [data-page]').removeClass('active');
-$('.ad-nav [data-page="'+page+'"]').addClass('active');
+    $('.ad-nav [data-page]').removeClass('active');
+    $(`.ad-nav [data-page="${page}"]`).addClass('active');
 
-$('.ad-sec').prop('hidden',true);
-$('#'+page+'Sec').prop('hidden',false);
+    $('.ad-sec').prop('hidden',true);
+    $('#'+page+'Sec').prop('hidden',false);
 
-$('#pageTitle').text(titles[page][0]);
-$('#pageSub').text(titles[page][1]);
+    $('#pageTitle').text(titles[page][0]);
+    $('#pageSub').text(titles[page][1]);
 
-if(page==='dashboard')renderDashboard();
-if(page==='products')renderProducts();
-if(page==='orders')renderOrders();
-if(page==='customers')renderCustomers();
+    if(page==='dashboard')renderDashboard();
+    if(page==='products')renderProducts();
+    if(page==='orders')renderOrders();
+    if(page==='customers')renderCustomers();
 
-$('html,body').scrollTop(0);
+    $('html,body').scrollTop(0);
 }
 
 function renderDashboard(){
+    const delivered=orders.filter(o=>String(o.status).toLowerCase()==='delivered');
 
-const os=getOrders();
-const ps=STCatalog.all();
-const cs=getCustomers();
+    const revenue=delivered.reduce((total,o)=>{
+        return total+Number(o.grandTotal||0);
+    },0);
 
-const delivered=os.filter(function(order){
-return String(order.status||'').toLowerCase()==='delivered';
-});
+    const pending=orders.filter(o=>{
+        return ['pending','processing'].includes(
+            String(o.status||'Pending').toLowerCase()
+        );
+    });
 
-const revenue=delivered.reduce(function(total,order){
-return total+Number(order.grandTotal||0);
-},0);
+    const low=products.filter(p=>Number(p.stock)<=9);
 
-$('#mRevenue').text(peso(revenue));
-$('#mOrders').text(os.length);
-$('#mProducts').text(ps.length);
-$('#mCustomers').text(cs.length);
+    $('#mRevenue').text(peso(revenue));
+    $('#mOrders').text(orders.length);
+    $('#mProducts').text(products.length);
+    $('#mCustomers').text(customers.length);
+    $('#mPending').text(pending.length);
+    $('#mLow').text(low.length);
 
-const pending=os.filter(function(order){
-return ['pending','processing'].includes(
-String(order.status||'Pending').toLowerCase()
-);
-});
-
-$('#mPending').text(pending.length);
-
-const low=ps.filter(function(product){
-return Number(product.stock)<=9;
-});
-
-$('#mLow').text(low.length);
-
-const days=[];
-
-for(let i=6;i>=0;i--){
-
-const start=new Date();
-
-start.setHours(0,0,0,0);
-start.setDate(start.getDate()-i);
-
-const end=new Date(start);
-end.setHours(23,59,59,999);
-
-const total=delivered
-.filter(function(order){
-
-const time=Number(order.orderTs||0);
-
-return time>=start.getTime()&&time<=end.getTime();
-
-})
-.reduce(function(sum,order){
-return sum+Number(order.grandTotal||0);
-},0);
-
-days.push({
-label:start.toLocaleDateString('en-PH',{weekday:'short'}),
-total:total
-});
+    renderSalesChart(delivered);
+    renderLowStock();
+    renderRecentOrders();
 }
 
-const max=Math.max(1,...days.map(function(day){
-return day.total;
-}));
+function renderSalesChart(delivered){
+    const days=[];
 
-$('#salesChart').html(
+    for(let i=6;i>=0;i--){
+        const start=new Date();
+        start.setHours(0,0,0,0);
+        start.setDate(start.getDate()-i);
 
-days.map(function(day){
+        const end=new Date(start);
+        end.setHours(23,59,59,999);
 
-const height=Math.max(
-4,
-Math.round(day.total/max*180)
-);
+        const total=delivered
+            .filter(o=>{
+                const time=new Date(
+                    String(o.createdAt).replace(' ','T')
+                ).getTime();
 
-return `
-<div class="ad-bar-wrap">
-<div class="ad-bar"
-title="${esc(day.label)}: ${peso(day.total)}"
-style="height:${height}px"></div>
-<small>${esc(day.label)}</small>
-</div>`;
+                return time>=start.getTime()&&time<=end.getTime();
+            })
+            .reduce((sum,o)=>sum+Number(o.grandTotal||0),0);
 
-}).join('')
+        days.push({
+            label:start.toLocaleDateString('en-PH',{weekday:'short'}),
+            total:total
+        });
+    }
 
-);
+    const max=Math.max(1,...days.map(d=>d.total));
 
-const lowProducts=ps
-.filter(function(product){
-return Number(product.stock)<=9;
-})
-.sort(function(a,b){
-return a.stock-b.stock;
-})
-.slice(0,6);
+    $('#salesChart').html(days.map(day=>{
+        const height=Math.max(4,Math.round(day.total/max*180));
 
-if(!lowProducts.length){
-
-$('#lowStockList').html(
-'<div class="ad-empty">No low-stock products.</div>'
-);
-
-}else{
-
-$('#lowStockList').html(
-
-lowProducts.map(function(product){
-
-return `
-<div class="ad-list-row">
-<div>
-<b>${esc(product.name)}</b>
-<small>${esc(product.category)} · ${esc(product.sub)}</small>
-</div>
-<span class="ad-stock-num">${product.stock}</span>
-</div>`;
-
-}).join('')
-
-);
-
+        return`
+        <div class="ad-bar-wrap">
+            <div
+                class="ad-bar"
+                title="${esc(day.label)}: ${peso(day.total)}"
+                style="height:${height}px"
+            ></div>
+            <small>${esc(day.label)}</small>
+        </div>`;
+    }).join(''));
 }
 
-const recent=[...os]
-.sort(function(a,b){
-return Number(b.orderTs||0)-Number(a.orderTs||0);
-})
-.slice(0,6);
+function renderLowStock(){
+    const lowProducts=products
+        .filter(p=>Number(p.stock)<=9)
+        .sort((a,b)=>Number(a.stock)-Number(b.stock))
+        .slice(0,6);
 
-if(!recent.length){
+    if(!lowProducts.length){
+        $('#lowStockList').html(
+            '<div class="ad-empty">No low-stock products.</div>'
+        );
+        return;
+    }
 
-$('#recentOrders').html(
-'<tr><td colspan="5" class="ad-empty">No orders yet.</td></tr>'
-);
-
-}else{
-
-$('#recentOrders').html(
-
-recent.map(function(order){
-
-return `
-<tr>
-<td><b>${esc(order.orderNumber)}</b></td>
-<td>${esc(order.name||order.user||'Customer')}</td>
-<td>${esc(order.orderDate||'')}</td>
-<td><b>${peso(order.grandTotal)}</b></td>
-<td>${orderBadge(order.status||'Pending')}</td>
-</tr>`;
-
-}).join('')
-
-);
-
+    $('#lowStockList').html(lowProducts.map(p=>`
+    <div class="ad-list-row">
+        <div>
+            <b>${esc(p.name)}</b>
+            <small>${esc(p.category)} · ${esc(p.sub)}</small>
+        </div>
+        <span class="ad-stock-num">${p.stock}</span>
+    </div>
+    `).join(''));
 }
+
+function renderRecentOrders(){
+    const recent=orders.slice(0,6);
+
+    if(!recent.length){
+        $('#recentOrders').html(
+            '<tr><td colspan="5" class="ad-empty">No orders yet.</td></tr>'
+        );
+        return;
+    }
+
+    $('#recentOrders').html(recent.map(o=>`
+    <tr>
+        <td><b>${esc(o.orderNumber)}</b></td>
+        <td>${esc(o.name||'Customer')}</td>
+        <td>${esc(formatDate(o.createdAt))}</td>
+        <td><b>${peso(o.grandTotal)}</b></td>
+        <td>${orderBadge(o.status)}</td>
+    </tr>
+    `).join(''));
 }
 
 function getFilteredProducts(){
+    const search=$.trim($('#productSearch').val()).toLowerCase();
 
-const search=$.trim($('#productSearch').val()).toLowerCase();
-
-return STCatalog.all().filter(function(product){
-
-const text=(
-product.name+' '+
-product.id+' '+
-product.category+' '+
-product.sub
-).toLowerCase();
-
-return !search||text.includes(search);
-});
+    return products.filter(p=>{
+        const text=(p.name+' '+p.id+' '+p.category+' '+p.sub).toLowerCase();
+        return !search||text.includes(search);
+    });
 }
 
 function renderProducts(){
+    const filtered=getFilteredProducts();
+    const total=filtered.length;
+    const totalPages=Math.max(1,Math.ceil(total/PAGE_SIZE));
 
-const products=getFilteredProducts();
+    if(productPage>totalPages)productPage=totalPages;
+    if(productPage<1)productPage=1;
 
-const total=products.length;
-const totalPages=Math.max(1,Math.ceil(total/PAGE_SIZE));
+    const start=(productPage-1)*PAGE_SIZE;
+    const end=start+PAGE_SIZE;
+    const list=filtered.slice(start,end);
 
-if(productPage>totalPages)productPage=totalPages;
-if(productPage<1)productPage=1;
+    $('#productCount').text(
+        total
+        ?`Showing ${start+1}–${Math.min(end,total)} of ${total} products`
+        :'0 products found'
+    );
 
-const start=(productPage-1)*PAGE_SIZE;
-const end=start+PAGE_SIZE;
+    if(!list.length){
+        $('#productRows').html(
+            '<tr><td colspan="6" class="ad-empty">No products found.</td></tr>'
+        );
+    }else{
+        $('#productRows').html(list.map(p=>`
+        <tr data-db-id="${p.dbId}">
 
-const list=products.slice(start,end);
+            <td>
+                <div class="ad-prod">
+                    <img src="${esc(p.img)}" alt="" onerror="this.style.visibility='hidden'">
 
-if(total){
+                    <div>
+                        <b>${esc(p.name)}</b>
+                        <small>${esc(p.id)}</small>
+                    </div>
+                </div>
+            </td>
 
-$('#productCount').text(
-'Showing '+(start+1)+'–'+Math.min(end,total)+
-' of '+total+' products'
-);
+            <td>
+                ${esc(p.category)}
+                <br>
+                <small class="ad-muted">${esc(p.sub)}</small>
+            </td>
 
-}else{
+            <td><b>${peso(p.price)}</b></td>
 
-$('#productCount').text('0 products found');
-}
+            <td>
+                <div class="ad-stock-control">
+                    <button type="button" data-stock="-1">−</button>
+                    <span>${p.stock}</span>
+                    <button type="button" data-stock="1">+</button>
+                </div>
+            </td>
 
-if(!list.length){
+            <td>
+                <span class="ad-status ${stockClass(p.stock)}">
+                    ${stockText(p.stock)}
+                </span>
+            </td>
 
-$('#productRows').html(
-'<tr><td colspan="6" class="ad-empty">No products found.</td></tr>'
-);
+            <td>
+                <div class="ad-actions">
 
-}else{
+                    <button class="ad-btn outline sm" data-edit type="button">
+                        <i class="bi bi-pencil"></i>
+                        Edit
+                    </button>
 
-$('#productRows').html(
+                    <button class="ad-btn danger sm" data-delete type="button">
+                        <i class="bi bi-trash"></i>
+                        Delete
+                    </button>
 
-list.map(function(product){
+                </div>
+            </td>
 
-return `
-<tr data-id="${esc(product.id)}">
+        </tr>
+        `).join(''));
+    }
 
-<td>
-<div class="ad-prod">
-<img src="${esc(product.img)}" alt=""
-onerror="this.style.visibility='hidden'">
-<div>
-<b>${esc(product.name)}</b>
-<small>${esc(product.id)}</small>
-</div>
-</div>
-</td>
-
-<td>
-${esc(product.category)}
-<br>
-<small class="ad-muted">${esc(product.sub)}</small>
-</td>
-
-<td><b>${peso(product.price)}</b></td>
-
-<td>
-<div class="ad-stock-control">
-<button type="button" data-stock="-1">−</button>
-<span>${product.stock}</span>
-<button type="button" data-stock="1">+</button>
-</div>
-</td>
-
-<td>
-<span class="ad-status ${stockClass(product.stock)}">
-${esc(STCatalog.status(product.stock))}
-</span>
-</td>
-
-<td>
-<div class="ad-actions">
-
-<button class="ad-btn outline sm" data-edit type="button">
-<i class="bi bi-pencil"></i>Edit
-</button>
-
-<button class="ad-btn danger sm" data-delete type="button">
-<i class="bi bi-trash"></i>Delete
-</button>
-
-</div>
-</td>
-
-</tr>`;
-
-}).join('')
-
-);
-
-}
-
-renderPager(totalPages);
+    renderPager(totalPages);
 }
 
 function renderPager(totalPages){
+    if(totalPages<=1){
+        $('#productPager').empty();
+        return;
+    }
 
-if(totalPages<=1){
-$('#productPager').empty();
-return;
-}
+    let html=`
+    <li class="page-item ${productPage===1?'disabled':''}">
+        <button class="page-link" data-page-number="${productPage-1}">
+            Previous
+        </button>
+    </li>`;
 
-let html='';
+    for(let i=1;i<=totalPages;i++){
 
-html+=`
-<li class="page-item ${productPage===1?'disabled':''}">
-<button class="page-link" data-page-number="${productPage-1}">
-Previous
-</button>
-</li>`;
+        if(
+            totalPages>7&&
+            i!==1&&
+            i!==totalPages&&
+            Math.abs(i-productPage)>1
+        ){
+            if(i===2&&productPage>3){
+                html+='<li class="page-item disabled"><span class="page-link">...</span></li>';
+            }
 
-for(let i=1;i<=totalPages;i++){
+            if(i===totalPages-1&&productPage<totalPages-2){
+                html+='<li class="page-item disabled"><span class="page-link">...</span></li>';
+            }
 
-if(
-totalPages>7&&
-i!==1&&
-i!==totalPages&&
-Math.abs(i-productPage)>1
-){
+            continue;
+        }
 
-if(i===2&&productPage>3){
-html+='<li class="page-item disabled"><span class="page-link">...</span></li>';
-}
+        html+=`
+        <li class="page-item ${i===productPage?'active':''}">
+            <button class="page-link" data-page-number="${i}">
+                ${i}
+            </button>
+        </li>`;
+    }
 
-if(i===totalPages-1&&productPage<totalPages-2){
-html+='<li class="page-item disabled"><span class="page-link">...</span></li>';
-}
+    html+=`
+    <li class="page-item ${productPage===totalPages?'disabled':''}">
+        <button class="page-link" data-page-number="${productPage+1}">
+            Next
+        </button>
+    </li>`;
 
-continue;
-}
-
-html+=`
-<li class="page-item ${i===productPage?'active':''}">
-<button class="page-link" data-page-number="${i}">
-${i}
-</button>
-</li>`;
-
-}
-
-html+=`
-<li class="page-item ${productPage===totalPages?'disabled':''}">
-<button class="page-link" data-page-number="${productPage+1}">
-Next
-</button>
-</li>`;
-
-$('#productPager').html(html);
-}
-
-function renderOrders(){
-
-const list=[...getOrders()].sort(function(a,b){
-return Number(b.orderTs||0)-Number(a.orderTs||0);
-});
-
-if(!list.length){
-
-$('#orderRows').html(
-'<tr><td colspan="6" class="ad-empty">No orders yet.</td></tr>'
-);
-
-return;
-}
-
-$('#orderRows').html(
-
-list.map(function(order){
-
-const quantity=Array.isArray(order.cartItems)
-?order.cartItems.reduce(function(total,item){
-return total+Number(item.quantity||0);
-},0)
-:0;
-
-const statuses=['Pending','Processing','Shipped','Delivered'];
-
-return `
-<tr data-order="${esc(order.orderNumber)}">
-
-<td>
-<b>${esc(order.orderNumber)}</b>
-<br>
-<small class="ad-muted">${quantity} items</small>
-</td>
-
-<td>
-${esc(order.name||order.user||'Customer')}
-<br>
-<small class="ad-muted">${esc(order.phone||'')}</small>
-</td>
-
-<td>${esc(order.paymentMethod||'')}</td>
-
-<td><b>${peso(order.grandTotal)}</b></td>
-
-<td>${esc(order.orderDate||'')}</td>
-
-<td>
-<select class="form-select ad-select order-status">
-
-${statuses.map(function(status){
-
-return `
-<option ${String(order.status||'Pending')===status?'selected':''}>
-${status}
-</option>`;
-
-}).join('')}
-
-</select>
-</td>
-
-</tr>`;
-
-}).join('')
-
-);
-}
-
-function renderCustomers(){
-
-const list=getCustomers();
-
-if(!list.length){
-
-$('#customerRows').html(
-'<tr><td colspan="5" class="ad-empty">No registered customers yet.</td></tr>'
-);
-
-return;
-}
-
-$('#customerRows').html(
-
-list.map(function(user){
-
-return `
-<tr>
-<td><b>${esc(user.name||user.username)}</b></td>
-<td>@${esc(user.username||'')}</td>
-<td>${esc(user.gmail||'')}</td>
-<td>${esc(user.contact||'')}</td>
-<td>${esc(user.address||'')}</td>
-</tr>`;
-
-}).join('')
-
-);
+    $('#productPager').html(html);
 }
 
 function openProduct(product){
+    editingProduct=product||null;
 
-editingId=product?product.id:null;
+    $('#formTitle').text(product?'Edit Product':'Add Product');
+    $('#pId').val(product?product.dbId:'');
+    $('#pCode').val(product?product.id:'');
+    $('#pName').val(product?product.name:'');
+    $('#pPrice').val(product?product.price:'');
+    $('#pStock').val(product?product.stock:10);
+    $('#pImage').val(product?product.img:'images/');
+    $('#pCategory').val(product?product.category:'household');
+    $('#pSub').val(product?product.sub:'');
+    $('#pDesc').val(product?product.desc:'');
 
-$('#formTitle').text(
-product?'Edit Product':'Add Product'
-);
+    $('#formMsg').removeClass('err ok').text('');
 
-$('#pName').val(product?product.name:'');
-$('#pPrice').val(product?product.price:'');
-$('#pStock').val(product?product.stock:20);
-$('#pImage').val(product?product.img:'images/');
-$('#pCategory').val(product?product.category:'household');
-$('#pSub').val(product?product.sub:'');
-$('#pDesc').val(product?product.desc:'');
-
-$('#formMsg')
-.removeClass('err ok')
-.text('');
-
-$('#productDialog')[0].showModal();
+    $('#productDialog')[0].showModal();
 }
 
 function closeProduct(){
-$('#productDialog')[0].close();
+    $('#productDialog')[0].close();
 }
 
-/* NAVIGATION */
+function renderOrders(){
+    if(!orders.length){
+        $('#orderRows').html(
+            '<tr><td colspan="6" class="ad-empty">No orders yet.</td></tr>'
+        );
+        return;
+    }
+
+    const statuses=[
+        'Pending',
+        'Processing',
+        'Shipped',
+        'Delivered',
+        'Cancelled'
+    ];
+
+    $('#orderRows').html(orders.map(o=>`
+    <tr data-order-id="${o.id}">
+
+        <td>
+            <b>${esc(o.orderNumber)}</b>
+            <br>
+            <small class="ad-muted">
+                ${o.totalItems} ${o.totalItems===1?'item':'items'}
+            </small>
+        </td>
+
+        <td>
+            ${esc(o.name||'Customer')}
+            <br>
+            <small class="ad-muted">${esc(o.phone||'')}</small>
+        </td>
+
+        <td>${esc(o.paymentMethod||'')}</td>
+
+        <td><b>${peso(o.grandTotal)}</b></td>
+
+        <td>${esc(formatDate(o.createdAt))}</td>
+
+        <td>
+            <select class="form-select ad-select order-status">
+                ${statuses.map(status=>`
+                <option value="${status}" ${o.status===status?'selected':''}>
+                    ${status}
+                </option>
+                `).join('')}
+            </select>
+        </td>
+
+    </tr>
+    `).join(''));
+}
+
+function renderCustomers(){
+    if(!customers.length){
+        $('#customerRows').html(
+            '<tr><td colspan="5" class="ad-empty">No registered customers yet.</td></tr>'
+        );
+        return;
+    }
+
+    $('#customerRows').html(customers.map(u=>`
+    <tr>
+        <td><b>${esc(u.name||u.username)}</b></td>
+        <td>@${esc(u.username||'')}</td>
+        <td>${esc(u.email||'')}</td>
+        <td>${esc(u.contact||'')}</td>
+        <td>${esc(u.address||'')}</td>
+    </tr>
+    `).join(''));
+}
+
+/* NAV */
 $('.ad-nav [data-page]').on('click',function(){
-go($(this).data('page'));
+    go($(this).data('page'));
 });
 
 $('[data-jump]').on('click',function(){
-go($(this).data('jump'));
-});
-
-/* LOGOUT */
-$('#adminLogout').on('click',function(){
-
-sessionStorage.removeItem('st_admin_session');
-
-location.href='index.html';
+    go($(this).data('jump'));
 });
 
 /* SEARCH */
 $('#productSearch').on('input',function(){
-
-productPage=1;
-
-renderProducts();
+    productPage=1;
+    renderProducts();
 });
 
 /* PAGINATION */
 $('#productPager').on('click','.page-link',function(){
+    const item=$(this).closest('.page-item');
 
-const item=$(this).closest('.page-item');
+    if(item.hasClass('disabled'))return;
 
-if(item.hasClass('disabled'))return;
+    productPage=Number($(this).data('page-number'));
 
-productPage=Number($(this).data('page-number'));
-
-renderProducts();
-
-$('html,body').animate({
-scrollTop:0
-},250);
+    renderProducts();
 });
 
-/* ADD PRODUCT */
+/* PRODUCT DIALOG */
 $('#addProduct').on('click',function(){
-openProduct(null);
+    openProduct(null);
 });
 
 $('#closeDialog,#cancelDialog').on('click',function(){
-closeProduct();
+    closeProduct();
 });
 
-/* PRODUCT ACTIONS */
+/* STOCK */
 $('#productRows').on('click','[data-stock]',function(){
+    const dbId=$(this).closest('tr').data('db-id');
+    const amount=Number($(this).data('stock'));
 
-const id=$(this).closest('tr').data('id');
-
-STCatalog.adjustStock(
-id,
-Number($(this).data('stock'))
-);
-
-renderProducts();
-renderDashboard();
+    phpPost('php/update_stock.php',{
+        id:dbId,
+        amount:amount
+    });
 });
 
+/* EDIT */
 $('#productRows').on('click','[data-edit]',function(){
+    const dbId=Number($(this).closest('tr').data('db-id'));
+    const product=products.find(p=>Number(p.dbId)===dbId);
 
-const id=$(this).closest('tr').data('id');
-
-const product=STCatalog.find(id);
-
-if(product)openProduct(product);
+    if(product)openProduct(product);
 });
 
+/* DELETE */
 $('#productRows').on('click','[data-delete]',function(){
+    const dbId=Number($(this).closest('tr').data('db-id'));
+    const product=products.find(p=>Number(p.dbId)===dbId);
 
-const id=$(this).closest('tr').data('id');
+    if(!product)return;
+    if(!confirm('Delete '+product.name+'?'))return;
 
-const product=STCatalog.find(id);
-
-if(!product)return;
-
-if(!confirm(
-'Delete '+product.name+
-'? This product will also disappear from the customer shop.'
-))return;
-
-STCatalog.remove(id);
-
-renderProducts();
-renderDashboard();
+    phpPost('php/delete_product.php',{
+        id:dbId
+    });
 });
 
-/* PRODUCT FORM */
+/* SAVE PRODUCT */
 $('#productForm').on('submit',function(e){
+    const name=$.trim($('#pName').val());
+    const price=Number($('#pPrice').val());
+    const stock=Number($('#pStock').val());
+    const image=$.trim($('#pImage').val());
+    const sub=$.trim($('#pSub').val());
 
-e.preventDefault();
+    if(
+        !name||
+        !image||
+        !sub||
+        !Number.isFinite(price)||
+        price<=0||
+        !Number.isFinite(stock)||
+        stock<0
+    ){
+        e.preventDefault();
 
-const data={
-name:$.trim($('#pName').val()),
-price:Number($('#pPrice').val()),
-stock:Number($('#pStock').val()),
-img:$.trim($('#pImage').val()),
-category:$('#pCategory').val(),
-sub:$.trim($('#pSub').val()),
-desc:$.trim($('#pDesc').val())
-};
+        $('#formMsg')
+            .removeClass('ok')
+            .addClass('err')
+            .text('Please complete the product name, price, stock, image and subcategory.');
 
-if(
-!data.name||
-!data.img||
-!data.sub||
-!Number.isFinite(data.price)||
-data.price<0||
-!Number.isFinite(data.stock)||
-data.stock<0
-){
+        return;
+    }
 
-$('#formMsg')
-.removeClass('ok')
-.addClass('err')
-.text('Please complete the product name, price, stock, image and subcategory.');
-
-return;
-}
-
-try{
-
-if(editingId){
-
-STCatalog.update(
-editingId,
-data
-);
-
-}else{
-
-STCatalog.add({
-id:makeId(data.name),
-...data
-});
-
-}
-
-closeProduct();
-
-renderProducts();
-renderDashboard();
-
-}catch(error){
-
-$('#formMsg')
-.removeClass('ok')
-.addClass('err')
-.text(error.message||'Could not save the product.');
-
-}
+    if(editingProduct){
+        this.action='php/update_product.php';
+        $('#pId').val(editingProduct.dbId);
+    }else{
+        this.action='php/add_product.php';
+        $('#pCode').val(makeProductCode(name));
+    }
 });
 
 /* ORDER STATUS */
 $('#orderRows').on('change','.order-status',function(){
+    const orderId=$(this).closest('tr').data('order-id');
+    const status=$(this).val();
 
-const row=$(this).closest('tr');
-
-const orderNumber=row.data('order');
-
-const list=getOrders();
-
-const order=list.find(function(item){
-return item.orderNumber===orderNumber;
-});
-
-if(!order)return;
-
-order.status=$(this).val();
-
-write('st_orders',list);
-
-const last=read('lastOrder',null);
-
-if(last&&last.orderNumber===order.orderNumber){
-
-last.status=order.status;
-
-write('lastOrder',last);
-}
-
-renderDashboard();
-});
-
-/* UPDATE WHEN STORAGE CHANGES */
-$(window).on('storage',function(){
-
-renderDashboard();
-renderProducts();
-renderOrders();
-renderCustomers();
-});
-
-$(window).on('st:catalog-changed',function(){
-
-renderDashboard();
-renderProducts();
+    phpPost('php/update_order_status.php',{
+        id:orderId,
+        status:status
+    });
 });
 
 /* START */
-go('dashboard');
+const requestedPage=new URLSearchParams(location.search).get('page');
+
+go(
+    titles[requestedPage]
+    ?requestedPage
+    :'dashboard'
+);
 
 });

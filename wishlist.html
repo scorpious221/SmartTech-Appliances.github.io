@@ -42,7 +42,7 @@
     if (q >= p.stock) { alert(`Only ${p.stock} stock available for ${p.name}.`); return; }
     it ? it.qty = q + 1 : c.push({ id:p.id, name:p.name, price:p.price, qty:1, img:p.img });
     localStorage.setItem('st_cart', JSON.stringify(c)); if (window.stCartCount) stCartCount();
-    $('#toast').html(`<span class="t-ico"><i class="bi bi-check2"></i></span><div class="t-txt"><b>Added to your cart</b><small>${esc(p.name)}</small></div><a class="btn-clay d-grid align-items-center text-decoration-none" style="height:44px" href="cart.html">View cart</a>`).addClass('show');
+    $('#toast').html(`<span class="t-ico"><i class="bi bi-check2"></i></span><div class="t-txt"><b>Added to your cart</b><small>${esc(p.name)}</small></div><a class="btn-clay d-grid align-items-center text-decoration-none" style="height:44px" href="cart.php">View cart</a>`).addClass('show');
     setTimeout(() => $('#toast').removeClass('show'), 3500);
   });
   window.renderProducts = draw; draw();
