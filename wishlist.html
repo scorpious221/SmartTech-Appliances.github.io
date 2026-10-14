@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wishlist — SmartTech Appliances</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="styles.css" rel="stylesheet"><link href="shop.css" rel="stylesheet"><link href="pages.css" rel="stylesheet">
+</head><body data-page="wishlist">
+<main id="main" class="container-xxl px-lg-5 pg">
+  <h1>My wishlist</h1><p class="sub">Items you’ve hearted. Saved in this browser.</p>
+  <div id="product-grid"></div>
+</main>
+<div id="toast" role="status" aria-live="polite"></div>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="layout.js"></script>
+<script src="products-data.js"></script>
+<script src="catalog-store.js"></script>
+<script src="products.js"></script>
+<script>
+(function () {
+  let wish = []; try { wish = JSON.parse(localStorage.getItem('st_wishlist')) || []; } catch (e) {}
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function draw() {
+    const list = wish.map(findProduct).filter(Boolean);
+    $('#product-grid').html(list.length ? list.map(p => {
+      const out = Number(p.stock) <= 0, low = Number(p.stock) > 0 && Number(p.stock) <= 9;
+      return `<article class="product-card${out ? ' is-out' : ''}"><div class="img"><button class="wish-btn" data-rm="${esc(p.id)}" aria-label="Remove ${esc(p.name)} from wishlist"><i class="bi bi-heart-fill" style="color:var(--st-clay)"></i></button><img src="${esc(p.img)}" alt="${esc(p.name)}" onerror="this.style.display='none'"></div><div class="card-body-st"><span class="product-sub">${esc(p.sub)}</span><h3 class="product-name">${esc(p.name)}</h3><div class="price-row"><span class="product-price">₱${p.price.toLocaleString()}</span></div><p style="font-size:12px;font-weight:700;color:${out ? '#A3321A' : low ? '#9A6700' : '#1B6B4A'};margin:-4px 0 12px">${out ? 'Out of stock' : low ? `Only ${p.stock} left in stock` : `${p.stock} in stock`}</p><div class="product-actions"><button class="btn-add" data-add="${esc(p.id)}"${out ? ' disabled' : ''}>${out ? 'Out of Stock' : 'Add to Cart'}</button><a class="btn-buy d-grid align-items-center text-center text-decoration-none" href="products.html?product=${encodeURIComponent(p.id)}">View details</a></div></div></article>`;
+    }).join('') : '<div class="empty"><span class="e-ico"><i class="bi bi-heart"></i></span><h3>Your wishlist is empty</h3><p>Tap the heart on any product to save it here.</p><a class="btn-clay d-inline-grid align-items-center text-decoration-none" href="products.html">Browse products</a></div>');
+  }
+  $(document).on('click', '[data-rm]', function () {
+    const id = $(this).data('rm'); wish = wish.filter(i => i !== id);
+    try { localStorage.setItem('st_wishlist', JSON.stringify(wish)); } catch (e) {}
+    draw();
+  }).on('click', '.btn-add', function () {
+    if (!localStorage.getItem('st_session')) { location.href = 'login.html?next=wishlist.html'; return; }
+    const id = $(this).data('add'), p = findProduct(id); if (!p) return;
+    if (p.stock <= 0) { alert(`${p.name} is out of stock.`); return; }
+    let c = []; try { c = JSON.parse(localStorage.getItem('st_cart')) || []; } catch (e) {}
+    const it = c.find(i => i.id === id), q = it ? Number(it.qty || 1) : 0;
+    if (q >= p.stock) { alert(`Only ${p.stock} stock available for ${p.name}.`); return; }
+    it ? it.qty = q + 1 : c.push({ id:p.id, name:p.name, price:p.price, qty:1, img:p.img });
+    localStorage.setItem('st_cart', JSON.stringify(c)); if (window.stCartCount) stCartCount();
+    $('#toast').html(`<span class="t-ico"><i class="bi bi-check2"></i></span><div class="t-txt"><b>Added to your cart</b><small>${esc(p.name)}</small></div><a class="btn-clay d-grid align-items-center text-decoration-none" style="height:44px" href="cart.html">View cart</a>`).addClass('show');
+    setTimeout(() => $('#toast').removeClass('show'), 3500);
+  });
+  window.renderProducts = draw; draw();
+})();
+</script>
+<script src="search.js"></script>
+</body></html>

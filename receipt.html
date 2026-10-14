@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Order receipt — SmartTech Appliances</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="styles.css" rel="stylesheet"><link href="shop.css" rel="stylesheet"><link href="pages.css" rel="stylesheet">
+<style>
+.rc-wrap{max-width:720px;margin:0 auto}
+.rc-hero{text-align:center;margin-bottom:32px}
+.rc-check{width:72px;height:72px;border-radius:50%;background:#E9F2EE;color:#1B6B4A;display:grid;place-items:center;font-size:34px;margin:0 auto 20px}
+.rc-hero h1{font-size:40px;margin:0 0 8px}.rc-hero p{color:var(--st-ink-2);margin:0}
+.rc-card{background:#fff;border:1px solid var(--st-sand);border-radius:24px;overflow:hidden;box-shadow:0 18px 40px rgba(15,42,36,.08)}
+.rc-top{background:var(--st-ink);color:var(--st-cream);padding:24px 32px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.rc-top .st-logo{color:#fff}.rc-top small{color:var(--st-mist);font-size:12px;text-align:right;line-height:1.5}
+.rc-body{padding:32px}
+.rc-meta{display:grid;grid-template-columns:1fr 1fr;gap:20px 32px;margin:0}
+.rc-meta dt{font-size:12px;font-weight:600;color:var(--st-ink-2);margin-bottom:4px}
+.rc-meta dd{margin:0;font-weight:700;font-size:15px;word-break:break-word}
+.rc-meta .full{grid-column:1/-1}
+.rc-copy{background:none;border:1px solid var(--st-sand);border-radius:999px;font-size:12px;font-weight:700;padding:2px 10px;margin-left:8px;color:var(--st-ink)}
+.rc-copy:hover{border-color:var(--st-ink)}
+.rc-tear{position:relative;border-top:2px dashed var(--st-sand);margin:28px -32px}
+.rc-tear::before,.rc-tear::after{content:"";position:absolute;top:-13px;width:24px;height:24px;border-radius:50%;background:var(--st-cream);border:1px solid var(--st-sand)}
+.rc-tear::before{left:-13px}.rc-tear::after{right:-13px}
+.rc-items{list-style:none;margin:0;padding:0}
+.rc-items li{display:grid;grid-template-columns:1fr auto;gap:4px 16px;padding:14px 0;border-bottom:1px solid var(--st-sand)}
+.rc-items li:last-child{border-bottom:0}
+.rc-items b{font-size:15px}.rc-items small{color:var(--st-ink-2);font-size:13px}.rc-items .amt{font-weight:800;text-align:right;grid-row:span 2;align-self:center}
+.rc-sum{margin-top:8px}.rc-row{display:flex;justify-content:space-between;padding:6px 0;font-size:15px;color:var(--st-ink-2)}
+.rc-row.total{color:var(--st-ink);font-weight:800;font-size:22px;border-top:2px solid var(--st-ink);margin-top:10px;padding-top:16px;letter-spacing:-.02em}
+.rc-next{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:28px;padding:20px;border-radius:16px;background:var(--st-cream)}
+.rc-next div{font-size:13px;color:var(--st-ink-2);line-height:1.45}.rc-next i{font-size:20px;color:var(--st-clay);display:block;margin-bottom:6px}.rc-next b{display:block;color:var(--st-ink)}
+.rc-note{text-align:center;color:var(--st-ink-2);font-size:12px;margin:24px 0 0}
+.rc-actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:28px}
+.rc-actions a,.rc-actions button{display:inline-flex;align-items:center;gap:8px;justify-content:center;text-decoration:none}
+.rc-empty{text-align:center;padding:64px 24px}.rc-empty i{font-size:40px;color:var(--st-clay)}.rc-empty h2{font-size:28px;margin:16px 0 8px}.rc-empty p{color:var(--st-ink-2);margin-bottom:24px}
+@media(max-width:575.98px){.rc-hero h1{font-size:30px}.rc-top,.rc-body{padding:24px 20px}.rc-tear{margin-inline:-20px}.rc-meta{grid-template-columns:1fr}.rc-next{grid-template-columns:1fr}.rc-top small{text-align:left}.rc-actions>*{flex:1 1 100%}}
+@media print{
+  body{background:#fff;padding:0}.st-topbar,.st-header,.st-footer,.st-bottomnav,.rc-hero,.rc-actions,.rc-next,.rc-copy{display:none!important}
+  .pg{padding:0}.rc-card{box-shadow:none;border-color:#ccc}.rc-tear::before,.rc-tear::after{display:none}
+}
+</style>
+</head>
+<body data-page="receipt">
+<main id="main" class="container-xxl px-lg-5 pg">
+  <div class="rc-wrap" id="rc"></div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="layout.js"></script>
+<script>
+(function () {
+  const root = document.getElementById('rc');
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const peso = n => '₱' + Number(n).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const PAY = { COD: 'Cash on Delivery', GCash: 'GCash', Maya: 'Maya', Card: 'Credit / Debit Card' };
+
+  let d = null;
+  try { d = JSON.parse(localStorage.getItem('lastOrder')); } catch (e) {}
+
+  if (!d || !Array.isArray(d.cartItems)) {
+    root.innerHTML = `<div class="rc-card rc-empty"><i class="bi bi-receipt" aria-hidden="true"></i><h2>No order found</h2><p>We couldn’t find an order in this browser. Place an order first to see your receipt.</p><a class="btn-clay" style="padding:0 28px;height:48px" href="products.html">Go shopping</a></div>`;
+    return;
+  }
+
+  const shipping = Math.max(0, Number(d.grandTotal) - Number(d.subtotal));
+  const qty = d.cartItems.reduce((t, i) => t + i.quantity, 0);
+
+  root.innerHTML = `
+  <div class="rc-hero">
+    <div class="rc-check"><i class="bi bi-check-lg" aria-hidden="true"></i></div>
+    <h1>Order confirmed</h1>
+    <p>Thank you for your order! Keep this receipt for your warranty and order tracking.</p>
+  </div>
+  <article class="rc-card" aria-label="Receipt">
+    <header class="rc-top">
+      <a class="st-logo" href="index.html" aria-label="SmartTech home"><img src="images/smarttechappliances.svg" alt="" width="60" height="49"><span>SmartTech</span></a>
+      <small>SmartTech Appliances<br>hello@smarttech.example · (02) 8123 4567</small>
+    </header>
+    <div class="rc-body">
+      <dl class="rc-meta">
+        <div><dt>Order number</dt><dd>${esc(d.orderNumber)}<button class="rc-copy" type="button" id="copy" aria-label="Copy order number">Copy</button></dd></div>
+        <div><dt>Date</dt><dd>${esc(d.orderDate)}</dd></div>
+        <div><dt>Payment method</dt><dd>${esc(PAY[d.paymentMethod] || d.paymentMethod)}</dd></div>
+        <div><dt>Items</dt><dd>${qty} ${qty === 1 ? 'item' : 'items'}</dd></div>
+        <div class="full"><dt>Ship to</dt><dd>${esc(d.address)}</dd></div>
+      </dl>
+      <div class="rc-tear" aria-hidden="true"></div>
+      <ul class="rc-items">${d.cartItems.map(i => `<li><b>${esc(i.name)}</b><span class="amt">${peso(i.price * i.quantity)}</span><small>${i.quantity} × ${peso(i.price)}</small></li>`).join('')}</ul>
+      <div class="rc-sum">
+        <div class="rc-row"><span>Subtotal</span><span>${peso(d.subtotal)}</span></div>
+        <div class="rc-row"><span>Shipping</span><span>${shipping ? peso(shipping) : 'Free'}</span></div>
+        <div class="rc-row total"><span>Total paid${d.paymentMethod === 'COD' ? ' on delivery' : ''}</span><span>${peso(d.grandTotal)}</span></div>
+      </div>
+      <div class="rc-next">
+        <div><i class="bi bi-box-seam" aria-hidden="true"></i><b>We pack it</b>Your order is prepared within 1–2 days.</div>
+        <div><i class="bi bi-truck" aria-hidden="true"></i><b>We deliver</b>Arrives in 2–5 days (Metro Manila) or 5–10 days (provinces).</div>
+        <div><i class="bi bi-shield-check" aria-hidden="true"></i><b>1-year warranty</b>Every item is covered by warranty.</div>
+      </div>
+      <p class="rc-note">30-day returns · 1-year warranty · Thank you for choosing SmartTech</p>
+    </div>
+  </article>
+  <div class="rc-actions">
+    <button type="button" class="btn-clay" style="padding:0 28px" onclick="window.print()"><i class="bi bi-printer" aria-hidden="true"></i>Print receipt</button>
+    <a class="btn-buy" style="padding:0 28px;display:inline-flex;align-items:center" href="track.html">Track my order</a>
+    <a class="btn-buy" style="padding:0 28px;display:inline-flex;align-items:center" href="products.html">Continue shopping</a>
+  </div>`;
+
+  document.getElementById('copy').onclick = function () {
+    const b = this;
+    (navigator.clipboard ? navigator.clipboard.writeText(d.orderNumber) : Promise.reject()).then(() => { b.textContent = 'Copied ✓'; setTimeout(() => b.textContent = 'Copy', 1500); }, () => { b.textContent = 'Press Ctrl+C'; });
+  };
+  /* Hindi na binubura ang lastOrder dito, para gumana ang refresh at ang track.html. */
+})();
+</script>
+<script src="search.js"></script>
+</body>
+</html>

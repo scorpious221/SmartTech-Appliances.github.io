@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Admin Dashboard — SmartTech Appliances</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+<link href="styles.css" rel="stylesheet">
+<link href="shop.css" rel="stylesheet">
+<link href="pages.css" rel="stylesheet">
+<link href="admin.css" rel="stylesheet">
+</head>
+
+<body class="admin-page">
+<div class="ad-shell">
+
+<aside class="ad-side">
+<a class="ad-brand" href="admin.html">
+<img src="images/smarttechappliances.svg" alt="">
+<span>SmartTech Admin</span>
+</a>
+
+<nav class="ad-nav" aria-label="Admin navigation">
+<button class="active" data-page="dashboard" type="button">
+<i class="bi bi-grid-1x2"></i><span>Dashboard</span>
+</button>
+
+<button data-page="products" type="button">
+<i class="bi bi-box-seam"></i><span>Products</span>
+</button>
+
+<button data-page="orders" type="button">
+<i class="bi bi-receipt"></i><span>Orders</span>
+</button>
+
+<button data-page="customers" type="button">
+<i class="bi bi-people"></i><span>Customers</span>
+</button>
+
+<a href="index.html" target="_blank">
+<i class="bi bi-shop"></i><span>View Store</span>
+</a>
+</nav>
+
+<button class="ad-nav ad-logout" id="adminLogout" type="button" style="padding:0">
+<span class="d-flex w-100 align-items-center gap-3 px-3">
+<i class="bi bi-box-arrow-left"></i><span>Logout</span>
+</span>
+</button>
+</aside>
+
+<main class="ad-main">
+
+<header class="ad-top">
+<div>
+<h1 id="pageTitle">Dashboard</h1>
+<p id="pageSub">Quick summary of your SmartTech store.</p>
+</div>
+
+<div class="ad-admin">
+<span class="ad-avatar"><i class="bi bi-person"></i></span>
+<span>Administrator</span>
+</div>
+</header>
+
+<section class="ad-sec" id="dashboardSec">
+
+<div class="ad-cards">
+<article class="ad-card">
+<small>Total Revenue</small>
+<strong id="mRevenue">₱0</strong>
+<span>Delivered orders</span>
+</article>
+
+<article class="ad-card">
+<small>Total Orders</small>
+<strong id="mOrders">0</strong>
+<span>All orders</span>
+</article>
+
+<article class="ad-card">
+<small>Total Products</small>
+<strong id="mProducts">0</strong>
+<span>Listed products</span>
+</article>
+
+<article class="ad-card">
+<small>Total Customers</small>
+<strong id="mCustomers">0</strong>
+<span>Registered accounts</span>
+</article>
+
+<article class="ad-card">
+<small>Pending Orders</small>
+<strong id="mPending">0</strong>
+<span>Need processing</span>
+</article>
+
+<article class="ad-card">
+<small>Low Stock</small>
+<strong id="mLow">0</strong>
+<span>9 units or less</span>
+</article>
+</div>
+
+<div class="ad-grid">
+
+<section class="ad-panel">
+<div class="ad-panel-head">
+<div>
+<h2>Sales Analytics</h2>
+<span class="ad-muted">Delivered sales from the last 7 days</span>
+</div>
+</div>
+<div class="ad-chart" id="salesChart"></div>
+</section>
+
+<section class="ad-panel">
+<div class="ad-panel-head">
+<div>
+<h2>Low Stock Alerts</h2>
+<span class="ad-muted">Products that need restocking</span>
+</div>
+
+<button class="ad-btn outline sm" data-jump="products" type="button">
+View products
+</button>
+</div>
+
+<div class="ad-list" id="lowStockList"></div>
+</section>
+
+</div>
+
+<section class="ad-panel">
+<div class="ad-panel-head">
+<div>
+<h2>Recent Orders</h2>
+<span class="ad-muted">Latest customer transactions</span>
+</div>
+
+<button class="ad-btn outline sm" data-jump="orders" type="button">
+View all
+</button>
+</div>
+
+<div class="table-responsive ad-table-wrap">
+<table class="table table-hover align-middle mb-0 ad-table">
+<thead>
+<tr>
+<th>Order</th>
+<th>Customer</th>
+<th>Date</th>
+<th>Total</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody id="recentOrders"></tbody>
+</table>
+</div>
+</section>
+
+</section>
+
+<section class="ad-sec" id="productsSec" hidden>
+
+<div class="ad-toolbar">
+<div class="flex-grow-1">
+<input class="form-control ad-search" id="productSearch" type="search"
+placeholder="Search product, category or subcategory">
+
+<div id="productCount" class="ad-muted mt-2"></div>
+</div>
+
+<button class="ad-btn" id="addProduct" type="button">
+<i class="bi bi-plus-lg"></i>Add Product
+</button>
+</div>
+
+<section class="ad-panel">
+
+<div class="table-responsive ad-table-wrap">
+<table class="table table-hover align-middle mb-0 ad-table">
+<thead>
+<tr>
+<th>Product</th>
+<th>Category</th>
+<th>Price</th>
+<th>Stock</th>
+<th>Status</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody id="productRows"></tbody>
+</table>
+</div>
+
+<nav class="mt-4" aria-label="Product pages">
+<ul class="pagination justify-content-center flex-wrap gap-1 mb-0" id="productPager"></ul>
+</nav>
+
+</section>
+</section>
+
+<section class="ad-sec" id="ordersSec" hidden>
+
+<section class="ad-panel">
+<div class="table-responsive ad-table-wrap">
+<table class="table table-hover align-middle mb-0 ad-table">
+<thead>
+<tr>
+<th>Order</th>
+<th>Customer</th>
+<th>Payment</th>
+<th>Total</th>
+<th>Date</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody id="orderRows"></tbody>
+</table>
+</div>
+</section>
+
+</section>
+
+<section class="ad-sec" id="customersSec" hidden>
+
+<section class="ad-panel">
+<div class="table-responsive ad-table-wrap">
+<table class="table table-hover align-middle mb-0 ad-table">
+<thead>
+<tr>
+<th>Customer</th>
+<th>Username</th>
+<th>Email</th>
+<th>Contact</th>
+<th>Address</th>
+</tr>
+</thead>
+<tbody id="customerRows"></tbody>
+</table>
+</div>
+</section>
+
+</section>
+
+</main>
+</div>
+
+<dialog class="ad-dialog" id="productDialog">
+
+<div class="ad-dialog-head">
+<h2 id="formTitle">Add Product</h2>
+
+<button class="ad-x" id="closeDialog" type="button" aria-label="Close">
+×
+</button>
+</div>
+
+<form class="ad-form" id="productForm" novalidate>
+
+<div class="ad-form-grid">
+
+<label class="field">
+Product name
+<input class="form-control" id="pName" required>
+</label>
+
+<label class="field">
+Price
+<input class="form-control" id="pPrice" type="number" min="0" step="1" required>
+</label>
+
+<label class="field">
+Stock quantity
+<input class="form-control" id="pStock" type="number" min="0" step="1" required>
+</label>
+
+<label class="field">
+Image path / URL
+<input class="form-control" id="pImage" placeholder="images/product.jpg" required>
+</label>
+
+<label class="field">
+Category
+<select class="form-select" id="pCategory">
+<option value="household">Household</option>
+<option value="entertainment">Entertainment</option>
+<option value="kitchen">Kitchen</option>
+</select>
+</label>
+
+<label class="field">
+Subcategory
+<input class="form-control" id="pSub" placeholder="e.g. Cooking Appliances" required>
+</label>
+
+<label class="field full">
+Description
+<textarea class="form-control" id="pDesc" rows="5"
+placeholder="Product description and features"></textarea>
+</label>
+
+</div>
+
+<p class="msg" id="formMsg"></p>
+
+<div class="ad-form-foot">
+<button class="ad-btn outline" id="cancelDialog" type="button">
+Cancel
+</button>
+
+<button class="ad-btn" type="submit">
+Save Product
+</button>
+</div>
+
+</form>
+</dialog>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="products-data.js"></script>
+<script src="catalog-store.js"></script>
+<script src="admin.js"></script>
+
+</body>
+</html>
