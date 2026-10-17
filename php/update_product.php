@@ -1,54 +1,91 @@
 <?php
-
 require_once "database.php";
+require_once "admin_media.php";
+requireAdminPost();
 
-if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-    header("Location: ../admin.php");
-    exit;
+$id=filter_var($_POST["id"]??null,FILTER_VALIDATE_INT);
+$name=trim($_POST["name"]??"");
+$price=filter_var($_POST["price"]??null,FILTER_VALIDATE_FLOAT);
+$category=trim($_POST["category"]??"");
+$subcategory=trim($_POST["subcategory"]??"");
+$description=trim($_POST["description"]??"");
+$stock=filter_var($_POST["stock"]??null,FILTER_VALIDATE_INT);
+
+if($id===false||$id<=0||$name===""||$price===false||$price<=0||$category===""||$subcategory===""||$stock===false||$stock<0){
+    http_response_code(400);
+    exit("Invalid product information.");
 }
 
-$id = (int) ($_POST["id"] ?? 0);
-$name = trim($_POST["name"] ?? "");
-$price = (float) ($_POST["price"] ?? 0);
-$image = trim($_POST["image"] ?? "");
-$category = trim($_POST["category"] ?? "");
-$subcategory = trim($_POST["subcategory"] ?? "");
-$description = trim($_POST["description"] ?? "");
-$stock = max(0, (int) ($_POST["stock"] ?? 0));
-
-if (
-    $id <= 0 ||
-    $name === "" ||
-    $price <= 0 ||
-    $category === ""
-) {
-    die("Invalid product information.");
+$stmt=$conn->prepare("SELECT image FROM products WHERE id=?");
+$stmt->execute([$id]);
+$oldImage=$stmt->fetchColumn();
+if($oldImage===false){
+    http_response_code(404);
+    exit("Product not found.");
 }
 
-$stmt = $conn->prepare("
-    UPDATE products
-    SET
-        name = :name,
-        price = :price,
-        image = :image,
-        category = :category,
-        subcategory = :subcategory,
-        description = :description,
-        stock = :stock
-    WHERE id = :id
-");
+$primary=saveAdminUpload($_FILES["primary_image"]??[]);
+if($primary&&$primary["type"]!=="image"){
+    deleteAdminUpload($primary["path"]);
+    http_response_code(400);
+    exit("The primary product image must be a supported image file.");
+}
+$gallery=[];
+try{
+    $gallery=saveAdminUploads($_FILES["product_gallery"]??[]);
+    if(($primary["size"]??0)+array_sum(array_column($gallery,"size"))>35*1024*1024){
+        throw new RuntimeException("All product media uploads must total 35 MB or less per save.");
+    }
+}catch(Throwable $error){
+    if($primary)deleteAdminUpload($primary["path"]);
+    throw$error;
+}
+$removeIds=array_values(array_unique(array_filter(array_map("intval",$_POST["remove_media"]??[]),fn($mediaId)=>$mediaId>0)));
+$removedPaths=[];
 
-$stmt->execute([
-    ":name" => $name,
-    ":price" => $price,
-    ":image" => $image,
-    ":category" => $category,
-    ":subcategory" => $subcategory,
-    ":description" => $description,
-    ":stock" => $stock,
-    ":id" => $id
-]);
+try{
+    $conn->beginTransaction();
+    $image=$primary["path"]??$oldImage;
+    $update=$conn->prepare("
+        UPDATE products
+        SET name=?,price=?,image=?,category=?,subcategory=?,description=?,stock=?
+        WHERE id=?
+    ");
+    $update->execute([$name,$price,$image,$category,$subcategory,$description,$stock,$id]);
 
+    if($primary&&$oldImage!==""&&$oldImage!==$primary["path"]){
+        $orderStmt=$conn->prepare("SELECT COALESCE(MAX(sort_order),0)+1 FROM product_media WHERE product_id=?");
+        $orderStmt->execute([$id]);
+        $oldOrder=(int)$orderStmt->fetchColumn();
+        $oldMedia=$conn->prepare("INSERT INTO product_media(product_id,media_type,file_path,sort_order) VALUES(?,?,?,?)");
+        $oldMedia->execute([$id,"image",$oldImage,$oldOrder]);
+    }
+
+    if($removeIds){
+        $placeholders=implode(",",array_fill(0,count($removeIds),"?"));
+        $selectRemoved=$conn->prepare("SELECT file_path FROM product_media WHERE product_id=? AND id IN ($placeholders)");
+        $selectRemoved->execute(array_merge([$id],$removeIds));
+        $removedPaths=$selectRemoved->fetchAll(PDO::FETCH_COLUMN);
+        $delete=$conn->prepare("DELETE FROM product_media WHERE product_id=? AND id IN ($placeholders)");
+        $delete->execute(array_merge([$id],$removeIds));
+    }
+
+    $nextOrderStmt=$conn->prepare("SELECT COALESCE(MAX(sort_order),0)+1 FROM product_media WHERE product_id=?");
+    $nextOrderStmt->execute([$id]);
+    $nextOrder=(int)$nextOrderStmt->fetchColumn();
+    $insert=$conn->prepare("INSERT INTO product_media(product_id,media_type,file_path,sort_order) VALUES(?,?,?,?)");
+    foreach($gallery as $media){
+        $insert->execute([$id,$media["type"],$media["path"],$nextOrder++]);
+    }
+    $conn->commit();
+}catch(Throwable $error){
+    if($conn->inTransaction())$conn->rollBack();
+    if($primary)deleteAdminUpload($primary["path"]);
+    foreach($gallery as $media)deleteAdminUpload($media["path"]);
+    throw$error;
+}
+
+foreach($removedPaths as $path)deleteAdminUpload((string)$path);
 header("Location: ../admin.php?page=products");
 exit;
 ?>

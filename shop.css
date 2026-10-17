@@ -50,11 +50,14 @@
     .card-link{text-decoration:none}.card-link::after{content:"";position:absolute;inset:0;border-radius:16px}
     .price-row{display:flex;justify-content:space-between;align-items:center;margin-top:auto;margin-bottom:14px}
     .product-price{font-size:22px;font-weight:800}
-    .product-actions{display:grid;gap:8px;position:relative;z-index:2}
-    .btn-add,.btn-buy,.btn-clay{height:48px;min-height:44px;border-radius:999px;font-size:14px;font-weight:700;padding:0 20px;border:1px solid var(--st-clay);background:var(--st-clay);color:#fff;transition:background .2s}
+    .product-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;position:relative;z-index:2}
+    .product-actions .btn-view{grid-column:1/-1}
+    .btn-add,.btn-buy,.btn-clay{height:48px;min-height:44px;border-radius:999px;font-size:14px;font-weight:700;padding:0 12px;border:1px solid var(--st-clay);background:var(--st-clay);color:#fff;transition:background .2s}
+    .btn-add,.btn-buy{border-radius:12px}
     .btn-add:hover,.btn-clay:hover{background:var(--st-clay-2);border-color:var(--st-clay-2)}
     .btn-buy{background:transparent;border-color:var(--st-ink);color:var(--st-ink)}
     .btn-buy:hover{background:var(--st-ink);color:var(--st-cream)}
+    @media(max-width:575.98px){.product-actions{grid-template-columns:minmax(0,1fr)}.product-actions .btn-view{grid-column:auto}}
     button:disabled{opacity:.5;cursor:not-allowed}
     .empty{grid-column:1/-1;text-align:center;padding:64px 16px;background:#fff;border:1px solid var(--st-sand);border-radius:24px}
     .empty i{font-size:36px;color:var(--st-clay)}.empty h3{margin:12px 0 4px}.empty p{color:var(--st-ink-2)}
@@ -200,7 +203,7 @@
     @media(max-width:991.98px){
     .st-topbar{height:52px;display:flex;align-items:center;justify-content:center;padding:0 20px;font-size:11px;font-weight:500;line-height:1.6}
     .st-header{padding:0}.st-header .navbar{min-height:76px;padding-left:14px;padding-right:14px}
-    .shop-head{padding:24px 0 32px}
+    .container-xxl.shop-head{padding:24px 28px 32px!important}
     .cat-tabs{gap:0;margin:24px 0 0;overflow:visible}
     .cat-box{flex:1;justify-content:center;text-align:center;display:flex;align-items:center;height:56px;padding:0 3px;font-size:12px;font-weight:500;color:var(--st-ink)}
     .cat-box.active{font-weight:800}

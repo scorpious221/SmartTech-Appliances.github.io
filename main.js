@@ -2,7 +2,7 @@ const IMG='images/';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-const shop=(cat,sub)=>'products.php'+(cat?'?cat='+cat:'')+(sub?'&sub='+encodeURIComponent(sub):'');
+const shop=(cat,sub)=>'products.php'+(cat?'?cat='+encodeURIComponent(cat):'')+(sub?'&sub='+encodeURIComponent(sub):'');
 
 const NAV=[
 ['Home','index.html',1],
@@ -43,7 +43,7 @@ const FEATURED=[
 {id:'generator',s:4.6,c:137,o:12000,b:'New',t:['new']}
 ];
 
-const CARDS=FEATURED.map(f=>{
+let CARDS=FEATURED.map(f=>{
     const b=PRODUCTS.find(p=>p.id===f.id);
 
     return b?{
@@ -133,36 +133,44 @@ set('#trustList',TRUST.map(([i,t,d,sh])=>`
 </li>
 `).join(''));
 
-set('#bento',TILES.map(([i,t,d,c,img,h])=>`
-<a class="st-tile ${c}" href="${h}">
-<img src="${IMG}${img}" alt="" loading="lazy">
-<span class="st-icon-box"><i class="bi bi-${i}"></i></span>
+const renderTiles=tiles=>set('#bento',tiles.map(tile=>`
+<a class="st-tile ${esc(tile.layout_class||'')}" href="${shop(tile.category,tile.subcategory)}">
+<img src="${esc(tile.image)}" alt="" loading="lazy">
+<span class="st-icon-box"><i class="bi bi-${esc(tile.icon)}"></i></span>
 <span>
-<h3>${t}</h3>
-<small>${d}</small>
+<h3>${esc(tile.title)}</h3>
+<small>${esc(tile.description)}</small>
 </span>
 </a>
 `).join(''));
+renderTiles(TILES.map(([icon,title,description,layout,image,href])=>{
+    const target=new URL(href,location.href);
+    return{
+        icon,title,description,layout_class:layout,image:IMG+image,
+        category:target.searchParams.get('cat')||'household',
+        subcategory:target.searchParams.get('sub')||''
+    };
+}));
 
-set('#bundles',BUNDLES.map(([t,d,p,o,img,h])=>`
+const renderBundles=bundles=>set('#bundles',bundles.map(bundle=>`
 <div class="col-md-6 col-lg-4">
 <article class="st-bundle">
 
 <div class="st-media">
-<img src="${IMG}${img}" alt="${esc(t)}" loading="lazy">
-<span class="st-badge">Save ${peso(o-p)}</span>
+<img src="${esc(bundle.image)}" alt="${esc(bundle.title)}" loading="lazy">
+${bundle.compare_at_price>bundle.price?`<span class="st-badge">Save ${peso(bundle.compare_at_price-bundle.price)}</span>`:''}
 </div>
 
 <div class="st-body">
-<h3>${t}</h3>
-<p>${d}</p>
+<h3>${esc(bundle.title)}</h3>
+<p>${esc(bundle.description)}</p>
 
 <div class="st-price">
-<strong>${peso(p)}</strong>
-<s class="st-old">${peso(o)}</s>
+<strong>${peso(bundle.price)}</strong>
+${bundle.compare_at_price>bundle.price?`<s class="st-old">${peso(bundle.compare_at_price)}</s>`:''}
 </div>
 
-<a href="${h}" class="btn st-btn st-btn-outline">
+<a href="${esc(bundle.link_url)}" class="btn st-btn st-btn-outline">
 View Bundle
 </a>
 </div>
@@ -170,6 +178,9 @@ View Bundle
 </article>
 </div>
 `).join(''));
+renderBundles(BUNDLES.map(([title,description,price,compare_at_price,image,link_url])=>({
+    title,description,price,compare_at_price,image:IMG+image,link_url
+})));
 
 set('#brands',BRANDS.map(b=>`<li>${b}</li>`).join(''));
 
@@ -192,29 +203,55 @@ Learn more <i class="bi bi-chevron-right"></i>
 </div>
 `).join(''));
 
-set('#promos',PROMOS.map(([t,d,b,img,sh,h])=>`
+const renderPromos=promos=>set('#promos',promos.map(promo=>`
 <div class="col-lg-6">
 
 <article class="st-promo">
 
-<img src="${IMG}${img}" alt="" loading="lazy">
+<img src="${esc(promo.image)}" alt="${esc(promo.image_alt||'')}" loading="lazy">
 
 <div>
-<h3>${t}</h3>
+<h3>${esc(promo.title)}</h3>
 <p>
-<span class="d-none d-lg-inline">${d}</span>
-<span class="d-lg-none">${sh}</span>
+<span>${esc(promo.description)}</span>
 </p>
 </div>
 
-<a href="${h}" class="btn st-btn st-btn-accent align-self-start">
-${b}
+<a href="${esc(promo.product_code?'product.php?id='+encodeURIComponent(promo.product_code):promo.link_url)}" class="btn st-btn st-btn-accent align-self-start">
+${esc(promo.button_label)}
 </a>
 
 </article>
 
 </div>
 `).join(''));
+renderPromos(PROMOS.map(([title,description,button_label,image,image_alt,link_url])=>({
+    title,description,button_label,image:IMG+image,image_alt,link_url
+})));
+
+function renderDeal(deal){
+    const section=$('#deal');
+    if(!section)return;
+    if(!deal){
+        section.hidden=true;
+        return;
+    }
+    section.hidden=false;
+    const image=$('#dealImage');
+    image.src=String(deal.image||deal.product_image||'');
+    image.alt=String(deal.title||deal.product_name||'Featured product');
+    $('#dealTitle').textContent=String(deal.title||deal.product_name||'Featured product');
+    $('#dealDescription').textContent=String(deal.description||'');
+    const price=Number(deal.product_price||0);
+    const compareAt=Number(deal.compare_at_price||0);
+    $('#dealPrice').textContent=peso(price);
+    const compare=$('#dealCompareAt');
+    compare.textContent=peso(compareAt);
+    compare.hidden=compareAt<=price;
+    $('#dealTag').textContent=compareAt>price?'SAVE '+peso(compareAt-price):'FEATURED PRODUCT';
+    $('#dealLink').href='product.php?id='+encodeURIComponent(String(deal.product_code));
+    renderCountdown(deal.ends_at);
+}
 
 let wish=[];
 
@@ -224,9 +261,14 @@ try{
 
 function card(p){
     const on=wish.includes(p.id);
-    const href='products.php?product='+p.id;
+    const href='product.php?id='+encodeURIComponent(p.id);
     const out=p.stock<=0;
     const low=p.stock>0&&p.stock<=9;
+    const stockMessage=low
+        ?`Only ${p.stock} left — order soon`
+        :out
+        ?'Currently unavailable'
+        :'';
 
     return`
     <article class="st-card${out?' out':''}">
@@ -234,7 +276,7 @@ function card(p){
         <div class="st-media">
 
             <a href="${href}" tabindex="-1">
-                <img src="${IMG}${p.i}" alt="${esc(p.n)}" loading="lazy">
+                <img src="${esc(p.i.startsWith('images/')||p.i.startsWith('uploads/')?p.i:IMG+p.i)}" alt="${esc(p.n)}" loading="lazy">
             </a>
 
             <div class="top">
@@ -243,7 +285,7 @@ function card(p){
                     ${out?'Out of stock':p.b}
                 </span>
 
-                <button class="st-wish" data-id="${p.id}" aria-pressed="${on}">
+                <button class="st-wish" data-id="${esc(p.id)}" aria-pressed="${on}">
                     <i class="bi bi-heart${on?'-fill':''}"></i>
                 </button>
 
@@ -259,28 +301,20 @@ function card(p){
                 </a>
             </h3>
 
-            <div class="st-rating">
-                <span class="st-stars">★★★★★</span>
-                <b>${p.s}</b>
-                <span>(${p.c})</span>
-            </div>
+            <a class="st-rating" href="${href}" aria-label="See product details and reviews">
+                <span>See details &amp; reviews</span>
+            </a>
 
-            ${
-                low
-                ?`<p class="st-low">Only ${p.stock} left — order soon</p>`
-                :out
-                ?'<p class="st-low">Currently unavailable</p>'
-                :''
-            }
+            <p class="st-low"${stockMessage?'':' aria-hidden="true"'}>${stockMessage}</p>
 
             <div class="st-price">
                 <strong>${peso(p.p)}</strong>
-                <s class="st-old">${peso(p.o)}</s>
+                ${Number(p.o)>Number(p.p)?`<s class="st-old">${peso(p.o)}</s>`:''}
             </div>
 
             <button
                 class="st-cart${out?' alt':''}"
-                data-id="${p.id}"
+                data-id="${esc(p.id)}"
                 ${out?'data-out="1" disabled':''}
             >
                 ${out?'Out of Stock':'Add to Cart'}
@@ -291,12 +325,30 @@ function card(p){
     </article>`;
 }
 
+function updateRailControls(){
+    const rail=$('#rail');
+    if(!rail)return;
+    const maxScroll=rail.scrollWidth-rail.clientWidth;
+    const previous=$('#railPrev');
+    const next=$('#railNext');
+    if(previous)previous.disabled=rail.scrollLeft<=1;
+    if(next)next.disabled=maxScroll<=1||rail.scrollLeft>=maxScroll-1;
+}
+
+document.addEventListener('click',event=>{
+    const card=event.target.closest('.st-card');
+    if(!card||event.target.closest('button,a'))return;
+    const link=card.querySelector('.st-media a');
+    if(link)location.href=link.href;
+});
+
 function renderProducts(tab){
     const list=tab==='all'
         ?CARDS
         :CARDS.filter(p=>p.t.includes(tab));
 
     set('#rail',list.map(card).join(''));
+    updateRailControls();
 
     if(drawProg){
         $('#rail').scrollLeft=0;
@@ -376,7 +428,7 @@ function cartAdd(id){
             name:p.n,
             price:p.p,
             qty:1,
-            img:IMG+p.i
+            img:p.i.startsWith('images/')||p.i.startsWith('uploads/')?p.i:IMG+p.i
         });
     }
 
@@ -436,22 +488,106 @@ $('#rail')?.addEventListener('click',e=>{
 
 cartCount();
 
-$('#railNext')?.addEventListener('click',()=>{
-    $('#rail').scrollBy({
-        left:306,
-        behavior:'smooth'
-    });
+$('#railPrev')?.addEventListener('click',()=>{
+    $('#rail')?.scrollBy({left:-306,behavior:'smooth'});
 });
+$('#railNext')?.addEventListener('click',()=>{
+    $('#rail')?.scrollBy({left:306,behavior:'smooth'});
+});
+$('#rail')?.addEventListener('scroll',()=>requestAnimationFrame(updateRailControls),{passive:true});
+window.addEventListener('resize',updateRailControls);
 
 renderProducts('all');
+
+fetch('php/get_storefront_content.php',{headers:{Accept:'application/json'}})
+    .then(response=>{
+        if(!response.ok)throw new Error('Storefront content request failed: '+response.status);
+        return response.json();
+    })
+    .then(content=>{
+        if(!Array.isArray(content.products)||!Array.isArray(content.promos)||!Array.isArray(content.bundles)||!Array.isArray(content.categories)||!Object.prototype.hasOwnProperty.call(content,'deal')||typeof content.demo_video!=='string'||!content.demo_video){
+            throw new Error('Storefront content response is incomplete.');
+        }
+        const featuredById=new Map(FEATURED.map(item=>[item.id,item]));
+        CARDS=content.products.map(product=>{
+            const featured=featuredById.get(product.id);
+            return{
+                id:String(product.id),
+                n:product.name,
+                p:Number(product.price),
+                o:featured?featured.o:0,
+                i:String(product.img||''),
+                stock:Number(product.stock||0),
+                b:featured?featured.b:'Featured',
+                t:featured?featured.t:[]
+            };
+        });
+        renderProducts('all');
+        renderTiles(content.categories.map(category=>({
+            ...category,
+            image:String(category.image||'')
+        })));
+        const productById=new Map(content.products.map(product=>[product.id,product]));
+        renderBundles(content.bundles.map(bundle=>({
+            ...bundle,
+            image:String(bundle.image||''),
+            description:bundle.description||bundle.product_codes
+                .map(code=>productById.get(code)?.name||code)
+                .join(' · ')
+        })));
+        renderPromos(content.promos.map(promo=>({
+            ...promo,
+            image:String(promo.image||'')
+        })));
+        renderDeal(content.deal);
+        const demoVideoSource=$('#demoDialog video source');
+        if(demoVideoSource&&demoVideoSource.getAttribute('src')!==content.demo_video){
+            demoVideoSource.src=content.demo_video;
+            demoVideoSource.removeAttribute('type');
+            $('#demoDialog video').load();
+        }
+    })
+    .catch(error=>console.error('Unable to load the latest storefront content.',error));
 
 document.querySelector('.st-search input')?.addEventListener('click',()=>{
     document.querySelector('.stq-btn')?.click();
 });
 
-const end=Date.now()+(2*864e5+14*36e5+36*6e4+8e3);
+const demoDialog=$('#demoDialog');
+const demoVideo=demoDialog?.querySelector('video');
+$('#watchDemoButton')?.addEventListener('click',()=>{
+    if(demoDialog&&!demoDialog.open)demoDialog.showModal();
+});
+demoDialog?.querySelector('.st-demo-dialog-close')?.addEventListener('click',()=>{
+    demoDialog.close();
+});
+demoDialog?.addEventListener('click',event=>{
+    if(event.target===demoDialog)demoDialog.close();
+});
+demoDialog?.addEventListener('close',()=>{
+    demoVideo?.pause();
+    if(demoVideo)demoVideo.currentTime=0;
+});
 
-function tick(){
+let countdownTimer=null;
+function renderCountdown(value){
+    const countdown=$('#countdown');
+    if(countdownTimer)clearInterval(countdownTimer);
+    countdownTimer=null;
+    if(!value){
+        countdown.textContent='';
+        countdown.style.display='none';
+        return;
+    }
+    const end=new Date(String(value).replace(' ','T')).getTime();
+    if(Number.isNaN(end)){
+        console.error('The deal end date is invalid.');
+        countdown.textContent='';
+        countdown.style.display='none';
+        return;
+    }
+    countdown.style.display='flex';
+    const tick=()=>{
     let s=Math.max(
         0,
         Math.floor((end-Date.now())/1000)
@@ -474,10 +610,10 @@ function tick(){
     });
 
     set('#countdown',units.join(''));
+    };
+    tick();
+    countdownTimer=setInterval(tick,1000);
 }
-
-tick();
-setInterval(tick,1000);
 
 const form=$('#nlForm');
 const email=$('#nlEmail');

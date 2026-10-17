@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once "database.php";
+require_once "vouchers.php";
 
 if($_SERVER["REQUEST_METHOD"]!=="POST"){
     header("Location: ../cart.php");
@@ -17,6 +18,7 @@ $fullName=trim($_POST["full_name"]??"");
 $phone=trim($_POST["phone"]??"");
 $address=trim($_POST["address"]??"");
 $paymentMethod=trim($_POST["payment_method"]??"");
+$voucherCode=strtoupper(trim($_POST["voucher_code"]??""));
 $items=json_decode($_POST["items"]??"[]",true);
 
 function failCheckout($message){
@@ -67,8 +69,17 @@ foreach($items as $item){
 try{
     $conn->beginTransaction();
 
+    $userStmt=$conn->prepare("SELECT id FROM users WHERE id=? AND role='customer' FOR UPDATE");
+    $userStmt->execute([$userId]);
+    if(!$userStmt->fetchColumn()){
+        throw new Exception("Your account could not be verified. Please sign in again.");
+    }
+    $orderCountStmt=$conn->prepare("SELECT COUNT(*) FROM orders WHERE user_id=?");
+    $orderCountStmt->execute([$userId]);
+    $firstOrder=(int)$orderCountStmt->fetchColumn()===0;
+
     $productStmt=$conn->prepare("
-        SELECT id,product_code,name,price,image,stock
+        SELECT id,product_code,name,price,image,category,stock
         FROM products
         WHERE product_code=?
         FOR UPDATE
@@ -103,13 +114,25 @@ try{
             "product_code"=>$product["product_code"],
             "product_name"=>$product["name"],
             "price"=>$price,
+            "category"=>$product["category"],
             "quantity"=>$quantity,
             "image"=>$product["image"]
         ];
     }
 
+    $voucherDiscount=0.0;
+    if($voucherCode!==""){
+        $voucherResult=calculateVoucherDiscount($conn,$voucherCode,$subtotal,$orderItems,$firstOrder,$userId,true);
+        if(!$voucherResult["valid"]){
+            throw new Exception($voucherResult["message"]);
+        }
+        $voucherDiscount=(float)$voucherResult["discount"];
+    }else{
+        $voucherCode=null;
+    }
+
     $shippingFee=$subtotal>=3000?0:150;
-    $grandTotal=$subtotal+$shippingFee;
+    $grandTotal=max(0,$subtotal-$voucherDiscount)+$shippingFee;
 
     do{
         $orderNumber="ORD-".date("Ymd")."-".strtoupper(bin2hex(random_bytes(3)));
@@ -130,10 +153,12 @@ try{
             payment_method,
             subtotal,
             shipping_fee,
+            voucher_code,
+            discount_amount,
             grand_total,
             status
         )
-        VALUES(?,?,?,?,?,?,?,?,?,'Pending')
+        VALUES(?,?,?,?,?,?,?,?,?,?,?,'Pending')
     ");
 
     $stmt->execute([
@@ -145,6 +170,8 @@ try{
         $paymentMethod,
         $subtotal,
         $shippingFee,
+        $voucherCode,
+        $voucherDiscount,
         $grandTotal
     ]);
 
@@ -193,6 +220,8 @@ try{
         "paymentMethod"=>$paymentMethod,
         "subtotal"=>$subtotal,
         "shippingFee"=>$shippingFee,
+        "voucherCode"=>$voucherCode,
+        "discountAmount"=>$voucherDiscount,
         "grandTotal"=>$grandTotal,
         "status"=>"Pending",
         "createdAt"=>date("Y-m-d H:i:s"),

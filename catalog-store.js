@@ -115,4 +115,24 @@
   }
 
   window.STCatalog = { KEY, all, find, status, save, add, update, remove, setStock, adjustStock, canFulfill, deduct, restore, resetToOriginal, clone };
+
+  fetch('php/get_storefront_content.php', { headers: { Accept: 'application/json' } })
+    .then(response => {
+      if (!response.ok) throw new Error(`Product catalog request failed: ${response.status}`);
+      return response.json();
+    })
+    .then(content => {
+      if (!Array.isArray(content.products)) throw new Error('Product catalog response is invalid.');
+      save(content.products.map(product => ({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        img: product.img,
+        category: product.category,
+        sub: product.sub,
+        desc: product.description,
+        stock: product.stock
+      })));
+    })
+    .catch(error => console.error('Unable to refresh the product catalog.', error));
 })();

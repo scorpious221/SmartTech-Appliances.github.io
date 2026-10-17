@@ -39,7 +39,7 @@ if(!preg_match('/^[a-zA-Z0-9_.\/-]+\.(html|php)$/',$next)){
 
 <link href="styles.css" rel="stylesheet">
 <link href="shop.css" rel="stylesheet">
-<link href="pages.css" rel="stylesheet">
+<link href="pages.css?v=mobile-gutters-2" rel="stylesheet">
 
 <style>
 .au{max-width:480px;margin:0 auto;transition:max-width .25s}
@@ -120,52 +120,27 @@ Password
 
 <label class="field">
 Username
-<input id="ru" name="username" autocomplete="username">
+<input id="ru" name="username" autocomplete="username" required>
 </label>
 
 <label class="field">
 Email
-<input id="re" name="email" type="email" autocomplete="email">
+<input id="re" name="email" type="email" autocomplete="email" required>
 </label>
 
 <label class="field full">
-Password (at least 6 characters)
-<input id="rp" name="password" type="password" autocomplete="new-password">
+Password (at least 8 characters)
+<input id="rp" name="password" type="password" minlength="8" autocomplete="new-password" required>
+</label>
+
+<label class="field full">
+Confirm password
+<input id="rpc" name="confirm_password" type="password" minlength="8" autocomplete="new-password" required>
 </label>
 
 <label class="field full">
 Full name
-<input id="rn" name="full_name" autocomplete="name">
-</label>
-
-<label class="field">
-Age
-<input id="ra" name="age" type="number" min="1" max="120" inputmode="numeric">
-</label>
-
-<label class="field">
-Sex
-<select id="rs" name="sex">
-<option value="" selected disabled>Select</option>
-<option>Male</option>
-<option>Female</option>
-<option>Other</option>
-</select>
-</label>
-
-<label class="field">
-Birthday
-<input id="rb" name="birthday" type="date">
-</label>
-
-<label class="field">
-Contact number
-<input id="rc" name="contact" type="tel" inputmode="numeric" placeholder="09123456789" autocomplete="tel">
-</label>
-
-<label class="field full">
-Address
-<input id="rd" name="address" autocomplete="street-address" placeholder="House no., street, barangay, city">
+<input id="rn" name="full_name" autocomplete="name" required>
 </label>
 
 </div>
@@ -185,7 +160,7 @@ Address
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="layout.js"></script>
+<script src="layout.js?v=20261017"></script>
 
 <script>
 (function(){
@@ -208,12 +183,20 @@ Address
 
     if(location.hash==='#register')mode(true);
 
-    $('#rc').addEventListener('input',function(){
-        this.value=this.value.replace(/\D/g,'').slice(0,11);
+    $('#fr').addEventListener('submit',function(e){
+        const password=$('#rp').value;
+        const confirmation=$('#rpc').value;
+
+        if(password!==confirmation){
+            e.preventDefault();
+            $('#msg').className='msg err';
+            $('#msg').textContent='Passwords do not match.';
+            $('#rpc').focus();
+        }
     });
 })();
 </script>
 
-<script src="search.js"></script>
+<script src="search.js?v=dynamic-catalog-1"></script>
 </body>
 </html>

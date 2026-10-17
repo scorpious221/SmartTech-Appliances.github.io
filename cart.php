@@ -1,6 +1,8 @@
 <?php
 session_start();
 require_once "php/database.php";
+$checkoutError=$_SESSION["checkout_error"]??"";
+unset($_SESSION["checkout_error"]);
 
 $stmt=$conn->query("SELECT product_code,name,price,image,stock FROM products ORDER BY id ASC");
 $dbProducts=[];
@@ -17,11 +19,15 @@ while($row=$stmt->fetch(PDO::FETCH_ASSOC)){
 
 $loggedIn=isset($_SESSION["user_id"])&&($_SESSION["role"]??"")==="customer";
 $user=[];
+$savedAddresses=[];
 
 if($loggedIn){
     $stmt=$conn->prepare("SELECT username,full_name,contact,address FROM users WHERE id=? LIMIT 1");
     $stmt->execute([$_SESSION["user_id"]]);
     $user=$stmt->fetch(PDO::FETCH_ASSOC)?:[];
+    $stmt=$conn->prepare("SELECT id,label,recipient_name,phone,address_line,barangay,city,province,postal_code,is_default FROM user_addresses WHERE user_id=? ORDER BY is_default DESC,id DESC");
+    $stmt->execute([$_SESSION["user_id"]]);
+    $savedAddresses=$stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 ?>
 <!DOCTYPE html>
@@ -39,7 +45,7 @@ if($loggedIn){
 
 <link href="styles.css" rel="stylesheet">
 <link href="shop.css" rel="stylesheet">
-<link href="pages.css" rel="stylesheet">
+<link href="pages.css?v=mobile-gutters-2" rel="stylesheet">
 
 <style>
 .ct-card{background:#fff;border:1px solid var(--st-sand);border-radius:16px}
@@ -75,6 +81,12 @@ if($loggedIn){
 .ck-side{position:sticky;top:110px}
 .ck-card input[type=text]{width:100%;border:1px solid var(--st-sand);border-radius:12px;padding:14px;font-size:15px;margin-bottom:12px}
 #ckCard{display:none;margin-top:12px}
+.voucher-form{display:flex;gap:8px;margin:12px 0}
+.voucher-form input{min-width:0;flex:1;border:1px solid var(--st-sand);border-radius:12px;padding:11px 12px;text-transform:uppercase}
+.voucher-form button{min-height:44px;padding:0 14px;border:0;border-radius:12px;background:var(--st-ink);color:#fff;font-weight:700}
+.voucher-message{min-height:20px;margin:4px 0 12px;font-size:13px}
+.voucher-message.error{color:#A3321A}.voucher-message.success{color:#1B6B4A}
+#voucherDiscountRow[hidden]{display:none}
 
 @media(max-width:991.98px){
     .ct-head{display:none}
@@ -94,6 +106,9 @@ if($loggedIn){
 
 <main id="main" class="container-xxl px-lg-5 pg">
 <h1 id="ttl">Shopping cart</h1>
+<?php if($checkoutError!==""): ?>
+<p class="msg err" role="alert"><?php echo htmlspecialchars($checkoutError,ENT_QUOTES,"UTF-8"); ?></p>
+<?php endif; ?>
 <section id="vCart"></section>
 <section id="vCheck" hidden></section>
 </main>
@@ -104,16 +119,18 @@ if($loggedIn){
 <input type="hidden" name="address" id="postAddress">
 <input type="hidden" name="payment_method" id="postPayment">
 <input type="hidden" name="items" id="postItems">
+<input type="hidden" name="voucher_code" id="postVoucher">
 </form>
 
 <script>
 window.DB_PRODUCTS=<?php echo json_encode($dbProducts,JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT); ?>;
 window.LOGGED_IN=<?php echo $loggedIn?'true':'false'; ?>;
 window.DB_USER=<?php echo json_encode($user,JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT); ?>;
+window.DB_ADDRESSES=<?php echo json_encode($savedAddresses,JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT); ?>;
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="layout.js"></script>
+<script src="layout.js?v=20261017"></script>
 
 <script>
 (function(){
@@ -122,10 +139,14 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const peso=n=>'₱'+Number(n||0).toLocaleString('en-PH');
 const FREE=3000,SHIP=150;
 const products=Array.isArray(window.DB_PRODUCTS)?window.DB_PRODUCTS:[];
+const addressBook=Array.isArray(window.DB_ADDRESSES)?window.DB_ADDRESSES:[];
 const read=(k,f)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?f:v}catch(e){return f}};
 const find=id=>products.find(p=>p.id===id)||null;
 
 let cart=read('st_cart',[]);
+let voucherCode='';
+let voucherDiscount=0;
+let voucherMessage='';
 
 cart=cart.map(i=>{
     const p=find(i.id);
@@ -293,6 +314,10 @@ function drawCheck(){
     const s=sub(ch);
     const sh=shipFor(s);
     const u=window.DB_USER||{};
+    const defaultAddress=addressBook.find(a=>Number(a.is_default)===1)||addressBook[0]||null;
+    const initialAddress=defaultAddress
+        ?`${defaultAddress.address_line}, Barangay ${defaultAddress.barangay}, ${defaultAddress.city}, ${defaultAddress.province} ${defaultAddress.postal_code}`
+        :(u.address||'');
 
     $('#ttl').textContent='Checkout';
     $('#vCart').hidden=true;
@@ -312,19 +337,29 @@ function drawCheck(){
             <div class="panel">
                 <h2>Delivery address</h2>
 
+                ${addressBook.length?`
+                <label class="field">Use a saved address
+                    <select id="savedAddress">
+                        ${addressBook.map(a=>`<option value="${a.id}" ${defaultAddress&&Number(a.id)===Number(defaultAddress.id)?'selected':''}>${esc(a.label)}${Number(a.is_default)===1?' · Default':''} — ${esc(a.city)}, ${esc(a.province)}</option>`).join('')}
+                        <option value="new">Enter a different address</option>
+                    </select>
+                </label>
+                <p class="small text-secondary"><a href="php/profile.php">Manage saved addresses</a></p>
+                `:''}
+
                 <label class="field">
                     Full name
-                    <input id="fn" value="${esc(u.full_name||'')}" autocomplete="name">
+                    <input id="fn" value="${esc(defaultAddress?defaultAddress.recipient_name:(u.full_name||''))}" autocomplete="name">
                 </label>
 
                 <label class="field">
                     Phone number
-                    <input id="ph" value="${esc(u.contact||'')}" type="tel" inputmode="tel" autocomplete="tel">
+                    <input id="ph" value="${esc(defaultAddress?defaultAddress.phone:(u.contact||''))}" type="tel" inputmode="tel" autocomplete="tel">
                 </label>
 
                 <label class="field">
                     Address
-                    <textarea id="ad" rows="3" placeholder="House no., street, barangay, city">${esc(u.address||'')}</textarea>
+                    <textarea id="ad" rows="3" placeholder="House no., street, barangay, city">${esc(initialAddress)}</textarea>
                 </label>
             </div>
 
@@ -399,9 +434,20 @@ function drawCheck(){
                     <span>${sh?peso(sh):'Free'}</span>
                 </div>
 
+                <form class="voucher-form" id="voucherForm">
+                    <input id="voucherCode" type="text" maxlength="40" autocomplete="off" placeholder="Voucher code" aria-label="Voucher code" value="${esc(voucherCode)}">
+                    <button type="submit" id="applyVoucher">Apply</button>
+                </form>
+                <p id="voucherMessage" class="voucher-message" role="status" aria-live="polite">${esc(voucherMessage)}</p>
+
+                <div class="pay-row" id="voucherDiscountRow" ${voucherDiscount>0?'':'hidden'}>
+                    <span>Voucher discount (${esc(voucherCode)})</span>
+                    <span id="voucherDiscountValue">−${peso(voucherDiscount)}</span>
+                </div>
+
                 <div class="pay-row total">
                     <span>Total</span>
-                    <span>${peso(s+sh)}</span>
+                    <span id="checkoutTotal">${peso(s-voucherDiscount+sh)}</span>
                 </div>
 
                 <p id="err" class="msg err" role="alert"></p>
@@ -416,6 +462,65 @@ function drawCheck(){
     </div>`;
 
     scrollTo(0,0);
+    if(voucherCode)validateVoucher(voucherCode);
+}
+
+async function validateVoucher(code){
+    const input=$('#voucherCode');
+    const button=$('#applyVoucher');
+    const message=$('#voucherMessage');
+    if(!input||!button||!message)return;
+    button.disabled=true;
+    button.textContent='Checking...';
+    $('#place').disabled=true;
+    message.className='voucher-message';
+    message.textContent='';
+
+    try{
+        const response=await fetch('php/apply_voucher.php',{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({
+                code,
+                items:chosen().map(item=>({id:item.id,quantity:item.qty}))
+            })
+        });
+        const result=await response.json();
+        if(!response.ok||!result.valid){
+            voucherCode='';
+            voucherDiscount=0;
+            voucherMessage=result.message||'Unable to apply that voucher.';
+            message.className='voucher-message error';
+            message.textContent=voucherMessage;
+        }else{
+            voucherCode=result.code;
+            voucherDiscount=Number(result.discount);
+            voucherMessage=voucherCode+' applied. You saved '+peso(voucherDiscount)+'.';
+            message.className='voucher-message success';
+            message.textContent=voucherMessage;
+            input.value=voucherCode;
+        }
+        const discountRow=$('#voucherDiscountRow');
+        discountRow.hidden=voucherDiscount<=0;
+        if(voucherDiscount>0){
+            discountRow.querySelector('span').textContent='Voucher discount ('+voucherCode+')';
+            $('#voucherDiscountValue').textContent='−'+peso(voucherDiscount);
+        }
+        const subtotal=sub(chosen()),shipping=shipFor(subtotal);
+        $('#checkoutTotal').textContent=peso(Math.max(0,subtotal-voucherDiscount)+shipping);
+    }catch(error){
+        voucherCode='';
+        voucherDiscount=0;
+        voucherMessage='Unable to check the voucher right now. Please try again.';
+        message.className='voucher-message error';
+        message.textContent=voucherMessage;
+        $('#voucherDiscountRow').hidden=true;
+        $('#checkoutTotal').textContent=peso(sub(chosen())+shipFor(sub(chosen())));
+    }finally{
+        button.disabled=false;
+        button.textContent='Apply';
+        $('#place').disabled=false;
+    }
 }
 
 function place(){
@@ -424,6 +529,9 @@ function place(){
     const err=m=>$('#err').textContent=m;
 
     if(!check.ok)return err(check.reason);
+    if($('#voucherCode').value.trim().toUpperCase()!==voucherCode){
+        return err('Apply the voucher code before placing your order.');
+    }
 
     const fn=$('#fn').value.trim();
     const ph=$('#ph').value.trim();
@@ -454,6 +562,7 @@ function place(){
     $('#postAddress').value=ad;
     $('#postPayment').value=pm;
     $('#postItems').value=JSON.stringify(items);
+    $('#postVoucher').value=voucherCode;
 
     $('#place').disabled=true;
     $('#place').textContent='Placing order...';
@@ -466,6 +575,9 @@ document.addEventListener('click',e=>{
     if(!b)return;
 
     if(b.id==='back'){
+        voucherCode='';
+        voucherDiscount=0;
+        voucherMessage='';
         $('#vCheck').hidden=true;
         $('#vCart').hidden=false;
         $('#ttl').textContent='Shopping cart';
@@ -530,6 +642,19 @@ document.addEventListener('change',e=>{
 
         if(t.checked)sel.add(id);
         else sel.delete(id);
+    }else if(t.id==='savedAddress'){
+        const address=addressBook.find(a=>String(a.id)===t.value);
+
+        if(address){
+            $('#fn').value=address.recipient_name;
+            $('#ph').value=address.phone;
+            $('#ad').value=`${address.address_line}, Barangay ${address.barangay}, ${address.city}, ${address.province} ${address.postal_code}`;
+        }else{
+            $('#fn').value=window.DB_USER?.full_name||'';
+            $('#ph').value='';
+            $('#ad').value='';
+        }
+        return;
     }else if(t.name==='pm'){
         $('#ckCard').style.display=t.value==='Card'?'block':'none';
         return;
@@ -557,6 +682,18 @@ document.addEventListener('input',e=>{
     }
 });
 
+document.addEventListener('submit',e=>{
+    if(e.target.id!=='voucherForm')return;
+    e.preventDefault();
+    const code=$('#voucherCode').value.trim();
+    if(!code){
+        $('#voucherMessage').className='voucher-message error';
+        $('#voucherMessage').textContent='Enter a voucher code.';
+        return;
+    }
+    validateVoucher(code);
+});
+
 drawCart();
 
 if(buy&&chosen().length){
@@ -566,7 +703,7 @@ if(buy&&chosen().length){
 })();
 </script>
 
-<script src="search.js"></script>
+<script src="search.js?v=dynamic-catalog-1"></script>
 
 </body>
 </html>

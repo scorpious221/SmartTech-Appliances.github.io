@@ -17,15 +17,15 @@ if($_SERVER["REQUEST_METHOD"]!=="POST"){
 $username=strtolower(trim($_POST["username"]??""));
 $email=trim($_POST["email"]??"");
 $password=$_POST["password"]??"";
+$confirmPassword=$_POST["confirm_password"]??"";
 $fullName=trim($_POST["full_name"]??"");
-$age=(int)($_POST["age"]??0);
-$sex=trim($_POST["sex"]??"");
-$birthday=trim($_POST["birthday"]??"");
-$contact=trim($_POST["contact"]??"");
-$address=trim($_POST["address"]??"");
 
-if(!$username||!$email||!$password||!$fullName||!$age||!$sex||!$birthday||!$contact||!$address){
+if(!$username||!$email||!$password||!$confirmPassword||!$fullName){
     back("Please fill in all fields.");
+}
+
+if($password!==$confirmPassword){
+    back("Passwords do not match.");
 }
 
 if($username==="admin"){
@@ -40,16 +40,8 @@ if(!filter_var($email,FILTER_VALIDATE_EMAIL)){
     back("Enter a valid email address.");
 }
 
-if(strlen($password)<6){
-    back("Password must be at least 6 characters.");
-}
-
-if($age<1||$age>120){
-    back("Enter a valid age.");
-}
-
-if(!preg_match('/^[0-9]{10,11}$/',$contact)){
-    back("Enter a valid contact number.");
+if(strlen($password)<8){
+    back("Password must be at least 8 characters.");
 }
 
 $check=$conn->prepare("SELECT id FROM users WHERE username=?");
@@ -74,26 +66,16 @@ $stmt=$conn->prepare("
         email,
         password,
         full_name,
-        age,
-        sex,
-        birthday,
-        contact,
-        address,
         role
     )
-    VALUES(?,?,?,?,?,?,?,?,?,'customer')
+    VALUES(?,?,?,?,'customer')
 ");
 
 $stmt->execute([
     $username,
     $email,
     $hashed,
-    $fullName,
-    $age,
-    $sex,
-    $birthday,
-    $contact,
-    $address
+    $fullName
 ]);
 
 $_SESSION["auth_message"]="Account created! You can now log in.";

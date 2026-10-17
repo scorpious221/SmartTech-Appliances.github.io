@@ -155,9 +155,9 @@ hello@smarttech.example
 <div class="sf-legal">
 <small>© 2026 SmartTech Appliances. Concept design.</small>
 <small>
-<a href="#">Privacy policy</a>
+<a href="policies.html#privacy">Privacy policy</a>
 &nbsp;•&nbsp;
-<a href="#">Terms &amp; conditions</a>
+<a href="policies.html#terms">Terms &amp; conditions</a>
 </small>
 </div>
 
@@ -225,5 +225,9 @@ window.stCartCount=function(){
 };
 
 stCartCount();
+
+const backToTopScript=document.createElement('script');
+backToTopScript.src=new URL('back-to-top.js',document.currentScript.src).href;
+document.body.appendChild(backToTopScript);
 
 })();

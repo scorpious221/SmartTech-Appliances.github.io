@@ -16,6 +16,9 @@ while($row=$stmt->fetch(PDO::FETCH_ASSOC)){
         "stock"=>(int)$row["stock"]
     ];
 }
+$categories=$conn->query("SELECT DISTINCT category FROM products WHERE category<>'' ORDER BY category")->fetchAll(PDO::FETCH_COLUMN);
+$requestedCategory=trim((string)($_GET["cat"]??""));
+$currentCategory=in_array($requestedCategory,$categories,true)?$requestedCategory:($categories[0]??"");
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -30,7 +33,7 @@ while($row=$stmt->fetch(PDO::FETCH_ASSOC)){
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 <link href="styles.css" rel="stylesheet">
-<link href="shop.css" rel="stylesheet">
+<link href="shop.css?v=product-actions-2" rel="stylesheet">
 </head>
 
 <body>
@@ -57,9 +60,9 @@ while($row=$stmt->fetch(PDO::FETCH_ASSOC)){
 <div class="collapse navbar-collapse order-3 order-lg-2" id="nav">
 <ul class="navbar-nav me-lg-4 gap-lg-3 pt-2 pt-lg-0" id="navList">
 <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
-<li class="nav-item"><a class="nav-link" href="products.php?cat=household" data-cat="household">Household</a></li>
-<li class="nav-item"><a class="nav-link" href="products.php?cat=entertainment" data-cat="entertainment">Entertainment</a></li>
-<li class="nav-item"><a class="nav-link" href="products.php?cat=kitchen" data-cat="kitchen">Kitchen</a></li>
+<?php foreach($categories as $category): ?>
+<li class="nav-item"><a class="nav-link" href="products.php?cat=<?php echo urlencode($category); ?>" data-cat="<?php echo htmlspecialchars($category,ENT_QUOTES,"UTF-8"); ?>"><?php echo htmlspecialchars($category,ENT_QUOTES,"UTF-8"); ?></a></li>
+<?php endforeach; ?>
 </ul>
 
 <form class="st-search ms-lg-auto flex-grow-1 my-3 my-lg-0" role="search" onsubmit="return false">
@@ -100,9 +103,9 @@ while($row=$stmt->fetch(PDO::FETCH_ASSOC)){
 </div>
 
 <div class="cat-tabs" role="tablist">
-<div class="cat-box active" data-cat="household" role="tab" tabindex="0">Household</div>
-<div class="cat-box" data-cat="entertainment" role="tab" tabindex="0">Entertainment</div>
-<div class="cat-box" data-cat="kitchen" role="tab" tabindex="0">Kitchen</div>
+<?php foreach($categories as $index=>$category): ?>
+<div class="cat-box<?php echo $category===$currentCategory?" active":""; ?>" data-cat="<?php echo htmlspecialchars($category,ENT_QUOTES,"UTF-8"); ?>" role="tab" tabindex="<?php echo $category===$currentCategory?"0":"-1"; ?>" aria-selected="<?php echo $category===$currentCategory?"true":"false"; ?>"><?php echo htmlspecialchars($category,ENT_QUOTES,"UTF-8"); ?></div>
+<?php endforeach; ?>
 </div>
 
 <div id="subcat-area"></div>
@@ -135,61 +138,6 @@ Everyday essentials. All backed by a 1-year warranty.
 </p>
 
 </section>
-
-<section id="cart-section" class="container-xxl px-lg-5">
-<h2>Your Cart</h2>
-<div id="cart-items"></div>
-
-<div class="cart-foot">
-<strong id="cart-total">Total: ₱0</strong>
-
-<div class="d-flex align-items-center gap-3">
-<button class="btn-link" type="button" onclick="clearCart()">Clear Cart</button>
-<button class="btn-clay" type="button" onclick="openPayment()">Proceed to Checkout</button>
-</div>
-</div>
-</section>
-
-<div id="payment" class="container-xxl px-lg-5">
-<div class="pay-card">
-
-<h2>Checkout</h2>
-
-<div id="pay-items" class="mb-3"></div>
-
-<label for="address" class="fw-bold mb-1">Delivery address</label>
-<textarea id="address" rows="3" placeholder="House no., street, barangay, city"></textarea>
-
-<fieldset class="mb-2">
-<legend class="fs-6 fw-bold">Payment method</legend>
-
-<label class="pay-opt"><input type="radio" name="paymethod" value="COD" checked> Cash on Delivery</label>
-<label class="pay-opt"><input type="radio" name="paymethod" value="GCash"> GCash</label>
-<label class="pay-opt"><input type="radio" name="paymethod" value="Maya"> Maya</label>
-<label class="pay-opt"><input type="radio" name="paymethod" value="Card"> Credit/Debit Card</label>
-</fieldset>
-
-<div id="card-fields">
-<input type="text" id="card-name" placeholder="Cardholder name">
-<input type="text" id="card-number" placeholder="Card number" inputmode="numeric">
-
-<div class="d-flex gap-2">
-<input type="text" id="card-exp" placeholder="MM/YY" inputmode="numeric">
-<input type="text" id="card-cvv" placeholder="CVV" inputmode="numeric">
-</div>
-</div>
-
-<div class="pay-row"><span>Subtotal</span><span id="pay-total">₱0</span></div>
-<div class="pay-row"><span>Shipping</span><span id="pay-ship">₱150</span></div>
-<div class="pay-row total"><span>Grand total</span><span id="pay-grand">₱0</span></div>
-
-<div class="pay-actions">
-<button class="btn-clay" type="button" onclick="completePayment()">Pay Now</button>
-<button class="btn-link" type="button" onclick="closePayment()">Cancel</button>
-</div>
-
-</div>
-</div>
 
 <section class="assure">
 <div class="container-xxl px-lg-5">
@@ -306,13 +254,15 @@ const PRODUCTS=<?php echo json_encode(
     JSON_HEX_APOS|
     JSON_HEX_QUOT
 ); ?>;
+window.INITIAL_CATEGORY=<?php echo json_encode($currentCategory,JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT); ?>;
 </script>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="products.js"></script>
-<script src="shop.js"></script>
-<script src="search.js"></script>
+<script src="products.js?v=dynamic-categories-1"></script>
+<script src="shop.js?v=dynamic-categories-1"></script>
+<script src="search.js?v=dynamic-catalog-1"></script>
+<script src="back-to-top.js"></script>
 
 <script>
 (function(){

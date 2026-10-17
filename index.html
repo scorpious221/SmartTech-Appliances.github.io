@@ -66,8 +66,8 @@
 </p>
 
 <div class="d-flex flex-wrap gap-3">
-<a href="products.php" class="btn st-btn st-btn-accent"><i class="bi bi-arrow-right d-none d-lg-inline"></i>Shop Now</a>
-<a href="#" class="btn st-btn st-btn-ghost"><i class="bi bi-play-fill"></i>Watch Demo</a>
+<a href="products.php" class="btn st-btn st-btn-accent"><i class="bi bi-chevron-right d-none d-lg-inline"></i>Shop Now</a>
+<button id="watchDemoButton" class="btn st-btn st-btn-ghost" type="button" aria-haspopup="dialog" aria-controls="demoDialog"><i class="bi bi-play-fill" aria-hidden="true"></i>Watch Demo</button>
 </div>
 
 <p class="st-hero-rating d-lg-none">
@@ -86,12 +86,12 @@
 <span class="st-dot gold"></span>Your home, connected
 </span>
 
-<a class="st-float st-float-1" href="products.php?product=doorknob" aria-label="View Smart Doorknob">
+<a class="st-float st-float-1" href="product.php?id=doorknob" aria-label="View Smart Doorknob">
 <span class="st-icon-box d-none d-lg-grid"><i class="bi bi-door-closed"></i></span>
 <div><b>Smart Doorknob</b><small>₱10,350</small></div>
 </a>
 
-<a class="st-float st-float-2" href="products.php?product=cctv" aria-label="View CCTV Camera">
+<a class="st-float st-float-2" href="product.php?id=cctv" aria-label="View CCTV Camera">
 <span class="st-icon-box d-none d-lg-grid"><i class="bi bi-camera-video"></i></span>
 <div><b>CCTV Camera</b><small>₱8,900</small></div>
 </a>
@@ -101,6 +101,17 @@
 
 </div>
 </section>
+
+<dialog class="st-demo-dialog" id="demoDialog" aria-labelledby="demoDialogTitle">
+<div class="st-demo-dialog-head">
+<h2 id="demoDialogTitle">SmartTech Home Demo</h2>
+<button class="st-demo-dialog-close" type="button" aria-label="Close demo video"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+</div>
+<video controls playsinline preload="metadata" poster="images/Living_room.png" aria-label="SmartTech home demo video">
+<source src="videos/demo-video.mp4" type="video/mp4">
+Your browser does not support video playback.
+</video>
+</dialog>
 
 <section class="st-trust">
 <div class="container-xxl px-lg-5">
@@ -119,7 +130,7 @@
 </div>
 
 <a href="products.php" class="st-link">
-View all categories <i class="bi bi-arrow-right"></i>
+View all categories <i class="bi bi-chevron-right"></i>
 </a>
 </div>
 
@@ -140,7 +151,7 @@ View all categories <i class="bi bi-arrow-right"></i>
 </div>
 
 <a href="products.php" class="st-link">
-Shop all products <i class="bi bi-arrow-right"></i>
+Shop all products <i class="bi bi-chevron-right"></i>
 </a>
 </div>
 
@@ -148,7 +159,8 @@ Shop all products <i class="bi bi-arrow-right"></i>
 
 <div class="st-rail-wrap">
 <div class="st-rail" id="rail" role="tabpanel" tabindex="0"></div>
-<button class="st-next" id="railNext"><i class="bi bi-chevron-right"></i></button>
+<button class="st-prev" id="railPrev" type="button" aria-label="Show previous products" disabled><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+<button class="st-next" id="railNext" type="button" aria-label="Show more products"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
 </div>
 
 <div class="st-progress d-lg-none" id="railProg"></div>
@@ -161,23 +173,23 @@ Shop all products <i class="bi bi-arrow-right"></i>
 
 <div class="col-lg-5">
 <div class="st-deal-img">
-<img src="images/ref.jpg" alt="Samsung Side-by-Side Refrigerator" loading="lazy">
-<span class="st-tag">SAVE ₱20,000</span>
+<img id="dealImage" src="images/ref.jpg" alt="Samsung Side-by-Side Refrigerator" loading="lazy">
+<span class="st-tag" id="dealTag">SAVE ₱20,000</span>
 </div>
 </div>
 
 <div class="col-lg-7">
 <p class="st-eyebrow light">Deal of the Month</p>
-<h2 class="st-deal-title">Samsung Side-by-Side Refrigerator</h2>
-<p class="st-lead sm">Spacious No-Frost storage, a built-in water and ice dispenser, and Digital Inverter efficiency—now at our best price this season.</p>
+<h2 class="st-deal-title" id="dealTitle">Samsung Side-by-Side Refrigerator</h2>
+<p class="st-lead sm" id="dealDescription">Spacious No-Frost storage, a built-in water and ice dispenser, and Digital Inverter efficiency—now at our best price this season.</p>
 <p class="d-flex align-items-baseline gap-3">
-<span class="st-deal-price">₱96,000</span>
-<s class="st-old light">₱116,000</s>
+<span class="st-deal-price" id="dealPrice">₱96,000</span>
+<s class="st-old light" id="dealCompareAt">₱116,000</s>
 </p>
 
 <div class="st-countdown" id="countdown"></div>
 
-<a href="products.php?product=fridge" class="btn st-btn st-btn-accent mt-4">
+<a href="product.php?id=fridge" id="dealLink" class="btn st-btn st-btn-accent mt-4">
 <i class="bi bi-arrow-right"></i>Grab the Deal
 </a>
 </div>
@@ -196,7 +208,7 @@ Shop all products <i class="bi bi-arrow-right"></i>
 </div>
 
 <a href="products.php" class="st-link">
-See all bundles <i class="bi bi-arrow-right"></i>
+See all bundles <i class="bi bi-chevron-right"></i>
 </a>
 </div>
 
@@ -384,9 +396,10 @@ Smarter essentials for Filipino homes. Bringing comfort, convenience and a littl
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="products-data.js"></script>
-<script src="catalog-store.js"></script>
-<script src="main.js"></script>
-<script src="search.js"></script>
+<script src="catalog-store.js?v=dynamic-catalog-1"></script>
+<script src="main.js?v=homepage-demo-video-1"></script>
+<script src="search.js?v=dynamic-catalog-1"></script>
+<script src="back-to-top.js"></script>
 
 </body>
 </html>

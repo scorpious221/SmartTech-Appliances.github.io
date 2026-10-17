@@ -55,7 +55,7 @@ function peso($value){
 
 <link href="styles.css" rel="stylesheet">
 <link href="shop.css" rel="stylesheet">
-<link href="pages.css" rel="stylesheet">
+<link href="pages.css?v=mobile-gutters-2" rel="stylesheet">
 
 <style>
 .tr-wrap{max-width:760px}
@@ -120,9 +120,10 @@ $steps=[
 
 $status=$order["status"]??"Pending";
 $current=0;
+$progressStatus=$status==="Completed"?"Delivered":$status;
 
 foreach($steps as $index=>$step){
-    if($step[0]===$status){
+    if($step[0]===$progressStatus){
         $current=$index;
         break;
     }
@@ -220,8 +221,8 @@ Shop now
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="layout.js"></script>
-<script src="search.js"></script>
+<script src="layout.js?v=20261017"></script>
+<script src="search.js?v=dynamic-catalog-1"></script>
 
 </body>
 </html>

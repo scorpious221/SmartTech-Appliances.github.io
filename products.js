@@ -7,8 +7,31 @@ function needLogin(){
 
 const FREE_SHIP_MIN=3000;
 const shippingFor=subtotal=>subtotal>=FREE_SHIP_MIN?0:150;
-let currentCategory='household';
+let currentCategory=window.INITIAL_CATEGORY||'household';
 let currentSubcat=null;
+const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+function safeProductDescription(value){
+    const parsed=new DOMParser().parseFromString(String(value??''),'text/html');
+    const allowed=new Set(['p','br','ul','ol','li','strong','b','em','i']);
+    const skipped=new Set(['script','style','iframe','object','svg','math']);
+    const output=document.createElement('div');
+    const copy=(source,target)=>{
+        source.childNodes.forEach(node=>{
+            if(node.nodeType===Node.TEXT_NODE){
+                target.appendChild(document.createTextNode(node.nodeValue||''));
+                return;
+            }
+            if(node.nodeType!==Node.ELEMENT_NODE)return;
+            const tag=node.tagName.toLowerCase();
+            if(skipped.has(tag))return;
+            const container=allowed.has(tag)?document.createElement(tag):target;
+            if(container!==target)target.appendChild(container);
+            copy(node,container);
+        });
+    };
+    copy(parsed.body,output);
+    return output.innerHTML;
+}
 
 function renderTopCats(){
     $('.cat-box').each(function(){
@@ -72,16 +95,18 @@ function renderProducts(){
         }
 
         $grid.append(`
-        <div class="product-card">
+        <div class="product-card" data-id="${escapeHtml(product.id)}">
+            <a class="product-image-link" href="product.php?id=${encodeURIComponent(product.id)}" aria-label="View details for ${escapeHtml(product.name)}">
             <div class="img">
-                <img src="${product.img}" alt="${product.name}" onerror="this.style.display='none'">
+                <img src="${escapeHtml(product.img)}" alt="${escapeHtml(product.name)}" onerror="this.style.display='none'">
             </div>
+            </a>
 
-            <div class="product-name">${product.name}</div>
+            <div class="product-name">${escapeHtml(product.name)}</div>
             <div class="product-price">₱${product.price.toLocaleString()}</div>
 
             <div style="color:var(--muted);font-size:13px;margin-bottom:8px">
-                ${product.sub}
+                ${escapeHtml(product.sub)}
             </div>
 
             <div class="stock-line ${stockClass}">
@@ -89,17 +114,17 @@ function renderProducts(){
             </div>
 
             <div class="product-actions">
-                <button class="btn-add" data-add="${product.id}" ${stock<=0?'disabled':''}>
+                <button class="btn-add" data-add="${escapeHtml(product.id)}" ${stock<=0?'disabled':''}>
                     ${stock<=0?'Out of Stock':'Add to Cart'}
                 </button>
 
-                <button class="btn-buy" data-buy="${product.id}" ${stock<=0?'disabled':''}>
+                <button class="btn-buy" data-buy="${escapeHtml(product.id)}" ${stock<=0?'disabled':''}>
                     ${stock<=0?'Unavailable':'Buy Now'}
                 </button>
 
-                <button class="btn-view" data-view="${product.id}">
+                <a class="btn-view" href="product.php?id=${encodeURIComponent(product.id)}">
                     View Details
-                </button>
+                </a>
             </div>
         </div>`);
     });
@@ -243,10 +268,10 @@ function renderCart(){
         <div class="cart-item">
 
             <div class="cart-left">
-                <img src="${item.img}" alt="${item.name}" onerror="this.style.display='none'">
+                <img src="${escapeHtml(item.img)}" alt="${escapeHtml(item.name)}" onerror="this.style.display='none'">
 
                 <div class="cart-meta">
-                    <div style="font-weight:bold">${item.name}</div>
+                    <div style="font-weight:bold">${escapeHtml(item.name)}</div>
                     <div style="color:var(--muted);font-size:13px">
                         ₱${item.price.toLocaleString()}
                     </div>
@@ -367,7 +392,7 @@ function openPayment(){
 
         $payItems.append(`
         <div style="padding:6px 0">
-            ${item.name} x${item.qty} —
+            ${escapeHtml(item.name)} x${Number(item.qty)} —
             ₱${(item.price*item.qty).toLocaleString()}
         </div>`);
     });
@@ -412,30 +437,30 @@ function showDetails(id){
     }
 
     $('#descContent').html(`
-        <img src="${product.img}" alt="${product.name}">
+        <img src="${escapeHtml(product.img)}" alt="${escapeHtml(product.name)}">
 
-        <h2>${product.name}</h2>
+        <h2>${escapeHtml(product.name)}</h2>
 
         <p>
             <strong>₱${product.price.toLocaleString()}</strong>
         </p>
 
-        <p style="color:#555">${product.sub}</p>
+        <p style="color:#555">${escapeHtml(product.sub)}</p>
 
         <p class="stock-line ${stockClass}">
             ${stockText}
         </p>
 
         <div style="text-align:left;margin:10px auto;max-width:600px">
-            ${product.desc}
+            ${safeProductDescription(product.desc)}
         </div>
 
         <div style="margin-top:15px">
-            <button class="btn-add" data-add="${product.id}" ${stock<=0?'disabled':''}>
+            <button class="btn-add" data-add="${escapeHtml(product.id)}" ${stock<=0?'disabled':''}>
                 ${stock<=0?'Out of Stock':'Add to Cart'}
             </button>
 
-            <button class="btn-buy" data-buy="${product.id}" ${stock<=0?'disabled':''}>
+            <button class="btn-buy" data-buy="${escapeHtml(product.id)}" ${stock<=0?'disabled':''}>
                 ${stock<=0?'Unavailable':'Buy Now'}
             </button>
         </div>
@@ -491,7 +516,7 @@ $(document).ready(function(){
 
     $(document).on('click','.btn-view',function(){
         const id=$(this).data('view');
-        if(id)showDetails(id);
+        if(id)location.href='product.php?id='+encodeURIComponent(id);
     });
 
     $(document).on('click','.qty-minus',function(){

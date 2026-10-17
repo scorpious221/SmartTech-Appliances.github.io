@@ -34,7 +34,7 @@ function peso($value){
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 <link href="styles.css" rel="stylesheet">
 <link href="shop.css" rel="stylesheet">
-<link href="pages.css" rel="stylesheet">
+<link href="pages.css?v=mobile-gutters-2" rel="stylesheet">
 
 <style>
 .rc-wrap{max-width:780px;margin:0 auto}.rc-card{background:#fff;border:1px solid var(--st-sand);border-radius:18px;padding:28px}.rc-success{text-align:center;margin-bottom:28px}.rc-success i{display:inline-grid;place-items:center;width:64px;height:64px;border-radius:50%;background:#E4F3EB;color:#1B6B4A;font-size:32px}.rc-success h1{font-size:30px;margin:16px 0 6px}.rc-success p{color:var(--st-ink-2);margin:0}.rc-info{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}.rc-info div{padding:14px;border:1px solid var(--st-sand);border-radius:12px}.rc-info small{display:block;color:var(--st-ink-2);margin-bottom:5px}.rc-item{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--st-sand)}.rc-item:last-child{border-bottom:0}.rc-item img{width:64px;height:64px;object-fit:contain;background:#F1F2F6;border-radius:10px;padding:5px}.rc-item div{flex:1}.rc-item small{display:block;color:var(--st-ink-2);margin-top:4px}.rc-item strong{white-space:nowrap}.rc-summary{margin-top:20px;padding-top:16px;border-top:1px solid var(--st-sand)}.rc-row{display:flex;justify-content:space-between;gap:20px;padding:5px 0}.rc-row.total{font-size:20px;font-weight:800;margin-top:6px}.rc-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:24px}@media(max-width:575.98px){.rc-card{padding:20px}.rc-info{grid-template-columns:1fr}}
@@ -109,6 +109,13 @@ function peso($value){
 <span><?php echo $order["shippingFee"]>0?peso($order["shippingFee"]):"Free"; ?></span>
 </div>
 
+<?php if((float)($order["discountAmount"]??0)>0): ?>
+<div class="rc-row">
+<span>Voucher<?php echo !empty($order["voucherCode"])?" (".e($order["voucherCode"]).")":""; ?></span>
+<span>−<?php echo peso($order["discountAmount"]); ?></span>
+</div>
+<?php endif; ?>
+
 <div class="rc-row total">
 <span>Total</span>
 <span><?php echo peso($order["grandTotal"]); ?></span>
@@ -172,6 +179,7 @@ localStorage.setItem('lastOrder',JSON.stringify(legacy));
 if(window.stCartCount)stCartCount();
 })();
 </script>
+<script src="back-to-top.js"></script>
 
 </body>
 </html>

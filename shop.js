@@ -1,12 +1,11 @@
 (function(){
 
-const DETAILS_PAGE='';
+const DETAILS_PAGE='product.php';
 
-const CATNAMES={
-    household:'Household',
-    entertainment:'Entertainment',
-    kitchen:'Kitchen'
-};
+const CATNAMES=Object.create(null);
+PRODUCTS.forEach(product=>{
+    if(product.category)CATNAMES[product.category]=product.category;
+});
 
 const SORTS={
     featured:'Featured',
@@ -116,6 +115,7 @@ function card(p){
                 <i class="bi bi-heart${on?'-fill':''}"></i>
             </button>
 
+            <a class="product-image-link" href="${href}" aria-label="View details for ${esc(p.name)}">
             <img
                 src="${esc(p.img)}"
                 alt="${esc(p.name)}"
@@ -127,7 +127,7 @@ function card(p){
                 View details
                 <i class="bi bi-arrow-up-right"></i>
             </span>
-
+            </a>
         </div>
 
         <div class="card-body-st">
@@ -369,7 +369,10 @@ $(function(){
     renderSubcats();
     renderProducts();
 
-    if(found)showDetails(pid);
+    if(found){
+        location.replace('product.php?id='+encodeURIComponent(pid));
+        return;
+    }
 
     $('#sortBtn').on('click',function(e){
         e.stopPropagation();
@@ -422,6 +425,12 @@ $(function(){
         showDetails(
             $(this).closest('.product-card').data('id')
         );
+    });
+
+    $(document).on('click','.product-card',function(e){
+        if($(e.target).closest('button,a').length)return;
+        const id=$(this).data('id');
+        if(id)location.href='product.php?id='+encodeURIComponent(id);
     });
 
     $(document).on('click','#reset-filters',function(){

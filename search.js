@@ -63,7 +63,9 @@ const FALLBACK=RAW.map(r=>({
     sub:r[5]
 }));
 
-const PRODUCTS_PAGE='products.php';
+const scriptUrl=document.currentScript.src;
+const PRODUCTS_PAGE=new URL('product.php',scriptUrl).href;
+const assetUrl=path=>new URL(path,scriptUrl).href;
 
 const onProductsPage=()=>{
     return typeof PRODUCTS!=='undefined'&&
@@ -80,7 +82,9 @@ const savedCatalog=()=>{
     }
 };
 
+let databaseCatalog=null;
 const catalog=()=>{
+    if(databaseCatalog)return databaseCatalog;
     if(typeof PRODUCTS!=='undefined')return PRODUCTS;
 
     return savedCatalog()||FALLBACK;
@@ -132,6 +136,18 @@ document.body.appendChild(overlay);
 const input=overlay.querySelector('.stq-in');
 const res=overlay.querySelector('.stq-res');
 
+fetch(new URL('php/get_storefront_content.php',scriptUrl),{headers:{Accept:'application/json'}})
+    .then(response=>{
+        if(!response.ok)throw new Error('Product search catalog request failed: '+response.status);
+        return response.json();
+    })
+    .then(content=>{
+        if(!Array.isArray(content.products))throw new Error('Product search catalog response is invalid.');
+        databaseCatalog=content.products;
+        if(overlay.classList.contains('open')&&input.value.trim())render();
+    })
+    .catch(error=>console.error('Unable to refresh the product search catalog.',error));
+
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({
     '&':'&amp;',
     '<':'&lt;',
@@ -167,7 +183,7 @@ function render(){
     <button class="stq-hit" data-id="${esc(p.id)}">
 
         <img
-        src="${esc(p.img)}"
+        src="${esc(assetUrl(p.img))}"
         alt=""
         onerror="this.style.visibility='hidden'"
         >
@@ -224,14 +240,15 @@ function choose(id){
 
     close();
 
-    if(onProductsPage()){
-        showProduct(product);
-    }else{
-        location.href=PRODUCTS_PAGE+'?product='+encodeURIComponent(product.id);
-    }
+    location.href=PRODUCTS_PAGE+'?id='+encodeURIComponent(product.id);
 }
 
 input.addEventListener('input',render);
+
+document.querySelector('.st-search')?.addEventListener('click',event=>{
+    event.preventDefault();
+    open();
+});
 
 input.addEventListener('keydown',e=>{
     if(e.key!=='Enter')return;
@@ -271,7 +288,7 @@ window.addEventListener('load',()=>{
     const product=PRODUCTS.find(p=>p.id===id);
 
     if(product){
-        showProduct(product);
+        location.replace(PRODUCTS_PAGE+'?id='+encodeURIComponent(product.id));
     }
 });
 
