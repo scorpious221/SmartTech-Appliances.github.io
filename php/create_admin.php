@@ -29,4 +29,4 @@ $stmt->execute([
 ]);
 
 echo "Admin account created successfully!";
-?>
+?>  

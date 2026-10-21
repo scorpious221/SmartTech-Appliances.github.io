@@ -3,8 +3,8 @@ session_start();
 require_once "php/database.php";
 
 if(!isset($_SESSION["user_id"])||($_SESSION["role"]??"")!=="admin"){
-    header("Location: login.php");
-    exit;
+header("Location: login.php");
+exit;
 }
 
 /* PRODUCTS */
@@ -12,83 +12,113 @@ $stmt=$conn->query("SELECT * FROM products ORDER BY id ASC");
 $dbProducts=[];
 
 while($row=$stmt->fetch(PDO::FETCH_ASSOC)){
-    $dbProducts[]=[
-        "dbId"=>(int)$row["id"],
-        "id"=>$row["product_code"],
-        "name"=>$row["name"],
-        "price"=>(float)$row["price"],
-        "img"=>$row["image"],
-        "category"=>$row["category"],
-        "sub"=>$row["subcategory"],
-        "desc"=>$row["description"],
-        "stock"=>(int)$row["stock"]
-    ];
+$dbProducts[]=[
+"dbId"=>(int)$row["id"],
+"id"=>$row["product_code"],
+"name"=>$row["name"],
+"price"=>(float)$row["price"],
+"img"=>$row["image"],
+"category"=>$row["category"],
+"sub"=>$row["subcategory"],
+"desc"=>$row["description"],
+"stock"=>(int)$row["stock"]
+];
 }
 
 /* CUSTOMERS */
 $stmt=$conn->query("
-    SELECT id,username,email,full_name,contact,address
-    FROM users
-    WHERE role='customer'
-    ORDER BY id DESC
+SELECT id,username,email,full_name,contact,address
+FROM users
+WHERE role='customer'
+ORDER BY id DESC
 ");
 
 $dbCustomers=[];
 
 while($row=$stmt->fetch(PDO::FETCH_ASSOC)){
-    $dbCustomers[]=[
-        "id"=>(int)$row["id"],
-        "username"=>$row["username"],
-        "email"=>$row["email"],
-        "name"=>$row["full_name"],
-        "contact"=>$row["contact"],
-        "address"=>$row["address"]
-    ];
+$dbCustomers[]=[
+"id"=>(int)$row["id"],
+"username"=>$row["username"],
+"email"=>$row["email"],
+"name"=>$row["full_name"],
+"contact"=>$row["contact"],
+"address"=>$row["address"]
+];
 }
 
 /* ORDERS */
 $stmt=$conn->query("
-    SELECT
-        o.id,
-        o.order_number,
-        o.user_id,
-        o.full_name,
-        o.phone,
-        o.address,
-        o.payment_method,
-        o.subtotal,
-        o.shipping_fee,
-        o.grand_total,
-        o.status,
-        o.created_at,
-        COALESCE(SUM(oi.quantity),0) AS total_items
-    FROM orders o
-    LEFT JOIN order_items oi ON oi.order_id=o.id
-    GROUP BY
-        o.id,o.order_number,o.user_id,o.full_name,o.phone,o.address,
-        o.payment_method,o.subtotal,o.shipping_fee,o.grand_total,
-        o.status,o.created_at
-    ORDER BY o.id DESC
+SELECT
+o.id,
+o.order_number,
+o.user_id,
+o.full_name,
+o.phone,
+o.address,
+o.payment_method,
+o.subtotal,
+o.shipping_fee,
+o.grand_total,
+o.status,
+o.created_at,
+COALESCE(SUM(oi.quantity),0) AS total_items
+FROM orders o
+LEFT JOIN order_items oi ON oi.order_id=o.id
+GROUP BY
+o.id,o.order_number,o.user_id,o.full_name,o.phone,o.address,
+o.payment_method,o.subtotal,o.shipping_fee,o.grand_total,
+o.status,o.created_at
+ORDER BY o.id DESC
 ");
 
 $dbOrders=[];
+$orderIndex=[];
 
 while($row=$stmt->fetch(PDO::FETCH_ASSOC)){
-    $dbOrders[]=[
-        "id"=>(int)$row["id"],
-        "orderNumber"=>$row["order_number"],
-        "userId"=>(int)$row["user_id"],
-        "name"=>$row["full_name"],
-        "phone"=>$row["phone"],
-        "address"=>$row["address"],
-        "paymentMethod"=>$row["payment_method"],
-        "subtotal"=>(float)$row["subtotal"],
-        "shippingFee"=>(float)$row["shipping_fee"],
-        "grandTotal"=>(float)$row["grand_total"],
-        "status"=>$row["status"],
-        "createdAt"=>$row["created_at"],
-        "totalItems"=>(int)$row["total_items"]
-    ];
+$dbOrders[]=[
+"id"=>(int)$row["id"],
+"orderNumber"=>$row["order_number"],
+"userId"=>(int)$row["user_id"],
+"name"=>$row["full_name"],
+"phone"=>$row["phone"],
+"address"=>$row["address"],
+"paymentMethod"=>$row["payment_method"],
+"subtotal"=>(float)$row["subtotal"],
+"shippingFee"=>(float)$row["shipping_fee"],
+"grandTotal"=>(float)$row["grand_total"],
+"status"=>$row["status"],
+"createdAt"=>$row["created_at"],
+"totalItems"=>(int)$row["total_items"],
+"items"=>[]
+];
+
+$orderIndex[(int)$row["id"]]=count($dbOrders)-1;
+}
+
+/* ORDER ITEMS */
+$stmt=$conn->query("
+SELECT
+oi.order_id,
+oi.product_name,
+oi.price,
+oi.quantity,
+p.image
+FROM order_items oi
+LEFT JOIN products p ON p.id=oi.product_id
+ORDER BY oi.order_id DESC,oi.id ASC
+");
+
+while($row=$stmt->fetch(PDO::FETCH_ASSOC)){
+$orderId=(int)$row["order_id"];
+
+if(!isset($orderIndex[$orderId]))continue;
+
+$dbOrders[$orderIndex[$orderId]]["items"][]=[
+"name"=>$row["product_name"],
+"price"=>(float)$row["price"],
+"quantity"=>(int)$row["quantity"],
+"image"=>$row["image"]??""
+];
 }
 ?>
 <!DOCTYPE html>
@@ -126,7 +156,6 @@ while($row=$stmt->fetch(PDO::FETCH_ASSOC)){
 <button data-page="products" type="button"><i class="bi bi-box-seam"></i><span>Products</span></button>
 <button data-page="orders" type="button"><i class="bi bi-receipt"></i><span>Orders</span></button>
 <button data-page="customers" type="button"><i class="bi bi-people"></i><span>Customers</span></button>
-<a href="index.html" target="_blank"><i class="bi bi-shop"></i><span>View Store</span></a>
 </nav>
 
 <a class="ad-nav ad-logout" href="php/logout.php" style="padding:0;text-decoration:none">
@@ -203,7 +232,7 @@ while($row=$stmt->fetch(PDO::FETCH_ASSOC)){
 <div class="ad-panel-head">
 <div>
 <h2>Sales Analytics</h2>
-<span class="ad-muted">Delivered sales from the last 7 days</span>
+<span class="ad-muted">Delivered sales</span>
 </div>
 </div>
 
@@ -220,9 +249,7 @@ while($row=$stmt->fetch(PDO::FETCH_ASSOC)){
 <span class="ad-muted">Products that need restocking</span>
 </div>
 
-<button class="ad-btn outline sm" data-jump="products" type="button">
-View products
-</button>
+<button class="ad-btn outline sm" data-jump="products" type="button">View products</button>
 
 </div>
 
@@ -241,9 +268,7 @@ View products
 <span class="ad-muted">Latest customer transactions</span>
 </div>
 
-<button class="ad-btn outline sm" data-jump="orders" type="button">
-View all
-</button>
+<button class="ad-btn outline sm" data-jump="orders" type="button">View all</button>
 
 </div>
 
@@ -277,12 +302,7 @@ View all
 
 <div class="flex-grow-1">
 
-<input
-class="form-control ad-search"
-id="productSearch"
-type="search"
-placeholder="Search product, category or subcategory"
->
+<input class="form-control ad-search" id="productSearch" type="search" placeholder="Search product, category or subcategory">
 
 <div id="productCount" class="ad-muted mt-2"></div>
 
@@ -330,13 +350,15 @@ Add Product
 
 <section class="ad-panel">
 
-<div class="table-responsive ad-table-wrap">
+<div class="table-responsive ad-table-wrap ad-mobile-table-wrap">
 
-<table class="table table-hover align-middle mb-0 ad-table">
+<table class="table table-hover align-middle mb-0 ad-table ad-mobile-table ad-orders-table">
 
 <thead>
 <tr>
 <th>Order</th>
+<th>Items</th>
+<th>Quantity</th>
 <th>Customer</th>
 <th>Payment</th>
 <th>Total</th>
@@ -423,13 +445,11 @@ Image path / URL
 
 <label class="field">
 Category
-
 <select class="form-select" id="pCategory" name="category">
 <option value="household">Household</option>
 <option value="entertainment">Entertainment</option>
 <option value="kitchen">Kitchen</option>
 </select>
-
 </label>
 
 <label class="field">

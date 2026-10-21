@@ -3,42 +3,54 @@ session_start();
 require_once "php/database.php";
 
 if(!isset($_SESSION["user_id"])||($_SESSION["role"]??"")!=="customer"){
-    header("Location: login.php?next=track.php");
-    exit;
+header("Location: login.php?next=track.php");
+exit;
 }
 
 $userId=(int)$_SESSION["user_id"];
 $orderNumber=strtoupper(trim($_GET["order"]??""));
 $order=null;
+$orderItems=[];
 
 if($orderNumber!==""){
-    $stmt=$conn->prepare("
-        SELECT id,order_number,full_name,phone,address,payment_method,
-               subtotal,shipping_fee,grand_total,status,created_at
-        FROM orders
-        WHERE order_number=? AND user_id=?
-        LIMIT 1
-    ");
-    $stmt->execute([$orderNumber,$userId]);
-    $order=$stmt->fetch(PDO::FETCH_ASSOC)?:null;
+$stmt=$conn->prepare("
+SELECT id,order_number,full_name,phone,address,payment_method,
+subtotal,shipping_fee,grand_total,status,created_at
+FROM orders
+WHERE order_number=? AND user_id=?
+LIMIT 1
+");
+$stmt->execute([$orderNumber,$userId]);
+$order=$stmt->fetch(PDO::FETCH_ASSOC)?:null;
+
+if($order){
+$stmt=$conn->prepare("
+SELECT
+oi.product_name,
+oi.price,
+oi.quantity,
+p.image
+FROM order_items oi
+LEFT JOIN products p ON p.id=oi.product_id
+WHERE oi.order_id=?
+ORDER BY oi.id ASC
+");
+$stmt->execute([(int)$order["id"]]);
+$orderItems=$stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 }
 
 $stmt=$conn->prepare("
-    SELECT order_number,status,grand_total,created_at
-    FROM orders
-    WHERE user_id=?
-    ORDER BY id DESC
+SELECT order_number,status,grand_total,created_at
+FROM orders
+WHERE user_id=?
+ORDER BY id DESC
 ");
 $stmt->execute([$userId]);
 $myOrders=$stmt->fetchAll(PDO::FETCH_ASSOC);
 
-function e($value){
-    return htmlspecialchars((string)$value,ENT_QUOTES,"UTF-8");
-}
-
-function peso($value){
-    return "₱".number_format((float)$value,2);
-}
+function e($value){return htmlspecialchars((string)$value,ENT_QUOTES,"UTF-8");}
+function peso($value){return "₱".number_format((float)$value,2);}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -58,7 +70,7 @@ function peso($value){
 <link href="pages.css" rel="stylesheet">
 
 <style>
-.tr-wrap{max-width:760px}
+.tr-wrap{width:100%;max-width:760px;margin:0 auto}
 .tr-orders{display:grid;gap:10px;margin-top:20px}
 .tr-order{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 16px;border:1px solid var(--st-sand);border-radius:12px;background:#fff;text-decoration:none;color:var(--st-ink)}
 .tr-order:hover{border-color:var(--st-clay)}
@@ -67,8 +79,27 @@ function peso($value){
 .tr-top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
 .tr-top small{display:block;color:var(--st-ink-2);margin-top:5px}
 
+.tr-items{margin-top:22px;padding-top:20px;border-top:1px solid var(--st-sand)}
+.tr-items h3{font-size:16px;font-weight:800;margin:0 0 14px}
+.tr-item-list{display:grid;gap:10px}
+.tr-item{display:grid;grid-template-columns:76px minmax(0,1fr) auto;align-items:center;gap:14px;padding:12px;border:1px solid var(--st-sand);border-radius:14px;background:var(--st-cream)}
+.tr-item-img{width:76px;height:76px;border-radius:10px;background:#fff;display:grid;place-items:center;overflow:hidden}
+.tr-item-img img{width:100%;height:100%;object-fit:contain;padding:6px}
+.tr-item-info{min-width:0}
+.tr-item-info b{display:block;font-size:14px;margin-bottom:5px}
+.tr-item-info small{display:block;color:var(--st-ink-2);font-size:12px}
+.tr-item-total{text-align:right;font-weight:800;font-size:14px;white-space:nowrap}
+
+.tr-summary{margin-top:14px;padding:14px;border:1px solid var(--st-sand);border-radius:12px;background:#fff}
+.tr-summary-row{display:flex;justify-content:space-between;gap:16px;padding:4px 0;font-size:13px}
+.tr-summary-row.total{font-size:15px;font-weight:800;border-top:1px solid var(--st-sand);margin-top:6px;padding-top:10px}
+
 @media(max-width:575.98px){
-    .tr-order,.tr-top{align-items:flex-start;flex-direction:column}
+.tr-wrap{max-width:100%}
+.tr-order,.tr-top{align-items:flex-start;flex-direction:column}
+.tr-item{grid-template-columns:64px minmax(0,1fr)}
+.tr-item-img{width:64px;height:64px}
+.tr-item-total{grid-column:2;text-align:left}
 }
 </style>
 </head>
@@ -100,9 +131,7 @@ autocomplete="off"
 <p class="msg err">We couldn't find this order under your account.</p>
 <?php endif; ?>
 
-<button class="btn-clay" type="submit">
-Track order
-</button>
+<button class="btn-clay" type="submit">Track order</button>
 
 </form>
 
@@ -112,20 +141,20 @@ Track order
 
 <?php
 $steps=[
-    ["Pending","Order placed","We have received your order."],
-    ["Processing","Processing","Your items are being prepared."],
-    ["Shipped","Out for delivery","Your order is on its way."],
-    ["Delivered","Delivered","Your order has been delivered."]
+["Pending","Order placed","We have received your order."],
+["Processing","Processing","Your items are being prepared."],
+["Shipped","Out for delivery","Your order is on its way."],
+["Delivered","Delivered","Your order has been delivered."]
 ];
 
 $status=$order["status"]??"Pending";
 $current=0;
 
 foreach($steps as $index=>$step){
-    if($step[0]===$status){
-        $current=$index;
-        break;
-    }
+if($step[0]===$status){
+$current=$index;
+break;
+}
 }
 
 $isCancelled=$status==="Cancelled";
@@ -140,17 +169,73 @@ $isCancelled=$status==="Cancelled";
 <small><?php echo e($order["payment_method"]); ?> · <?php echo peso($order["grand_total"]); ?></small>
 </div>
 
-<span class="tr-status">
-<?php echo e($status); ?>
-</span>
+<span class="tr-status"><?php echo e($status); ?></span>
 
 </div>
 
+<?php if(count($orderItems)): ?>
+
+<div class="tr-items">
+
+<h3>Items in this order</h3>
+
+<div class="tr-item-list">
+
+<?php foreach($orderItems as $item): ?>
+
+<?php
+$image=trim((string)($item["image"]??""));
+if($image==="")$image="images/smarttechappliances.svg";
+$itemTotal=(float)$item["price"]*(int)$item["quantity"];
+?>
+
+<div class="tr-item">
+
+<div class="tr-item-img">
+<img src="<?php echo e($image); ?>" alt="<?php echo e($item["product_name"]); ?>" onerror="this.src='images/smarttechappliances.svg'">
+</div>
+
+<div class="tr-item-info">
+<b><?php echo e($item["product_name"]); ?></b>
+<small><?php echo peso($item["price"]); ?> × <?php echo (int)$item["quantity"]; ?></small>
+</div>
+
+<div class="tr-item-total">
+<?php echo peso($itemTotal); ?>
+</div>
+
+</div>
+
+<?php endforeach; ?>
+
+</div>
+
+<div class="tr-summary">
+
+<div class="tr-summary-row">
+<span>Subtotal</span>
+<b><?php echo peso($order["subtotal"]); ?></b>
+</div>
+
+<div class="tr-summary-row">
+<span>Shipping</span>
+<b><?php echo (float)$order["shipping_fee"]<=0?"Free":peso($order["shipping_fee"]); ?></b>
+</div>
+
+<div class="tr-summary-row total">
+<span>Total</span>
+<span><?php echo peso($order["grand_total"]); ?></span>
+</div>
+
+</div>
+
+</div>
+
+<?php endif; ?>
+
 <?php if($isCancelled): ?>
 
-<p class="msg err mt-3 mb-0">
-This order has been cancelled.
-</p>
+<p class="msg err mt-4 mb-0">This order has been cancelled.</p>
 
 <?php else: ?>
 
@@ -179,9 +264,7 @@ Delivering to: <?php echo e($order["address"]); ?>
 
 <?php if(count($myOrders)): ?>
 
-<h2 class="fs-5 mt-4">
-My orders
-</h2>
+<h2 class="fs-5 mt-4">My orders</h2>
 
 <div class="tr-orders">
 
@@ -194,9 +277,7 @@ My orders
 <small><?php echo e($item["created_at"]); ?> · <?php echo peso($item["grand_total"]); ?></small>
 </div>
 
-<span class="tr-status">
-<?php echo e($item["status"]); ?>
-</span>
+<span class="tr-status"><?php echo e($item["status"]); ?></span>
 
 </a>
 
@@ -208,9 +289,7 @@ My orders
 
 <div class="panel mt-4 text-center">
 <p class="mb-3">You don't have any orders yet.</p>
-<a class="btn-clay d-inline-grid align-items-center text-decoration-none px-4" href="products.php">
-Shop now
-</a>
+<a class="btn-clay d-inline-grid align-items-center text-decoration-none px-4" href="products.php">Shop now</a>
 </div>
 
 <?php endif; ?>

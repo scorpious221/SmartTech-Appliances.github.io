@@ -136,61 +136,6 @@ Everyday essentials. All backed by a 1-year warranty.
 
 </section>
 
-<section id="cart-section" class="container-xxl px-lg-5">
-<h2>Your Cart</h2>
-<div id="cart-items"></div>
-
-<div class="cart-foot">
-<strong id="cart-total">Total: ₱0</strong>
-
-<div class="d-flex align-items-center gap-3">
-<button class="btn-link" type="button" onclick="clearCart()">Clear Cart</button>
-<button class="btn-clay" type="button" onclick="openPayment()">Proceed to Checkout</button>
-</div>
-</div>
-</section>
-
-<div id="payment" class="container-xxl px-lg-5">
-<div class="pay-card">
-
-<h2>Checkout</h2>
-
-<div id="pay-items" class="mb-3"></div>
-
-<label for="address" class="fw-bold mb-1">Delivery address</label>
-<textarea id="address" rows="3" placeholder="House no., street, barangay, city"></textarea>
-
-<fieldset class="mb-2">
-<legend class="fs-6 fw-bold">Payment method</legend>
-
-<label class="pay-opt"><input type="radio" name="paymethod" value="COD" checked> Cash on Delivery</label>
-<label class="pay-opt"><input type="radio" name="paymethod" value="GCash"> GCash</label>
-<label class="pay-opt"><input type="radio" name="paymethod" value="Maya"> Maya</label>
-<label class="pay-opt"><input type="radio" name="paymethod" value="Card"> Credit/Debit Card</label>
-</fieldset>
-
-<div id="card-fields">
-<input type="text" id="card-name" placeholder="Cardholder name">
-<input type="text" id="card-number" placeholder="Card number" inputmode="numeric">
-
-<div class="d-flex gap-2">
-<input type="text" id="card-exp" placeholder="MM/YY" inputmode="numeric">
-<input type="text" id="card-cvv" placeholder="CVV" inputmode="numeric">
-</div>
-</div>
-
-<div class="pay-row"><span>Subtotal</span><span id="pay-total">₱0</span></div>
-<div class="pay-row"><span>Shipping</span><span id="pay-ship">₱150</span></div>
-<div class="pay-row total"><span>Grand total</span><span id="pay-grand">₱0</span></div>
-
-<div class="pay-actions">
-<button class="btn-clay" type="button" onclick="completePayment()">Pay Now</button>
-<button class="btn-link" type="button" onclick="closePayment()">Cancel</button>
-</div>
-
-</div>
-</div>
-
 <section class="assure">
 <div class="container-xxl px-lg-5">
 <h2>Good choices. Zero worries.</h2>
@@ -297,15 +242,7 @@ Everyday essentials. All backed by a 1-year warranty.
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script>
-const PRODUCTS=<?php echo json_encode(
-    $products,
-    JSON_UNESCAPED_SLASHES|
-    JSON_UNESCAPED_UNICODE|
-    JSON_HEX_TAG|
-    JSON_HEX_AMP|
-    JSON_HEX_APOS|
-    JSON_HEX_QUOT
-); ?>;
+const PRODUCTS=<?php echo json_encode($products,JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT); ?>;
 </script>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -316,21 +253,16 @@ const PRODUCTS=<?php echo json_encode(
 
 <script>
 (function(){
-    function sync(){
-        document.querySelectorAll('#navList a[data-cat]').forEach(function(a){
-            const on=a.dataset.cat===currentCategory;
-            a.classList.toggle('active',on);
-            on?a.setAttribute('aria-current','page'):a.removeAttribute('aria-current');
-        });
-    }
-
-    const base=window.renderTopCats;
-    window.renderTopCats=function(){
-        base();
-        sync();
-    };
-
-    sync();
+function sync(){
+document.querySelectorAll('#navList a[data-cat]').forEach(function(a){
+const on=a.dataset.cat===currentCategory;
+a.classList.toggle('active',on);
+on?a.setAttribute('aria-current','page'):a.removeAttribute('aria-current');
+});
+}
+const base=window.renderTopCats;
+window.renderTopCats=function(){base();sync();};
+sync();
 })();
 </script>
 
