@@ -416,10 +416,11 @@ Add Product
 <button class="ad-x" id="closeDialog" type="button">×</button>
 </div>
 
-<form class="ad-form" id="productForm" method="POST" novalidate>
+<form class="ad-form" id="productForm" method="POST" enctype="multipart/form-data" novalidate>
 
 <input type="hidden" name="id" id="pId">
 <input type="hidden" name="product_code" id="pCode">
+<input type="hidden" name="existing_image" id="pExistingImage">
 
 <div class="ad-form-grid">
 
@@ -430,18 +431,27 @@ Product name
 
 <label class="field">
 Price
-<input class="form-control" id="pPrice" name="price" type="number" min="0" step="0.01" required>
+<input class="form-control" id="pPrice" name="price" type="number" min="0.01" step="0.01" required>
 </label>
 
 <label class="field">
 Stock quantity
-<input class="form-control" id="pStock" name="stock" type="number" min="0" step="1" required>
+<input class="form-control" id="pStock" name="stock" type="number" min="0" max="100" step="1" required>
 </label>
 
 <label class="field">
-Image path / URL
-<input class="form-control" id="pImage" name="image" required>
+Product image
+<input class="form-control" id="pImage" name="image" type="file" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif">
 </label>
+
+<div class="field full" id="pImagePreviewWrap" style="display:none">
+<span>Current image</span>
+
+<div style="display:flex;align-items:center;gap:12px;margin-top:8px">
+<img id="pImagePreview" src="" alt="Product image" style="width:70px;height:70px;object-fit:contain;border:1px solid var(--st-sand);border-radius:10px;background:#f5f5f5;padding:5px">
+<small class="ad-muted" id="pImageName"></small>
+</div>
+</div>
 
 <label class="field">
 Category
@@ -454,7 +464,7 @@ Category
 
 <label class="field">
 Subcategory
-<input class="form-control" id="pSub" name="subcategory" required>
+<select class="form-select" id="pSub" name="subcategory" required></select>
 </label>
 
 <label class="field full">

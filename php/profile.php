@@ -188,7 +188,6 @@ Back to Home
 <button class="active" type="button" data-tab="profile"><i class="bi bi-person"></i>My Profile</button>
 <button type="button" data-tab="orders"><i class="bi bi-receipt"></i>My Orders</button>
 <button type="button" data-tab="password"><i class="bi bi-shield-lock"></i>Password</button>
-<a href="../wishlist.html"><i class="bi bi-heart"></i>Wishlist</a>
 <a class="out" href="logout.php"><i class="bi bi-box-arrow-right"></i>Log out</a>
 </nav>
 
@@ -330,11 +329,6 @@ Confirm new password
 <a href="../products.php">
 <i class="bi bi-shop"></i>
 <span>Shop</span>
-</a>
-
-<a href="../wishlist.html">
-<i class="bi bi-heart"></i>
-<span>Wishlist</span>
 </a>
 
 <a href="../cart.php">
