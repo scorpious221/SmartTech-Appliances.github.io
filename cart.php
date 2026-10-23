@@ -4,7 +4,7 @@ require_once "php/database.php";
 $checkoutError=$_SESSION["checkout_error"]??"";
 unset($_SESSION["checkout_error"]);
 
-$stmt=$conn->query("SELECT product_code,name,price,image,stock FROM products ORDER BY id ASC");
+$stmt=$conn->query("SELECT product_code,name,COALESCE(sale_price,price) AS price,image,stock FROM products ORDER BY id ASC");
 $dbProducts=[];
 
 while($row=$stmt->fetch(PDO::FETCH_ASSOC)){
@@ -16,6 +16,13 @@ while($row=$stmt->fetch(PDO::FETCH_ASSOC)){
         "stock"=>(int)$row["stock"]
     ];
 }
+$dbBundles=$conn->query("SELECT id,title,product_codes,price,compare_at_price FROM home_bundles WHERE active=1 ORDER BY sort_order,id")->fetchAll(PDO::FETCH_ASSOC);
+foreach($dbBundles as &$bundle){
+    $bundle["product_codes"]=json_decode((string)$bundle["product_codes"],true)?:[];
+    $bundle["price"]=(float)$bundle["price"];
+    $bundle["compare_at_price"]=(float)$bundle["compare_at_price"];
+}
+unset($bundle);
 
 $loggedIn=isset($_SESSION["user_id"])&&($_SESSION["role"]??"")==="customer";
 $user=[];
@@ -78,6 +85,12 @@ if($loggedIn){
 .ck-item div{flex:1;min-width:0;font-size:14px}
 .ck-item small{display:block;color:var(--st-ink-2)}
 .ck-item span{font-weight:700}
+.ck-item-main{min-width:0}
+.ck-qty{display:flex;align-items:center;gap:8px;margin-top:7px}
+.ck-qty button{width:30px;height:30px;border:1px solid var(--st-sand);border-radius:8px;background:#fff;color:var(--st-ink);font-weight:700}
+.ck-qty button:disabled{opacity:.45;cursor:not-allowed}
+.ck-qty-input{width:58px;height:32px;border:1px solid var(--st-sand);border-radius:8px;background:#fff;color:var(--st-ink);font-size:13px;font-weight:700;text-align:center}
+.ck-qty-input:focus{border-color:var(--st-clay);outline:2px solid rgba(163,50,26,.14)}
 .ck-side{position:sticky;top:110px}
 .ck-card input[type=text]{width:100%;border:1px solid var(--st-sand);border-radius:12px;padding:14px;font-size:15px;margin-bottom:12px}
 #ckCard{display:none;margin-top:12px}
@@ -87,6 +100,21 @@ if($loggedIn){
 .voucher-message{min-height:20px;margin:4px 0 12px;font-size:13px}
 .voucher-message.error{color:#A3321A}.voucher-message.success{color:#1B6B4A}
 #voucherDiscountRow[hidden]{display:none}
+.checkout-vouchers{margin-top:18px;padding-top:16px;border-top:1px solid var(--st-sand)}
+.checkout-vouchers h3{font-size:15px;font-weight:800;margin:0 0 4px}
+.checkout-vouchers-intro{font-size:12px;color:var(--st-ink-2);margin:0 0 10px}
+.checkout-voucher-list{display:grid;gap:8px;max-height:300px;overflow-y:auto}
+.checkout-voucher{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;padding:11px;border:1px solid var(--st-sand);border-radius:12px;background:#fff}
+.checkout-voucher-copy{min-width:0}
+.checkout-voucher-copy b{display:block;font-size:13px}
+.checkout-voucher-copy small{display:block;color:var(--st-ink-2);font-size:11px;line-height:1.4;margin-top:3px}
+.checkout-voucher-code{display:inline-block;margin-top:5px;padding:3px 7px;border-radius:5px;background:var(--st-cream);font-size:10px;font-weight:800;letter-spacing:.05em}
+.checkout-voucher button{min-height:36px;padding:0 10px;border:0;border-radius:9px;background:var(--st-clay);color:#fff;font-size:12px;font-weight:700;white-space:nowrap}
+.checkout-voucher button:disabled{background:#e7e5e1;color:#8c8c8c;cursor:not-allowed}
+.checkout-voucher button.remove{border:1px solid var(--st-sand);background:#fff;color:var(--st-ink)}
+.checkout-voucher.unavailable{background:#f5f4f1;border-color:#e7e5e1;color:#777}
+.checkout-voucher.unavailable .checkout-voucher-copy small{color:#8a8a8a}
+.checkout-voucher-status{font-size:11px;color:#8a8a8a;margin:8px 0 0}
 
 @media(max-width:991.98px){
     .ct-head{display:none}
@@ -120,10 +148,12 @@ if($loggedIn){
 <input type="hidden" name="payment_method" id="postPayment">
 <input type="hidden" name="items" id="postItems">
 <input type="hidden" name="voucher_code" id="postVoucher">
+<input type="hidden" name="bundle_id" id="postBundleId">
 </form>
 
 <script>
 window.DB_PRODUCTS=<?php echo json_encode($dbProducts,JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT); ?>;
+window.DB_BUNDLES=<?php echo json_encode($dbBundles,JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT); ?>;
 window.LOGGED_IN=<?php echo $loggedIn?'true':'false'; ?>;
 window.DB_USER=<?php echo json_encode($user,JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT); ?>;
 window.DB_ADDRESSES=<?php echo json_encode($savedAddresses,JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT); ?>;
@@ -139,6 +169,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const peso=n=>'₱'+Number(n||0).toLocaleString('en-PH');
 const FREE=3000,SHIP=150;
 const products=Array.isArray(window.DB_PRODUCTS)?window.DB_PRODUCTS:[];
+const bundles=Array.isArray(window.DB_BUNDLES)?window.DB_BUNDLES:[];
 const addressBook=Array.isArray(window.DB_ADDRESSES)?window.DB_ADDRESSES:[];
 const read=(k,f)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?f:v}catch(e){return f}};
 const find=id=>products.find(p=>p.id===id)||null;
@@ -147,6 +178,12 @@ let cart=read('st_cart',[]);
 let voucherCode='';
 let voucherDiscount=0;
 let voucherMessage='';
+let checkoutVouchers=[];
+let bundlePurchase=null;
+
+try{
+    bundlePurchase=JSON.parse(sessionStorage.getItem('st_bundle_purchase')||'null');
+}catch(e){}
 
 cart=cart.map(i=>{
     const p=find(i.id);
@@ -161,7 +198,12 @@ cart=cart.map(i=>{
     };
 }).filter(Boolean);
 
-let sel=new Set(cart.map(i=>i.id));
+let activeBundle=bundlePurchase?bundles.find(bundle=>Number(bundle.id)===Number(bundlePurchase.id))||null:null;
+if(bundlePurchase&&!activeBundle){
+    sessionStorage.removeItem('st_bundle_purchase');
+    bundlePurchase=null;
+}
+let sel=new Set(activeBundle?activeBundle.product_codes:cart.map(i=>i.id));
 let buy=null;
 
 try{
@@ -169,7 +211,7 @@ try{
     sessionStorage.removeItem('st_buy');
 }catch(e){}
 
-if(buy)sel=new Set([buy]);
+if(buy&&!activeBundle)sel=new Set([buy]);
 
 const save=()=>{
     try{
@@ -185,6 +227,20 @@ const count=list=>list.reduce((t,i)=>t+i.qty,0);
 const shipFor=s=>s>=FREE?0:SHIP;
 
 save();
+
+function bundleTotals(list){
+    const regularSubtotal=sub(list);
+    if(!activeBundle)return{valid:true,subtotal:regularSubtotal,savings:0,quantity:0,unitPrice:0};
+    const codes=activeBundle.product_codes;
+    const items=codes.map(code=>list.find(item=>item.id===code));
+    if(items.some(item=>!item))return{valid:false,reason:'Keep every product in the bundle selected.'};
+    const quantity=Math.min(...items.map(item=>item.qty));
+    if(quantity<1)return{valid:false,reason:'The bundle needs at least one of each included product.'};
+    const regularUnitPrice=items.reduce((total,item)=>total+item.price,0);
+    const unitPrice=Math.min(Number(activeBundle.price),regularUnitPrice);
+    const savings=Math.max(0,(regularUnitPrice-unitPrice)*quantity);
+    return{valid:true,subtotal:regularSubtotal-savings,savings,quantity,unitPrice};
+}
 
 function canFulfill(list){
     if(!list.length)return{ok:false,reason:'Select at least one item.'};
@@ -211,6 +267,59 @@ function canFulfill(list){
     return{ok:true};
 }
 
+function renderCheckoutVouchers(){
+    const container=$('#checkoutVoucherList');
+    if(!container)return;
+    if(!checkoutVouchers.length){
+        container.innerHTML='<p class="checkout-voucher-status">No vouchers are currently available.</p>';
+        return;
+    }
+    container.innerHTML=checkoutVouchers.map(voucher=>{
+        const applied=voucher.valid&&voucher.code===voucherCode;
+        const offer=voucher.type==='percent'
+            ?`${Number(voucher.value)}% off${Number(voucher.cap)>0?` up to ${peso(voucher.cap)}`:''}`
+            :`${peso(voucher.value)} off`;
+        const ends=voucher.ends_at?` · Ends ${esc(String(voucher.ends_at).slice(0,10))}`:'';
+        const status=voucher.valid
+            ?`Save ${peso(voucher.discount)} with this order${ends}`
+            :`${esc(voucher.message||'Not applicable to this order')}${ends}`;
+        return`<article class="checkout-voucher${voucher.valid?'':' unavailable'}">
+            <div class="checkout-voucher-copy">
+                <b>${esc(voucher.label)} · ${esc(offer)}</b>
+                ${voucher.terms?`<small>${esc(voucher.terms)}</small>`:''}
+                <span class="checkout-voucher-code">${esc(voucher.code)}</span>
+                <small>${status}</small>
+            </div>
+            <button type="button" class="${applied?'remove':''}" ${applied?'data-remove-voucher':'data-voucher-code="'+esc(voucher.code)+'"'} ${voucher.valid?'':'disabled'}>${applied?'Remove voucher':voucher.valid?'Use voucher':'Unavailable'}</button>
+        </article>`;
+    }).join('');
+}
+
+async function loadCheckoutVouchers(){
+    const container=$('#checkoutVoucherList');
+    if(!container)return;
+    container.innerHTML='<p class="checkout-voucher-status">Checking vouchers for this order…</p>';
+    try{
+        const response=await fetch('php/apply_voucher.php',{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({
+                action:'list',
+                bundle_purchase:Boolean(activeBundle),
+                items:chosen().map(item=>({id:item.id,quantity:item.qty}))
+            })
+        });
+        const result=await response.json();
+        if(!response.ok||!Array.isArray(result.vouchers)){
+            throw new Error(result.message||'Unable to load vouchers right now.');
+        }
+        checkoutVouchers=result.vouchers;
+        renderCheckoutVouchers();
+    }catch(error){
+        container.innerHTML=`<p class="checkout-voucher-status">${esc(error.message||'Unable to load vouchers right now. Please try again.')}</p>`;
+    }
+}
+
 function drawCart(){
     const v=$('#vCart');
 
@@ -226,13 +335,22 @@ function drawCart(){
     }
 
     const ch=chosen();
-    const s=sub(ch);
+    const totals=bundleTotals(ch);
+    const s=totals.subtotal;
     const all=ch.length===cart.length&&cart.length>0;
     const need=FREE-s;
 
     v.innerHTML=`
+    ${activeBundle?`
+    <div class="ct-card p-3 mb-3">
+        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+            <div><b>${esc(activeBundle.title)} bundle</b><p class="mb-0 mt-1 text-secondary">All included products are selected together. Bundle price: ${peso(totals.unitPrice)} per set${totals.quantity>1?` · ${totals.quantity} sets`:''}${totals.savings>0?` · You save ${peso(totals.savings)}`:''}</p></div>
+            <button type="button" class="btn-link" data-act="exit-bundle">Exit bundle checkout</button>
+        </div>
+        ${totals.valid?'':`<p class="msg err mb-0 mt-2">${esc(totals.reason)}</p>`}
+    </div>`:''}
     <div class="ct-card ct-head">
-        <input type="checkbox" class="ck-all" ${all?'checked':''}>
+        <input type="checkbox" class="ck-all" ${all?'checked':''} ${activeBundle?'disabled':''}>
         <span>Product</span>
         <span class="ct-unit">Unit price</span>
         <span>Quantity</span>
@@ -246,7 +364,7 @@ function drawCart(){
 
         return`
         <div class="ct-card ct-row" data-id="${esc(i.id)}">
-            <input type="checkbox" class="ck-i" ${sel.has(i.id)?'checked':''}>
+            <input type="checkbox" class="ck-i" ${sel.has(i.id)?'checked':''} ${activeBundle?'disabled':''}>
 
             <div class="ct-prod">
                 <img src="${esc(i.img)}" alt="" onerror="this.style.visibility='hidden'">
@@ -271,11 +389,11 @@ function drawCart(){
 
     <div class="ct-card ct-bar">
         <label>
-            <input type="checkbox" class="ck-all" ${all?'checked':''}>
-            Select all (${cart.length})
+            <input type="checkbox" class="ck-all" ${all?'checked':''} ${activeBundle?'disabled':''}>
+            ${activeBundle?`${count(ch)} bundle items`:`Select all (${cart.length})`}
         </label>
 
-        <button type="button" class="btn-link" data-act="delsel">Delete selected</button>
+        ${activeBundle?'':`<button type="button" class="btn-link" data-act="delsel">Delete selected</button>`}
 
         <span class="ct-grow"></span>
 
@@ -284,7 +402,7 @@ function drawCart(){
             <strong>${peso(s)}</strong>
         </div>
 
-        <button type="button" class="btn-clay" data-act="go" style="padding:0 32px">Checkout</button>
+        <button type="button" class="btn-clay" data-act="go" style="padding:0 32px" ${totals.valid?'':'disabled'}>Checkout</button>
     </div>
 
     <p class="ct-ship" style="margin-top:12px">
@@ -311,7 +429,13 @@ function drawCheck(){
         return;
     }
 
-    const s=sub(ch);
+    const totals=bundleTotals(ch);
+    if(!totals.valid){
+        alert(totals.reason);
+        drawCart();
+        return;
+    }
+    const s=totals.subtotal;
     const sh=shipFor(s);
     const u=window.DB_USER||{};
     const defaultAddress=addressBook.find(a=>Number(a.is_default)===1)||addressBook[0]||null;
@@ -363,20 +487,27 @@ function drawCheck(){
                 </label>
             </div>
 
-            <div class="panel">
-                <h2>Products ordered</h2>
+            <div class="panel" id="checkoutItems">
+                <h2>${activeBundle?`${esc(activeBundle.title)} bundle`:'' || 'Products ordered'}</h2>
 
-                ${ch.map(i=>`
+                ${ch.map(i=>{
+                    const product=find(i.id);
+                    return`
                 <div class="ck-item">
                     <img src="${esc(i.img)}" alt="" onerror="this.style.visibility='hidden'">
 
-                    <div>
+                    <div class="ck-item-main">
                         <b>${esc(i.name)}</b>
-                        <small>${i.qty} × ${peso(i.price)}</small>
+                        <small>${activeBundle?'Bundle item':`${peso(i.price)} each`}</small>
+                        <div class="ck-qty" aria-label="Quantity for ${esc(i.name)}">
+                            <button type="button" data-check-act="minus" data-id="${esc(i.id)}" aria-label="Decrease ${esc(i.name)} quantity">−</button>
+                            <input class="ck-qty-input" type="number" min="1" max="${product?product.stock:i.qty}" step="1" value="${i.qty}" data-id="${esc(i.id)}" aria-label="Quantity for ${esc(i.name)}">
+                            <button type="button" data-check-act="plus" data-id="${esc(i.id)}" aria-label="Increase ${esc(i.name)} quantity" ${product&&i.qty>=product.stock?'disabled':''}>+</button>
+                        </div>
                     </div>
 
-                    <span>${peso(i.price*i.qty)}</span>
-                </div>`).join('')}
+                    <span>${activeBundle?'Included':peso(i.price*i.qty)}</span>
+                </div>`}).join('')}
             </div>
 
             <div class="panel ck-card">
@@ -425,24 +556,31 @@ function drawCheck(){
                 <h2>Order summary</h2>
 
                 <div class="pay-row">
-                    <span>Subtotal (${count(ch)} items)</span>
-                    <span>${peso(s)}</span>
+                    <span id="checkoutSubtotalLabel">${activeBundle?`Bundle total (${totals.quantity} ${totals.quantity===1?'set':'sets'})`:`Subtotal (${count(ch)} items)`}</span>
+                    <span id="checkoutSubtotal">${peso(s)}</span>
                 </div>
+                ${activeBundle?`<p class="small text-success mb-2" id="bundleSavings"${totals.savings>0?'':' hidden'}>Bundle discount included — you save ${peso(totals.savings)}.</p>`:''}
 
                 <div class="pay-row">
                     <span>Shipping</span>
-                    <span>${sh?peso(sh):'Free'}</span>
+                    <span id="checkoutShipping">${sh?peso(sh):'Free'}</span>
                 </div>
 
-                <form class="voucher-form" id="voucherForm">
+                ${activeBundle?`<p class="small text-secondary mt-3 mb-0">The bundle price is already discounted. Voucher codes cannot be combined with bundle purchases.</p>`:`<form class="voucher-form" id="voucherForm">
                     <input id="voucherCode" type="text" maxlength="40" autocomplete="off" placeholder="Voucher code" aria-label="Voucher code" value="${esc(voucherCode)}">
                     <button type="submit" id="applyVoucher">Apply</button>
                 </form>
-                <p id="voucherMessage" class="voucher-message" role="status" aria-live="polite">${esc(voucherMessage)}</p>
+                <p id="voucherMessage" class="voucher-message" role="status" aria-live="polite">${esc(voucherMessage)}</p>`}
+                <section class="checkout-vouchers" aria-labelledby="checkoutVouchersTitle">
+                    <h3 id="checkoutVouchersTitle">Your vouchers</h3>
+                    <p class="checkout-vouchers-intro">Applicable vouchers can be selected. Others are shown disabled.</p>
+                    <div class="checkout-voucher-list" id="checkoutVoucherList"><p class="checkout-voucher-status">Checking vouchers for this order…</p></div>
+                </section>
 
                 <div class="pay-row" id="voucherDiscountRow" ${voucherDiscount>0?'':'hidden'}>
                     <span>Voucher discount (${esc(voucherCode)})</span>
                     <span id="voucherDiscountValue">−${peso(voucherDiscount)}</span>
+                    <button type="button" class="btn-link" id="removeVoucher">Remove</button>
                 </div>
 
                 <div class="pay-row total">
@@ -462,6 +600,7 @@ function drawCheck(){
     </div>`;
 
     scrollTo(0,0);
+    loadCheckoutVouchers();
     if(voucherCode)validateVoucher(voucherCode);
 }
 
@@ -500,6 +639,7 @@ async function validateVoucher(code){
             message.textContent=voucherMessage;
             input.value=voucherCode;
         }
+        renderCheckoutVouchers();
         const discountRow=$('#voucherDiscountRow');
         discountRow.hidden=voucherDiscount<=0;
         if(voucherDiscount>0){
@@ -514,6 +654,7 @@ async function validateVoucher(code){
         voucherMessage='Unable to check the voucher right now. Please try again.';
         message.className='voucher-message error';
         message.textContent=voucherMessage;
+        renderCheckoutVouchers();
         $('#voucherDiscountRow').hidden=true;
         $('#checkoutTotal').textContent=peso(sub(chosen())+shipFor(sub(chosen())));
     }finally{
@@ -527,9 +668,11 @@ function place(){
     const ch=chosen();
     const check=canFulfill(ch);
     const err=m=>$('#err').textContent=m;
+    const totals=bundleTotals(ch);
 
     if(!check.ok)return err(check.reason);
-    if($('#voucherCode').value.trim().toUpperCase()!==voucherCode){
+    if(!totals.valid)return err(totals.reason);
+    if(!activeBundle&&$('#voucherCode').value.trim().toUpperCase()!==voucherCode){
         return err('Apply the voucher code before placing your order.');
     }
 
@@ -563,6 +706,7 @@ function place(){
     $('#postPayment').value=pm;
     $('#postItems').value=JSON.stringify(items);
     $('#postVoucher').value=voucherCode;
+    $('#postBundleId').value=activeBundle?String(activeBundle.id):'';
 
     $('#place').disabled=true;
     $('#place').textContent='Placing order...';
@@ -571,8 +715,42 @@ function place(){
 }
 
 document.addEventListener('click',e=>{
-    const b=e.target.closest('[data-act],#back,#place');
+    const b=e.target.closest('[data-act],[data-check-act],#back,#place,#removeVoucher,[data-voucher-code],[data-remove-voucher]');
     if(!b)return;
+
+    if(b.id==='removeVoucher'||b.hasAttribute('data-remove-voucher')){
+        voucherCode='';
+        voucherDiscount=0;
+        voucherMessage='Voucher removed.';
+        const input=$('#voucherCode');
+        if(input)input.value='';
+        const message=$('#voucherMessage');
+        if(message){
+            message.className='voucher-message';
+            message.textContent=voucherMessage;
+        }
+        $('#voucherDiscountRow').hidden=true;
+        $('#checkoutTotal').textContent=peso(sub(chosen())+shipFor(sub(chosen())));
+        renderCheckoutVouchers();
+        return;
+    }
+
+    if(b.hasAttribute('data-voucher-code')){
+        const code=b.dataset.voucherCode||'';
+        const input=$('#voucherCode');
+        if(input)input.value=code;
+        validateVoucher(code);
+        return;
+    }
+
+    if(b.dataset.act==='exit-bundle'){
+        activeBundle=null;
+        bundlePurchase=null;
+        sessionStorage.removeItem('st_bundle_purchase');
+        sel=new Set(cart.map(i=>i.id));
+        drawCart();
+        return;
+    }
 
     if(b.id==='back'){
         voucherCode='';
@@ -587,6 +765,23 @@ document.addEventListener('click',e=>{
 
     if(b.id==='place'){
         place();
+        return;
+    }
+
+    if(b.hasAttribute('data-check-act')){
+        const item=cart.find(cartItem=>cartItem.id===b.dataset.id);
+        const product=item?find(item.id):null;
+        if(!item||!product)return;
+        if(b.dataset.checkAct==='plus'){
+            if(item.qty>=product.stock)return;
+            item.qty++;
+        }else if(b.dataset.checkAct==='minus'){
+            item.qty=Math.max(1,item.qty-1);
+        }else{
+            return;
+        }
+        save();
+        refreshCheckoutQuantities();
         return;
     }
 
@@ -610,8 +805,13 @@ document.addEventListener('click',e=>{
     }else if(action==='del'&&item){
         if(!confirm('Remove this item?'))return;
 
+        if(activeBundle){
+            activeBundle=null;
+            bundlePurchase=null;
+            sessionStorage.removeItem('st_bundle_purchase');
+        }
         cart=cart.filter(i=>i!==item);
-        sel.delete(id);
+        sel=new Set(cart.map(i=>i.id));
     }else if(action==='delsel'){
         if(!sel.size)return;
         if(!confirm('Delete selected items?'))return;
@@ -621,6 +821,11 @@ document.addEventListener('click',e=>{
     }else if(action==='go'){
         if(!chosen().length){
             alert('Select at least one item.');
+            return;
+        }
+        const totals=bundleTotals(chosen());
+        if(!totals.valid){
+            alert(totals.reason);
             return;
         }
 
@@ -635,7 +840,15 @@ document.addEventListener('click',e=>{
 document.addEventListener('change',e=>{
     const t=e.target;
 
-    if(t.classList.contains('ck-all')){
+    if(t.matches('.ck-qty-input')){
+        const item=cart.find(cartItem=>cartItem.id===t.dataset.id);
+        const product=item?find(item.id):null;
+        if(!item||!product)return;
+        item.qty=Math.min(product.stock,Math.max(1,Math.floor(Number(t.value)||1)));
+        save();
+        refreshCheckoutQuantities();
+        return;
+    }else if(t.classList.contains('ck-all')){
         sel=t.checked?new Set(cart.map(i=>i.id)):new Set();
     }else if(t.classList.contains('ck-i')){
         const id=t.closest('.ct-row').dataset.id;
@@ -698,6 +911,46 @@ drawCart();
 
 if(buy&&chosen().length){
     drawCheck();
+}
+
+function refreshCheckoutQuantities(){
+    const ch=chosen();
+    const totals=bundleTotals(ch);
+    const subtotal=totals.subtotal;
+    const shipping=shipFor(subtotal);
+    const list=$('#checkoutItems');
+    if(list){
+        list.innerHTML=`<h2>${activeBundle?`${esc(activeBundle.title)} bundle`:'Products ordered'}</h2>${ch.map(i=>{
+            const product=find(i.id);
+            return`<div class="ck-item">
+                <img src="${esc(i.img)}" alt="" onerror="this.style.visibility='hidden'">
+                <div class="ck-item-main">
+                    <b>${esc(i.name)}</b>
+                    <small>${activeBundle?'Bundle item':`${peso(i.price)} each`}</small>
+                    <div class="ck-qty" aria-label="Quantity for ${esc(i.name)}">
+                        <button type="button" data-check-act="minus" data-id="${esc(i.id)}" aria-label="Decrease ${esc(i.name)} quantity">−</button>
+                        <input class="ck-qty-input" type="number" min="1" max="${product?product.stock:i.qty}" step="1" value="${i.qty}" data-id="${esc(i.id)}" aria-label="Quantity for ${esc(i.name)}">
+                        <button type="button" data-check-act="plus" data-id="${esc(i.id)}" aria-label="Increase ${esc(i.name)} quantity" ${product&&i.qty>=product.stock?'disabled':''}>+</button>
+                    </div>
+                </div>
+                <span>${activeBundle?'Included':peso(i.price*i.qty)}</span>
+            </div>`;
+        }).join('')}`;
+    }
+    const subtotalLabel=$('#checkoutSubtotalLabel');
+    if(subtotalLabel)subtotalLabel.textContent=activeBundle
+        ?`Bundle total (${totals.quantity} ${totals.quantity===1?'set':'sets'})`
+        :`Subtotal (${count(ch)} items)`;
+    if($('#checkoutSubtotal'))$('#checkoutSubtotal').textContent=peso(subtotal);
+    if($('#checkoutShipping'))$('#checkoutShipping').textContent=shipping?peso(shipping):'Free';
+    if($('#checkoutTotal'))$('#checkoutTotal').textContent=peso(Math.max(0,subtotal-voucherDiscount)+shipping);
+    const savings=$('#bundleSavings');
+    if(savings){
+        savings.hidden=totals.savings<=0;
+        savings.textContent=`Bundle discount included — you save ${peso(totals.savings)}.`;
+    }
+    if(voucherCode&&!activeBundle)validateVoucher(voucherCode);
+    else loadCheckoutVouchers();
 }
 
 })();

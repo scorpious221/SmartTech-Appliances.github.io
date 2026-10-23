@@ -6,12 +6,15 @@ requireAdminPost();
 $id=filter_var($_POST["id"]??null,FILTER_VALIDATE_INT);
 $name=trim($_POST["name"]??"");
 $price=filter_var($_POST["price"]??null,FILTER_VALIDATE_FLOAT);
+$onSale=($_POST["on_sale"]??"") === "1";
+$salePrice=$onSale?filter_var($_POST["sale_price"]??null,FILTER_VALIDATE_FLOAT):null;
+$isBestseller=($_POST["is_bestseller"]??"") === "1";
 $category=trim($_POST["category"]??"");
 $subcategory=trim($_POST["subcategory"]??"");
 $description=trim($_POST["description"]??"");
 $stock=filter_var($_POST["stock"]??null,FILTER_VALIDATE_INT);
 
-if($id===false||$id<=0||$name===""||$price===false||$price<=0||$category===""||$subcategory===""||$stock===false||$stock<0){
+if($id===false||$id<=0||$name===""||$price===false||$price<=0||($onSale&&($salePrice===false||$salePrice<=0||$salePrice>=$price))||$category===""||$subcategory===""||$stock===false||$stock<0){
     http_response_code(400);
     exit("Invalid product information.");
 }
@@ -48,10 +51,10 @@ try{
     $image=$primary["path"]??$oldImage;
     $update=$conn->prepare("
         UPDATE products
-        SET name=?,price=?,image=?,category=?,subcategory=?,description=?,stock=?
+        SET name=?,price=?,sale_price=?,is_bestseller=?,image=?,category=?,subcategory=?,description=?,stock=?
         WHERE id=?
     ");
-    $update->execute([$name,$price,$image,$category,$subcategory,$description,$stock,$id]);
+    $update->execute([$name,$price,$salePrice,$isBestseller?1:0,$image,$category,$subcategory,$description,$stock,$id]);
 
     if($primary&&$oldImage!==""&&$oldImage!==$primary["path"]){
         $orderStmt=$conn->prepare("SELECT COALESCE(MAX(sort_order),0)+1 FROM product_media WHERE product_id=?");

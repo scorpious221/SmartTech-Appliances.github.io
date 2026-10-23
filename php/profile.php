@@ -311,7 +311,8 @@ $stmt->execute([$userId]);
 $addresses=$stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $stmt=$conn->prepare("
-    SELECT o.id,o.order_number,o.status,o.grand_total,o.voucher_code,o.discount_amount,o.created_at,e.delivered_at,
+    SELECT o.id,o.order_number,o.status,o.grand_total,o.voucher_code,o.discount_amount,
+           o.cancellation_reason,o.cancellation_details,o.created_at,e.delivered_at,
            (e.delivered_at>=DATE_SUB(NOW(),INTERVAL 7 DAY)) AS refund_window_open
     FROM orders o
     LEFT JOIN order_delivery_events e ON e.order_id=o.id
@@ -322,7 +323,8 @@ $stmt->execute([$userId]);
 $orders=$stmt->fetchAll(PDO::FETCH_ASSOC);
 $stmt=$conn->prepare("
     SELECT oi.id AS order_item_id,oi.order_id,oi.product_id,oi.product_name,oi.price,oi.quantity,
-           p.product_code,pr.id AS review_id,rr.status AS refund_status
+           p.product_code,p.image AS product_image,pr.id AS review_id,
+           rr.status AS refund_status,rr.admin_note AS refund_admin_note
     FROM orders o
     JOIN order_items oi ON oi.order_id=o.id
     LEFT JOIN products p ON p.id=oi.product_id
@@ -384,12 +386,24 @@ function peso($v){
 
 <style>
 .account-order-items{display:grid;gap:10px;width:100%;margin-top:6px}
-.account-order-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 12px;padding:12px;border:1px solid var(--st-sand);border-radius:12px;background:#fff;font-size:14px}
+.account-order-item{display:grid;grid-template-columns:52px minmax(0,1fr) auto;align-items:center;gap:8px 12px;padding:12px;border:1px solid var(--st-sand);border-radius:12px;background:#fff;font-size:14px}
+.account-order-thumb{display:grid;width:52px;height:52px;place-items:center;overflow:hidden;border-radius:10px;background:#f1f2f6;color:var(--st-ink-2)}
+.account-order-thumb img{width:100%;height:100%;padding:4px;object-fit:contain}
+.account-order-thumb i{font-size:20px}
+.account-order-product{min-width:0}
+.account-order-product-name{display:block;line-height:1.45}
 .account-order-item-actions{grid-column:1/-1;display:flex;gap:12px;flex-wrap:wrap}
+.refund-admin-note{flex-basis:100%;padding:8px 10px;border-left:3px solid var(--st-clay);border-radius:0 8px 8px 0;background:var(--st-cream);color:var(--st-ink)!important;line-height:1.5}
 .account-refund{grid-column:1/-1;margin-top:4px}
 .account-refund summary{color:var(--st-clay);font-size:13px;font-weight:700;cursor:pointer}
 .account-refund form{max-width:540px;padding-top:10px}
 .account-refund textarea{display:block;width:100%;min-height:90px;margin-top:6px;padding:12px;border:1px solid var(--st-sand);border-radius:12px}
+.account-cancel{flex:1 1 100%;margin-top:4px}
+.account-cancel summary{color:#A3321A;font-size:13px;font-weight:700;cursor:pointer}
+.account-cancel form{max-width:540px;padding-top:10px}
+.account-cancel select,.account-cancel textarea{display:block;width:100%;margin-top:6px;padding:12px;border:1px solid var(--st-sand);border-radius:12px;background:#fff}
+.account-cancel textarea{min-height:84px}
+.account-cancel .cancel-details[hidden]{display:none}
 .account-order-item a,.order>a{color:var(--st-clay);font-weight:700}
 @media(max-width:991.98px){.account-order-item{font-size:13px}}
 .pf-back-label{display:none}
@@ -538,12 +552,54 @@ function peso($v){
 .settings-note form{margin-top:14px}
 .settings-note textarea{width:100%;margin:6px 0 14px;padding:12px;border:1px solid var(--st-sand);border-radius:10px}
 .settings-note .form-check{margin-top:10px}
+.orders .order{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:14px 18px;padding:20px;border-radius:18px;box-shadow:0 5px 18px rgba(15,42,36,.045)}
+.order-head{grid-column:1/-1;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.order-meta b{display:block;font-size:15px;letter-spacing:.01em}
+.order-meta small{font-size:12px;line-height:1.5}
+.order-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.order-status{display:inline-flex;align-items:center;min-height:30px;padding:5px 11px;border-radius:999px;background:#fff4e6;color:#9a5b00;font-size:12px;font-weight:800;white-space:nowrap}
+.order-status[data-status="Cancelled"]{background:#f3eeee;color:#766565}
+.order-status[data-status="Delivered"],.order-status[data-status="Completed"]{background:#e9f2ee;color:#1b6b4a}
+.order-track{display:inline-flex;min-height:38px;align-items:center;justify-content:center;padding:0 14px;border:1px solid var(--st-sand);border-radius:999px;color:var(--st-ink)!important;font-size:12px;font-weight:800;text-decoration:none}
+.order-track:hover{border-color:var(--st-ink);background:var(--st-cream)}
+.orders .account-order-items{grid-column:1/-1;margin-top:0;padding-top:14px;border-top:1px solid var(--st-sand)}
+.account-order-item{padding:12px 14px;background:#fff}
+.account-cancel{grid-column:1/-1;width:100%;margin:0;padding:12px 14px;border:1px solid #f0d8d2;border-radius:14px;background:#fffaf8}
+.account-cancel summary{display:flex;align-items:center;gap:9px;min-height:30px;color:#a3321a;list-style:none}
+.account-cancel summary::-webkit-details-marker{display:none}
+.account-cancel summary span{color:var(--st-ink-2);font-size:12px;font-weight:500}
+.account-cancel summary::before{content:"!";display:grid;width:22px;height:22px;place-items:center;border-radius:50%;background:#f8e5df;font-size:12px}
+.account-cancel summary::after{content:"+";margin-left:auto;font-size:20px;font-weight:500}
+.account-cancel[open] summary::after{content:"−"}
+.account-cancel form{max-width:none;padding-top:14px}
+.cancel-intro{margin:0 0 12px;color:var(--st-ink-2);font-size:13px}
+.cancel-reasons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0;padding:0;border:0}
+.cancel-reasons legend{margin-bottom:8px;font-size:13px;font-weight:800}
+.cancel-reason-option{display:flex;align-items:flex-start;gap:9px;min-height:44px;margin:0;padding:11px 12px;border:1px solid var(--st-sand);border-radius:11px;background:#fff;color:var(--st-ink);font-size:12px;line-height:1.4;cursor:pointer}
+.cancel-reason-option:has(input:checked){border-color:var(--st-clay);background:#fff5f1}
+.cancel-reason-option input{margin-top:1px;accent-color:var(--st-clay);flex:none}
+.cancel-details{display:block;margin-top:12px}
+.cancel-details textarea{min-height:88px}
+.cancel-note{display:flex;align-items:flex-start;gap:8px;margin:14px 0;color:var(--st-ink-2);font-size:12px;line-height:1.5}
+.cancel-note i{color:var(--st-clay);margin-top:1px}
+.cancel-confirm{display:inline-flex;min-height:42px;align-items:center;justify-content:center;gap:8px;padding:0 16px;border:0;border-radius:999px;background:#a3321a;color:#fff;font-size:13px;font-weight:800}
+.cancel-confirm:hover{background:#852a17}
+.cancel-confirm:focus-visible{outline:3px solid var(--st-gold);outline-offset:2px}
+.cancelled-reason{grid-column:1/-1;padding:10px 12px;border-radius:10px;background:#f5f4f1;color:#625e5b;font-size:12px}
 @media(max-width:767.98px){
     .purchase-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))}
     .pf-settings{top:16px;right:8px}
     .pf-settings summary{width:44px;height:44px;border-color:rgba(255,255,255,.35);background:rgba(255,255,255,.08);color:#fff}
     .pf-settings-menu{top:48px}
     .voucher-list{grid-template-columns:1fr}
+    .orders .order{grid-template-columns:minmax(0,1fr);gap:12px;padding:16px}
+    .order-head{grid-column:1;flex-direction:column;gap:10px}
+    .order-actions{width:100%;justify-content:space-between}
+    .orders .account-order-items,.account-cancel,.cancelled-reason{grid-column:1}
+    .account-order-item{grid-template-columns:46px minmax(0,1fr) auto;gap:8px}
+    .account-order-thumb{width:46px;height:46px}
+    .cancel-reasons{grid-template-columns:1fr}
+    .account-cancel{padding:11px}
 }
 </style>
 </head>
@@ -839,23 +895,67 @@ $purchaseCategory=$order["status"]==="Pending"?"pay":($order["status"]==="Proces
 ?>
 <article class="order" data-order-status="<?php echo e($order["status"]); ?>" data-order-category="<?php echo e($purchaseCategory); ?>">
 
-<div>
+<header class="order-head">
+<div class="order-meta">
 <b><?php echo e($order["order_number"]); ?></b>
 <small><?php echo e($order["created_at"]); ?> · <?php echo peso($order["grand_total"]); ?><?php if((float)$order["discount_amount"]>0): ?> · <?php echo e($order["voucher_code"]); ?> saved <?php echo peso($order["discount_amount"]); ?><?php endif; ?></small>
 </div>
 
-<span class="status">
-<?php echo e($order["status"]); ?>
+<div class="order-actions">
+<span class="order-status" data-status="<?php echo e($order["status"]); ?>">
+<?php echo $order["status"]==="Pending"?"Waiting for seller confirmation":($order["status"]==="Processing"?"Order confirmed · Processing":e($order["status"])); ?>
 </span>
+<a class="order-track" href="../track.php?order=<?php echo urlencode($order["order_number"]); ?>">Track order <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
+</div>
+</header>
 
-<a href="../track.php?order=<?php echo urlencode($order["order_number"]); ?>">Track order</a>
+<?php if($order["status"]==="Cancelled"&&!empty($order["cancellation_reason"])): ?>
+<div class="cancelled-reason"><b>Cancellation reason:</b> <?php echo e($order["cancellation_reason"]); ?><?php if(!empty($order["cancellation_details"])): ?> — <?php echo e($order["cancellation_details"]); ?><?php endif; ?></div>
+<?php endif; ?>
+
+<?php if(in_array($order["status"],["Pending","Processing"],true)): ?>
+<details class="account-cancel">
+<summary><b>Need to cancel?</b><span><?php echo $order["status"]==="Pending"?"This order is still waiting for seller confirmation.":"This confirmed order can still be cancelled before it ships."; ?></span></summary>
+<form method="POST" action="cancel_order.php">
+<input type="hidden" name="csrf_token" value="<?php echo e($csrfToken); ?>">
+<input type="hidden" name="order_id" value="<?php echo (int)$order["id"]; ?>">
+<p class="cancel-intro">Why do you want to cancel this order?</p>
+<fieldset class="cancel-reasons">
+<legend class="visually-hidden">Choose a cancellation reason</legend>
+<?php foreach(["Changed my mind","Ordered by mistake","Found a better price","Want to change my items or address","Delivery is taking too long","Payment issue","No longer need the item","Other"] as $reason): ?>
+<label class="cancel-reason-option">
+<input type="radio" name="reason" value="<?php echo e($reason); ?>" class="cancel-reason" required>
+<span><?php echo e($reason); ?></span>
+</label>
+<?php endforeach; ?>
+</fieldset>
+<label class="field cancel-details" hidden>Tell us more
+<textarea name="details" maxlength="500" placeholder="Please share the reason for cancelling."></textarea>
+</label>
+<p class="cancel-note"><i class="bi bi-info-circle" aria-hidden="true"></i><span>Cancelling takes effect immediately and cannot be undone. Orders can no longer be cancelled once shipped.</span></p>
+<button class="cancel-confirm" type="submit"><i class="bi bi-x-circle" aria-hidden="true"></i>Confirm cancellation</button>
+</form>
+</details>
+<?php endif; ?>
 
 <?php if(!empty($orderItems[(int)$order["id"]])): ?>
 <div class="account-order-items">
 <?php foreach($orderItems[(int)$order["id"]] as $orderItem): ?>
 <div class="account-order-item">
-<span><?php echo e($orderItem["product_name"]); ?> × <?php echo (int)$orderItem["quantity"]; ?></span>
-<span><?php echo peso((float)$orderItem["price"]*(int)$orderItem["quantity"]); ?></span>
+<div class="account-order-thumb">
+<?php if(!empty($orderItem["product_image"])):
+    $productImage=(string)$orderItem["product_image"];
+    $productImage=(strncmp($productImage,"images/",7)===0||strncmp($productImage,"uploads/",8)===0)
+        ? "../".$productImage
+        : "../images/".$productImage;
+?>
+<img src="<?php echo e($productImage); ?>" alt="" loading="lazy" onerror="this.hidden=true">
+<?php else: ?>
+<i class="bi bi-box-seam" aria-hidden="true"></i>
+<?php endif; ?>
+</div>
+<div class="account-order-product">
+<b class="account-order-product-name"><?php echo e($orderItem["product_name"]); ?> × <?php echo (int)$orderItem["quantity"]; ?></b>
 <div class="account-order-item-actions">
 <?php if($order["status"]==="Completed"&&!$orderItem["review_id"]&&!empty($orderItem["product_code"])): ?>
 <a href="../product.php?id=<?php echo urlencode($orderItem["product_code"]); ?>#reviews">Rate this product</a>
@@ -864,8 +964,13 @@ $purchaseCategory=$order["status"]==="Pending"?"pay":($order["status"]==="Proces
 <?php endif; ?>
 <?php if(!empty($orderItem["refund_status"])): ?>
 <span class="small">Return/refund request: <?php echo e($orderItem["refund_status"]); ?><?php echo $orderItem["refund_status"]==="Approved"?" — payment refund still needs manual processing.":""; ?></span>
+<?php if(!empty($orderItem["refund_admin_note"])): ?>
+<span class="small refund-admin-note"><b>Message from the seller:</b> <?php echo nl2br(e($orderItem["refund_admin_note"])); ?></span>
+<?php endif; ?>
 <?php endif; ?>
 </div>
+</div>
+<span><?php echo peso((float)$orderItem["price"]*(int)$orderItem["quantity"]); ?></span>
 <?php if(in_array($order["status"],["Delivered","Completed"],true)&&!empty($order["refund_window_open"])&&$orderItem["refund_status"]!=="Pending"): ?>
 <details class="account-refund">
 <summary>Request return / refund</summary>
@@ -1129,6 +1234,20 @@ document.querySelectorAll('.delete-address-form').forEach(form=>{
     form.addEventListener('submit',event=>{
         if(!confirm('Remove this saved delivery address?'))event.preventDefault();
     });
+});
+
+document.querySelectorAll('.account-cancel').forEach(details=>{
+    const reasons=details.querySelectorAll('.cancel-reason');
+    const more=details.querySelector('.cancel-details');
+    const textarea=more.querySelector('textarea');
+    const update=()=>{
+        const isOther=details.querySelector('.cancel-reason:checked')?.value==='Other';
+        more.hidden=!isOther;
+        textarea.required=isOther;
+        if(!isOther)textarea.value='';
+    };
+    reasons.forEach(reason=>reason.addEventListener('change',update));
+    update();
 });
 
 document.querySelectorAll('[data-edit-address]').forEach(button=>{

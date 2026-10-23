@@ -40,9 +40,9 @@ function saveAdminUpload(array $file):?array{
     }
     [$extension,$maxSize]=$types[$mime];
     if($size>$maxSize){
-        throw new RuntimeException(str_starts_with((string)$mime,"video/")?"Videos must be 30 MB or smaller.":"Images must be 8 MB or smaller.");
+        throw new RuntimeException(strpos((string)$mime,"video/")===0?"Videos must be 30 MB or smaller.":"Images must be 8 MB or smaller.");
     }
-    if(str_starts_with((string)$mime,"image/")){
+    if(strpos((string)$mime,"image/")===0){
         $imageInfo=getimagesize($tmp);
         if(!$imageInfo||($imageInfo["mime"]??"")!==$mime||(int)$imageInfo[0]>10000||(int)$imageInfo[1]>10000||(int)$imageInfo[0]*(int)$imageInfo[1]>40000000){
             throw new RuntimeException("The uploaded image is invalid.");
@@ -58,7 +58,7 @@ function saveAdminUpload(array $file):?array{
         throw new RuntimeException("Unable to save the uploaded media file.");
     }
     return[
-        "type"=>str_starts_with((string)$mime,"video/")?"video":"image",
+        "type"=>strpos((string)$mime,"video/")===0?"video":"image",
         "path"=>"uploads/store/".$filename,
         "size"=>$size
     ];
@@ -95,7 +95,7 @@ function saveAdminUploads(array $files):array{
 
 function deleteAdminUpload(string $path):void{
     $prefix="uploads/store/";
-    if(!str_starts_with($path,$prefix)||basename($path)!==substr($path,strlen($prefix)))return;
+    if(strncmp($path,$prefix,strlen($prefix))!==0||basename($path)!==substr($path,strlen($prefix)))return;
     $file=__DIR__."/../".$path;
     if(is_file($file))unlink($file);
 }

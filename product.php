@@ -6,7 +6,8 @@ function e($value){
     return htmlspecialchars((string)$value,ENT_QUOTES,"UTF-8");
 }
 
-function renderStars($rating){
+function renderStars($rating,$hasRatings=true){
+    if(!$hasRatings)return "★★★★★";
     $rating=(int)round((float)$rating);
     return str_repeat("★",$rating).str_repeat("☆",5-$rating);
 }
@@ -97,7 +98,7 @@ if($_SERVER["REQUEST_METHOD"]==="POST"){
 }
 
 $stmt=$conn->prepare("
-    SELECT id,product_code,name,price,image,category,subcategory,description,stock
+    SELECT id,product_code,name,price,sale_price,is_bestseller,image,category,subcategory,description,stock
     FROM products WHERE product_code=? LIMIT 1
 ");
 $stmt->execute([$productCode]);
@@ -136,12 +137,13 @@ if(!$product){
     $reviews=$stmt->fetchAll(PDO::FETCH_ASSOC);
 
     $stmt=$conn->prepare("
-        SELECT p.product_code,p.name,p.price,p.image,
-               COALESCE(AVG(pr.rating),0) AS average_rating
+        SELECT p.product_code,p.name,COALESCE(p.sale_price,p.price) AS price,
+               p.price AS regular_price,p.sale_price,p.image,
+               COALESCE(AVG(pr.rating),0) AS average_rating,COUNT(pr.id) AS review_count
         FROM products p
         LEFT JOIN product_reviews pr ON pr.product_id=p.id
         WHERE p.category=? AND p.id<>?
-        GROUP BY p.id,p.product_code,p.name,p.price,p.image
+        GROUP BY p.id,p.product_code,p.name,p.price,p.sale_price,p.image
         ORDER BY average_rating DESC,p.id DESC
         LIMIT 4
     ");
@@ -185,7 +187,7 @@ $storeCategories=$conn->query("SELECT DISTINCT category FROM products WHERE cate
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 <link href="styles.css" rel="stylesheet">
-<link href="shop.css?v=product-actions-2" rel="stylesheet">
+<link href="shop.css?v=product-ratings-2" rel="stylesheet">
 <style>
 .pd-wrap{max-width:1180px;margin:auto;padding:36px 24px 90px}
 .pd-crumbs{display:flex;gap:9px;align-items:center;margin-bottom:24px;color:var(--st-ink-2);font-size:13px}
@@ -198,8 +200,10 @@ $storeCategories=$conn->query("SELECT DISTINCT category FROM products WHERE cate
 .pd-kicker{color:var(--st-ink-2);font-size:13px}
 .pd-info h1{margin:8px 0 12px;font-size:clamp(26px,4vw,38px);line-height:1.2}
 .pd-rating{display:flex;align-items:center;gap:10px;margin-bottom:20px}
-.pd-stars{color:#ed941f;letter-spacing:2px}
+.pd-stars{color:#ed941f;letter-spacing:2px}.pd-stars.unrated{color:#26332f}
 .pd-price{font-size:30px;font-weight:800;margin:18px 0}
+.pd-price del{font-size:18px;color:var(--st-ink-2);font-weight:500;margin-left:8px}
+.pd-labels{display:flex;gap:8px;margin:16px 0 0}.pd-labels span{padding:5px 9px;border-radius:6px;background:#f4e6c8;color:#5c3b0a;font-size:11px;font-weight:800;text-transform:uppercase}.pd-labels .sale{background:#a3321a;color:#fff}
 .pd-stock{font-weight:700;font-size:13px;margin:0 0 18px}
 .pd-assurance{display:flex;gap:12px;flex-wrap:wrap;margin:22px 0;color:var(--st-ink-2);font-size:13px}
 .pd-assurance span{display:inline-flex;align-items:center;gap:6px}
@@ -227,7 +231,7 @@ $storeCategories=$conn->query("SELECT DISTINCT category FROM products WHERE cate
 .pd-related{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
 .pd-related a{color:inherit;text-decoration:none}
 .pd-related img{width:100%;height:180px;object-fit:contain;background:#f1f2f6;border-radius:12px;padding:12px}
-.pd-related b,.pd-related small{display:block;margin-top:8px}
+.pd-related b,.pd-related small{display:block;margin-top:8px}.pd-related .pd-stars{font-size:13px}.pd-related .pd-stars.unrated{color:#26332f}
 .pd-notice{padding:14px 16px;border-radius:12px;background:#eef6f1;color:#1b6b4a}
 .pd-empty{padding:24px;text-align:center;color:var(--st-ink-2)}
 @media(max-width:767.98px){
@@ -309,11 +313,17 @@ $storeCategories=$conn->query("SELECT DISTINCT category FROM products WHERE cate
 <span class="pd-kicker"><?php echo e(ucfirst($product["category"])); ?> · <?php echo e($product["subcategory"]); ?></span>
 <h1><?php echo e($product["name"]); ?></h1>
 <div class="pd-rating">
-<span class="pd-stars"><?php echo e(renderStars($ratingSummary["average_rating"])); ?></span>
+<span class="pd-stars<?php echo (int)$ratingSummary["review_count"]===0?" unrated":""; ?>"><?php echo e(renderStars($ratingSummary["average_rating"],(int)$ratingSummary["review_count"]>0)); ?></span>
 <b><?php echo number_format((float)$ratingSummary["average_rating"],1); ?></b>
 <a href="#reviews"><?php echo (int)$ratingSummary["review_count"]; ?> reviews</a>
 </div>
-<p class="pd-price">₱<?php echo number_format((float)$product["price"],2); ?></p>
+<?php if($product["sale_price"]!==null||$product["is_bestseller"]): ?>
+<div class="pd-labels">
+<?php if($product["sale_price"]!==null): ?><span class="sale">Sale</span><?php endif; ?>
+<?php if($product["is_bestseller"]): ?><span>Bestseller</span><?php endif; ?>
+</div>
+<?php endif; ?>
+<p class="pd-price">₱<?php echo number_format((float)($product["sale_price"]??$product["price"]),2); ?><?php if($product["sale_price"]!==null): ?> <del>₱<?php echo number_format((float)$product["price"],2); ?></del><?php endif; ?></p>
 <p class="pd-stock <?php echo (int)$product["stock"]>0?"text-success":"text-danger"; ?>">
 <?php echo (int)$product["stock"]>0?(int)$product["stock"]." in stock":"Currently out of stock"; ?>
 </p>
@@ -339,7 +349,7 @@ $storeCategories=$conn->query("SELECT DISTINCT category FROM products WHERE cate
 <div class="pd-summary">
 <div class="pd-score">
 <strong><?php echo number_format((float)$ratingSummary["average_rating"],1); ?></strong>
-<span class="pd-stars"><?php echo e(renderStars($ratingSummary["average_rating"])); ?></span>
+<span class="pd-stars<?php echo (int)$ratingSummary["review_count"]===0?" unrated":""; ?>"><?php echo e(renderStars($ratingSummary["average_rating"],(int)$ratingSummary["review_count"]>0)); ?></span>
 <small>Based on <?php echo (int)$ratingSummary["review_count"]; ?> verified reviews</small>
 </div>
 <div class="pd-bars">
@@ -399,7 +409,7 @@ $storeCategories=$conn->query("SELECT DISTINCT category FROM products WHERE cate
 <a href="product.php?id=<?php echo urlencode($item["product_code"]); ?>">
 <img src="<?php echo e($item["image"]); ?>" alt="" loading="lazy">
 <b><?php echo e($item["name"]); ?></b>
-<small>₱<?php echo number_format((float)$item["price"],2); ?> · <?php echo number_format((float)$item["average_rating"],1); ?> ★</small>
+<small><span class="pd-stars<?php echo (int)$item["review_count"]===0?" unrated":""; ?>"><?php echo e(renderStars($item["average_rating"],(int)$item["review_count"]>0)); ?></span> · <?php echo (int)$item["review_count"]?number_format((float)$item["average_rating"],1)." · ":"No ratings · "; ?>₱<?php echo number_format((float)$item["price"],2); ?></small>
 </a>
 <?php endforeach; ?>
 </div>
@@ -415,7 +425,7 @@ $storeCategories=$conn->query("SELECT DISTINCT category FROM products WHERE cate
 <a href="<?php echo e($accountHref); ?>"><i class="bi bi-person"></i><span>Account</span></a>
 </nav>
 <script>
-const PRODUCT=<?php echo empty($notFound)?json_encode(["id"=>$product["product_code"],"name"=>$product["name"],"price"=>(float)$product["price"],"img"=>$product["image"],"stock"=>(int)$product["stock"]],JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT):"null"; ?>;
+const PRODUCT=<?php echo empty($notFound)?json_encode(["id"=>$product["product_code"],"name"=>$product["name"],"price"=>(float)($product["sale_price"]??$product["price"]),"img"=>$product["image"],"stock"=>(int)$product["stock"]],JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT):"null"; ?>;
 const PRODUCT_GALLERY=<?php echo empty($notFound)?json_encode($productGallery,JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT):"[]"; ?>;
 document.querySelectorAll('[data-gallery-index]').forEach(button=>button.addEventListener('click',()=>{
     const media=PRODUCT_GALLERY[Number(button.dataset.galleryIndex)];

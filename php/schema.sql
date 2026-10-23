@@ -3,6 +3,8 @@ CREATE TABLE IF NOT EXISTS products (
     product_code VARCHAR(100) NOT NULL,
     name VARCHAR(255) NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
+    sale_price DECIMAL(10, 2) NULL DEFAULT NULL,
+    is_bestseller TINYINT(1) NOT NULL DEFAULT 0,
     image VARCHAR(512) NOT NULL DEFAULT '',
     category VARCHAR(100) NOT NULL,
     subcategory VARCHAR(100) NOT NULL DEFAULT '',
@@ -11,6 +13,10 @@ CREATE TABLE IF NOT EXISTS products (
     PRIMARY KEY (id),
     UNIQUE KEY uq_products_product_code (product_code)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+ALTER TABLE products
+    ADD COLUMN IF NOT EXISTS sale_price DECIMAL(10, 2) NULL DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS is_bestseller TINYINT(1) NOT NULL DEFAULT 0;
 
 CREATE TABLE IF NOT EXISTS product_media (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -187,6 +193,8 @@ CREATE TABLE IF NOT EXISTS orders (
     discount_amount DECIMAL(10, 2) NOT NULL DEFAULT 0,
     grand_total DECIMAL(10, 2) NOT NULL,
     status VARCHAR(30) NOT NULL DEFAULT 'Pending',
+    cancellation_reason VARCHAR(80) NULL,
+    cancellation_details VARCHAR(500) NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     UNIQUE KEY uq_orders_order_number (order_number),
@@ -195,7 +203,9 @@ CREATE TABLE IF NOT EXISTS orders (
 
 ALTER TABLE orders
     ADD COLUMN IF NOT EXISTS voucher_code VARCHAR(40) NULL,
-    ADD COLUMN IF NOT EXISTS discount_amount DECIMAL(10, 2) NOT NULL DEFAULT 0;
+    ADD COLUMN IF NOT EXISTS discount_amount DECIMAL(10, 2) NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS cancellation_reason VARCHAR(80) NULL,
+    ADD COLUMN IF NOT EXISTS cancellation_details VARCHAR(500) NULL;
 
 INSERT IGNORE INTO vouchers
     (code,label,description,discount_type,discount_value,minimum_spend,first_order_only,discount_cap,required_product_sets,active)

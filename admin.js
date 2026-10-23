@@ -201,18 +201,29 @@ function renderSalesChart(delivered){
     }
 
     const max=Math.max(1,...days.map(d=>d.total));
+    const compactPeso=value=>Number(value).toLocaleString('en-PH',{
+        style:'currency',
+        currency:'PHP',
+        notation:'compact',
+        maximumFractionDigits:1
+    });
 
     $('#salesChart').html(days.map(day=>{
-        const height=Math.max(4,Math.round(day.total/max*180));
+        const height=day.total>0?Math.max(3,day.total/max*100):0;
 
         return`
         <div class="ad-bar-wrap">
-            <div
-                class="ad-bar"
-                title="${esc(day.label)}: ${peso(day.total)}"
-                style="height:${height}px"
-            ></div>
-            <small>${esc(day.label)}</small>
+            <small class="ad-bar-value">${day.total>0?esc(compactPeso(day.total)):'—'}</small>
+            <div class="ad-bar-track">
+                <div
+                    class="ad-bar"
+                    role="img"
+                    aria-label="${esc(day.label)} sales ${peso(day.total)}"
+                    title="${esc(day.label)}: ${peso(day.total)}"
+                    style="height:${height}%"
+                ></div>
+            </div>
+            <small class="ad-bar-day">${esc(day.label)}</small>
         </div>`;
     }).join(''));
 }
@@ -307,6 +318,10 @@ function renderProducts(){
                     <div>
                         <b>${esc(p.name)}</b>
                         <small>${esc(p.id)}</small>
+                        ${p.salePrice!==null||p.isBestseller?`<div class="ad-prod-labels">
+                            ${p.salePrice!==null?`<span class="ad-status low">Sale · ${peso(p.salePrice)}</span>`:''}
+                            ${p.isBestseller?'<span class="ad-status in">Bestseller</span>':''}
+                        </div>`:''}
                     </div>
                 </div>
             </td>
@@ -317,7 +332,7 @@ function renderProducts(){
                 <small class="ad-muted">${esc(p.sub)}</small>
             </td>
 
-            <td><b>${peso(p.price)}</b></td>
+            <td>${p.salePrice!==null?`<b>${peso(p.salePrice)}</b><br><del class="ad-muted">${peso(p.price)}</del>`:`<b>${peso(p.price)}</b>`}</td>
 
             <td>
                 <div class="ad-stock-control">
@@ -414,10 +429,14 @@ function openProduct(product){
     $('#pCode').val(product?product.id:'');
     $('#pName').val(product?product.name:'');
     $('#pPrice').val(product?product.price:'');
+    $('#pSalePrice').val(product&&product.salePrice!==null?product.salePrice:'');
+    $('#pOnSale').prop('checked',Boolean(product&&product.salePrice!==null));
+    $('#pSalePrice').prop('disabled',!(product&&product.salePrice!==null));
+    $('#pBestseller').prop('checked',Boolean(product&&product.isBestseller));
     $('#pStock').val(product?product.stock:10);
     $('#pImage').val('');
     $('#pCategory').val(product?product.category:'household');
-    $('#pSub').val(product?product.sub:'');
+    populateProductSubcategories($('#pCategory').val(),product?product.sub:'');
     $('#pDesc').val(product?product.desc:'');
     $('#existingProductMedia').html(product?`
         <div class="ad-media-preview">
@@ -436,6 +455,19 @@ function openProduct(product){
     $('#formMsg').removeClass('err ok').text('');
 
     $('#productDialog')[0].showModal();
+}
+
+function populateProductSubcategories(category,selected=''){
+    const values=[...new Set(products
+        .filter(product=>product.category===category)
+        .map(product=>String(product.sub||'').trim())
+        .filter(Boolean))];
+    if(selected&&!values.includes(selected))values.push(selected);
+    const options=values.sort().map(value=>`<option value="${esc(value)}">${esc(value)}</option>`).join('');
+    $('#pSub')
+        .html(`<option value="">${category?'Choose a subcategory':'Choose a category first'}</option>${options}`)
+        .prop('disabled',!category)
+        .val(selected||'');
 }
 
 function closeProduct(){
@@ -460,7 +492,7 @@ function renderOrders(){
     ];
 
     $('#orderRows').html(orders.map(o=>`
-    <tr data-order-id="${o.id}">
+    <tr data-order-id="${o.id}" class="${o.status==='Cancelled'?'order-cancelled':''}">
 
         <td>
             <b>${esc(o.orderNumber)}</b>
@@ -474,6 +506,7 @@ function renderOrders(){
             ${esc(o.name||'Customer')}
             <br>
             <small class="ad-muted">${esc(o.phone||'')}</small>
+            ${o.cancellationReason?`<br><small class="ad-muted">Cancellation: ${esc(o.cancellationReason)}${o.cancellationDetails?' — '+esc(o.cancellationDetails):''}</small>`:''}
         </td>
 
         <td>${esc(o.paymentMethod||'')}</td>
@@ -483,13 +516,29 @@ function renderOrders(){
         <td>${esc(formatDate(o.createdAt))}</td>
 
         <td>
-            <select class="form-select ad-select order-status" ${o.status==='Completed'?'disabled':''}>
-                ${statuses.map(status=>`
-                <option value="${status}" ${o.status===status?'selected':''} ${status==='Completed'?'disabled':''}>
-                    ${status}
-                </option>
-                `).join('')}
-            </select>
+            <div class="order-status-editor">
+                <select class="form-select ad-select order-status" data-original-status="${esc(o.status)}" ${['Cancelled','Completed'].includes(o.status)?'disabled':''}>
+                    ${statuses.map(status=>`
+                    <option value="${status}" ${o.status===status?'selected':''} ${status==='Completed'||(status==='Cancelled'&&!['Pending','Processing'].includes(o.status))?'disabled':''}>
+                        ${status}
+                    </option>
+                    `).join('')}
+                </select>
+                <div class="order-cancel-fields" hidden>
+                    <label class="visually-hidden" for="cancelReason${Number(o.id)}">Cancellation reason</label>
+                    <select class="form-select ad-select order-cancel-reason" id="cancelReason${Number(o.id)}">
+                        <option value="">Choose cancellation reason</option>
+                        <option>Customer requested cancellation</option>
+                        <option>Unable to fulfill order</option>
+                        <option>Payment issue</option>
+                        <option>Item unavailable</option>
+                        <option>Other</option>
+                    </select>
+                    <textarea class="form-control order-cancel-details" rows="2" maxlength="500" placeholder="Explain the reason for cancellation" hidden></textarea>
+                </div>
+                <button class="ad-btn sm order-save" type="button" hidden>Save</button>
+                <small class="order-status-message" role="alert" hidden></small>
+            </div>
         </td>
 
     </tr>
@@ -652,56 +701,129 @@ function optionList(values,selected=[]){
     }).join('');
 }
 
+function updateBundlePricing(){
+    const selectedCodes=$('#contentFields .bundle-product-checkbox:checked').map((index,checkbox)=>checkbox.value).get();
+    const originalCents=selectedCodes.reduce((total,code)=>{
+        const product=products.find(entry=>entry.id===code);
+        return total+(product?Math.round((Number(product.price)||0)*100):0);
+    },0);
+    const preset=$('#contentFields .bundle-discount-preset').val();
+    const discountPercent=preset==='custom'
+        ?Number($('#contentFields .bundle-discount-custom').val())
+        :Number(preset);
+    const validDiscount=Number.isFinite(discountPercent)?Math.min(99.99999999,Math.max(0,discountPercent)):0;
+    const bundleCents=Math.round(originalCents*(100-validDiscount)/100);
+
+    $('#contentFields .bundle-original-price').val((originalCents/100).toFixed(2));
+    $('#contentFields .bundle-price').val((bundleCents/100).toFixed(2));
+    $('#contentFields [name="discount_percent"]').val(validDiscount.toFixed(8));
+    $('#contentFields .bundle-discount-custom')
+        .prop('disabled',preset!=='custom')
+        .prop('required',preset==='custom');
+    $('#contentFields .bundle-savings').text(`Save ${peso((originalCents-bundleCents)/100)} (${validDiscount.toFixed(2).replace(/\.?0+$/,'')}%)`);
+}
+
 function openContentEditor(type,item=null){
     const isNew=!item;
     const fields=[];
+    const inputPlaceholders={
+        title:'Enter a title',
+        button_label:'e.g. Shop now',
+        image_alt:'Describe the image for screen readers',
+        link_url:'e.g. products.php',
+        sort_order:'e.g. 1',
+        code:'e.g. SMART10',
+        label:'e.g. 10% off your order',
+        compare_at_price:'e.g. 0.00',
+        discount_value:'e.g. 10',
+        minimum_spend:'e.g. 2000.00',
+        discount_cap:'e.g. 500.00',
+        total_usage_limit:'e.g. 100',
+        per_customer_limit:'e.g. 1'
+    };
+    const areaPlaceholders={
+        description:'Write a short description',
+        bundle_sets:'One set per line, product codes separated by commas'
+    };
     const field=(label,name,control,full=false)=>fields.push(`<label class="field${full?' full':''}">${label}${control}</label>`);
-    const text=(name,value='',attrs='')=>`<input class="form-control" name="${name}" value="${esc(value)}" ${attrs}>`;
-    const area=(name,value='',attrs='')=>`<textarea class="form-control" name="${name}" rows="3" ${attrs}>${esc(value)}</textarea>`;
+    const text=(name,value='',attrs='')=>{
+        const placeholder=inputPlaceholders[name];
+        const placeholderAttr=placeholder&&!/\bplaceholder=/.test(attrs)?`placeholder="${esc(placeholder)}"`:'';
+        return`<input class="form-control" name="${name}" value="${esc(value)}" ${placeholderAttr} ${attrs}>`;
+    };
+    const area=(name,value='',attrs='')=>{
+        const placeholder=areaPlaceholders[name];
+        const placeholderAttr=placeholder&&!/\bplaceholder=/.test(attrs)?`placeholder="${esc(placeholder)}"`:'';
+        return`<textarea class="form-control" name="${name}" rows="3" ${placeholderAttr} ${attrs}>${esc(value)}</textarea>`;
+    };
     const select=(name,options,value)=>`<select class="form-select" name="${name}">${options}</select>`;
     const imageField=()=>{
         field('Cover image', 'image',`<input class="form-control" name="image" type="file" accept="image/jpeg,image/png,image/webp,image/gif" ${isNew?'required':''}><small class="ad-note">JPG, PNG, WebP, or GIF · up to 8 MB${item?.image?` · Current image: ${esc(item.image)}`:''}</small>`,true);
     };
     if(type==='promo'){
-        field('Title','title',text('title',item?.title||'','maxlength="180" required'));
+        field('Title','title',text('title',item?.title||'','placeholder="e.g. Weekend appliance deals" maxlength="180" required'));
         field('Button label','button_label',text('button_label',item?.button_label||'Shop now','maxlength="80" required'));
-        field('Description','description',area('description',item?.description||'','maxlength="2000" required'),true);
+        field('Description','description',area('description',item?.description||'','placeholder="Describe the promotion and its benefits." maxlength="2000" required'),true);
         field('Image description (accessibility)','image_alt',text('image_alt',item?.image_alt||'','maxlength="180"'));
         field('Link directly to a product (optional)','product_code',select('product_code',`<option value="">Use destination URL instead</option>${optionList(products.map(product=>({value:product.id,label:product.name+' · '+product.id})),item?.product_code?[item.product_code]:[])}`,item?.product_code||''));
         field('Button destination URL','link_url',text('link_url',item?.link_url||'products.php','maxlength="512" required'));
         imageField();
         field('Display order','sort_order',text('sort_order',item?.sort_order??(promos.length+1),'type="number" min="0" step="1"'));
     }else if(type==='bundle'){
-        field('Bundle name','title',text('title',item?.title||'','maxlength="180" required'));
-        field('Bundle description','description',area('description',item?.description||'','maxlength="500"'));
-        field('Included products','product_codes',select('product_codes[]',optionList(products.map(product=>({value:product.id,label:product.name+' · '+product.id})),item?.product_codes||[]),'').replace('<select ','<select multiple size="6" '),true);
-        field('Bundle price (₱)','price',text('price',item?.price??'','type="number" min="0.01" step="0.01" required'));
-        field('Original price (₱)','compare_at_price',text('compare_at_price',item?.compare_at_price??'','type="number" min="0" step="0.01"'));
+        field('Bundle name','title',text('title',item?.title||'','placeholder="e.g. Smart Kitchen Set" maxlength="180" required'));
+        field('Bundle description','description',area('description',item?.description||'','placeholder="Briefly describe the products included." maxlength="500"'));
+        const selectedCodes=item?.product_codes||[];
+        fields.push(`<div class="field full"><span>Included products</span><div class="bundle-product-list">${products.map(product=>`<label class="bundle-product-option"><input class="bundle-product-checkbox" type="checkbox" name="product_codes[]" value="${esc(product.id)}" ${selectedCodes.includes(product.id)?'checked':''}><span><b>${esc(product.name)}</b><small>${esc(product.id)} · ${peso(product.price)}</small></span></label>`).join('')}</div></div>`);
+        const initialDiscount=item&&Number(item.compare_at_price)>0
+            ?Math.min(99.99,Math.max(0,(1-Number(item.price)/Number(item.compare_at_price))*100))
+            :0;
+        const roundedDiscount=Number(initialDiscount.toFixed(8));
+        const discountOptions=[0,5,10,15,20].map(value=>({value:String(value),label:value===0?'No discount':`${value}%`}));
+        const presetDiscount=discountOptions.some(option=>Math.abs(Number(option.value)-roundedDiscount)<0.0000001);
+        discountOptions.push({value:'custom',label:'Custom percentage'});
+        fields.push(`<div class="field"><span>Discount percentage</span><div class="bundle-discount-controls">${select('discount_preset',optionList(discountOptions,[presetDiscount?String(roundedDiscount):'custom']),'').replace('<select class="form-select"','<select class="form-select bundle-discount-preset"')}<label class="bundle-custom-discount"><input class="form-control bundle-discount-custom" type="number" min="0" max="99.99999999" step="0.00000001" value="${presetDiscount?'':roundedDiscount.toFixed(8)}" placeholder="e.g. 10" aria-label="Custom discount percentage"><span>%</span></label></div><small class="ad-note bundle-savings"></small><input type="hidden" name="discount_percent" value=""></div>`);
+        field('Bundle price (₱)','price',`<input class="form-control bundle-price" name="price" value="${esc(item?.price??'')}" type="number" min="0.01" step="0.01" readonly required>`);
+        field('Original price (₱)','compare_at_price',`<input class="form-control bundle-original-price" name="compare_at_price" value="${esc(item?.compare_at_price??'')}" type="number" min="0" step="0.01" readonly>`);
         field('Destination URL','link_url',text('link_url',item?.link_url||'products.php','maxlength="512" required'));
         imageField();
         field('Display order','sort_order',text('sort_order',item?.sort_order??(bundles.length+1),'type="number" min="0" step="1"'));
     }else if(type==='category'){
-        field('Tile title','title',text('title',item?.title||'','maxlength="100" required'));
-        field('Short description','description',text('description',item?.description||'','maxlength="255"'));
-        field('Bootstrap icon name','icon',text('icon',item?.icon||'grid','maxlength="60" required'));
-        field('Product category','category',text('category',item?.category||'','list="contentCategoryOptions" maxlength="100" required')+`<datalist id="contentCategoryOptions">${optionList(productCategories)}</datalist>`);
-        field('Subcategory (optional)','subcategory',text('subcategory',item?.subcategory||'','maxlength="120"'));
+        const iconOptions=[
+            ['grid','Grid'],['house','House'],['cup-hot','Kitchen'],['controller','Gaming controller'],
+            ['display','Display'],['speaker','Speaker'],['camera-video','Video camera'],['lightbulb','Light bulb'],
+            ['shield-check','Shield check'],['plug','Plug'],['pc-display','Computer display'],
+            ['headphones','Headphones'],['wifi','Wi-Fi'],['lamp','Lamp'],['tools','Tools'],['box-seam','Box']
+        ].map(([value,label])=>({value,label:`${label} · ${value}`}));
+        if(item?.icon&&!iconOptions.some(option=>option.value===item.icon)){
+            iconOptions.push({value:item.icon,label:`Current icon · ${item.icon}`});
+        }
+        const categories=[...new Set([...productCategories,item?.category||''].filter(Boolean))].sort();
+        field('Tile title','title',text('title',item?.title||'','placeholder="e.g. Smart Home" maxlength="100" required'));
+        field('Short description','description',text('description',item?.description||'','placeholder="e.g. Lighting, hubs & automation" maxlength="255"'));
+        field('Bootstrap icon','icon',select('icon',`<option value="">Choose a Bootstrap icon</option>${optionList(iconOptions,item?.icon?[item.icon]:[])}`,item?.icon||'').replace('<select class="form-select"','<select class="form-select" required'));
+        field('Product category','category',select('category',`<option value="">Choose a product category</option>${optionList(categories,item?.category?[item.category]:[])}`,item?.category||'').replace('<select class="form-select"','<select class="form-select" required'));
+        const initialSubcategories=products
+            .filter(product=>product.category===item?.category)
+            .map(product=>String(product.sub||'').trim())
+            .filter(Boolean);
+        if(item?.subcategory&&!initialSubcategories.includes(item.subcategory))initialSubcategories.push(item.subcategory);
+        field('Subcategory (optional)','subcategory',select('subcategory',`<option value="">${item?.category?'No subcategory (all products)':'Choose a category first'}</option>${optionList([...new Set(initialSubcategories)].sort(),item?.subcategory?[item.subcategory]:[])}`,item?.subcategory||'').replace('<select class="form-select"','<select class="form-select" data-category-subcategory'+(item?.category?'':' disabled')));
         field('Tile size','layout_class',select('layout_class',optionList([{value:'',label:'Standard'},{value:'wide',label:'Wide'},{value:'tall',label:'Tall'},{value:'wide tall',label:'Wide and tall'}]),item?.layout_class||''));
         imageField();
         field('Display order','sort_order',text('sort_order',item?.sort_order??(homeCategories.length+1),'type="number" min="0" step="1"'));
     }else if(type==='deal'){
-        field('Featured product','product_code',select('product_code',optionList(products.map(product=>({value:product.id,label:product.name+' · '+product.id})),item?[item.product_code]:[]),item?.product_code||''));
-        field('Deal title','title',text('title',item?.title||'','maxlength="180" required'));
-        field('Deal description','description',area('description',item?.description||'','maxlength="2000" required'),true);
+        field('Featured product','product_code',select('product_code',`<option value="">Choose a featured product</option>${optionList(products.map(product=>({value:product.id,label:product.name+' · '+product.id})),item?[item.product_code]:[])}`,item?.product_code||''));
+        field('Deal title','title',text('title',item?.title||'','placeholder="e.g. Deal of the Month" maxlength="180" required'));
+        field('Deal description','description',area('description',item?.description||'','placeholder="Describe the featured product and deal." maxlength="2000" required'),true);
         field('Original price (₱)','compare_at_price',text('compare_at_price',item?.compare_at_price??0,'type="number" min="0" step="0.01"'));
-        field('Deal ends at (optional)','ends_at',text('ends_at',item?.ends_at?item.ends_at.replace(' ','T').slice(0,16):'','type="datetime-local"'));
+        field('Deal ends at (optional)','ends_at',text('ends_at',item?.ends_at?item.ends_at.replace(' ','T').slice(0,16):'','type="datetime-local"')+'<small class="ad-note">Choose a date and time, or leave empty for no end date.</small>');
         fields.push(`<label class="field full">Deal image override (optional)<input class="form-control" name="image" type="file" accept="image/jpeg,image/png,image/webp,image/gif"><small class="ad-note">Leave empty to keep the current deal image. Image uploads are limited to 8 MB.</small></label>`);
     }else if(type==='demo_video'){
         fields.push(`<label class="field full">New homepage demo video<input class="form-control" name="video" type="file" accept="video/mp4,video/webm,video/ogg" required><small class="ad-note">MP4, WebM, or OGG · maximum 30 MB. Replacing the video updates the homepage Watch Demo button.</small>${item?.video_path?`<small class="ad-note">Current video: ${esc(item.video_path)}</small>`:''}</label>`);
     }else{
         field('Voucher code','code',text('code',item?.code||'','maxlength="40" pattern="[A-Za-z0-9_-]+" required'));
         field('Offer title','label',text('label',item?.label||'','maxlength="180" required'));
-        field('Terms and conditions','description',area('description',item?.description||'','maxlength="500"'),true);
+        field('Terms and conditions','description',area('description',item?.description||'','placeholder="Add any limits or conditions for this voucher." maxlength="500"'),true);
         field('Discount type','discount_type',select('discount_type',optionList([{value:'fixed',label:'Fixed amount'},{value:'percent',label:'Percentage'}]),item?.discount_type||'fixed'));
         field('Discount value','discount_value',text('discount_value',item?.discount_value??'','type="number" min="0.01" step="0.01" required'));
         field('Minimum spend (₱)','minimum_spend',text('minimum_spend',item?.minimum_spend??0,'type="number" min="0" step="0.01"'));
@@ -709,8 +831,8 @@ function openContentEditor(type,item=null){
         field('Eligible products','eligible_products',select('eligible_products[]',optionList(products.map(product=>({value:product.id,label:product.name+' · '+product.id})),item?.eligible_products||[]),'').replace('<select ','<select multiple size="6" '));
         field('Eligible categories','eligible_categories',select('eligible_categories[]',optionList(productCategories,item?.eligible_categories||[]),'').replace('<select ','<select multiple size="5" '));
         field('Required bundle sets','bundle_sets',area('bundle_sets',(item?.required_product_sets||[]).map(set=>set.join(', ')).join('\n'),'placeholder="One set per line, product codes separated by commas"'));
-        field('Starts at','starts_at',text('starts_at',item?.starts_at?item.starts_at.replace(' ','T').slice(0,16):'','type="datetime-local"'));
-        field('Ends at','ends_at',text('ends_at',item?.ends_at?item.ends_at.replace(' ','T').slice(0,16):'','type="datetime-local"'));
+        field('Starts at','starts_at',text('starts_at',item?.starts_at?item.starts_at.replace(' ','T').slice(0,16):'','type="datetime-local"')+'<small class="ad-note">Choose a date and time, or leave empty to start immediately.</small>');
+        field('Ends at','ends_at',text('ends_at',item?.ends_at?item.ends_at.replace(' ','T').slice(0,16):'','type="datetime-local"')+'<small class="ad-note">Choose a date and time, or leave empty for no end date.</small>');
         field('Total uses limit (optional)','total_usage_limit',text('total_usage_limit',item?.total_usage_limit??'','type="number" min="1" step="1"'));
         field('Uses per customer (optional)','per_customer_limit',text('per_customer_limit',item?.per_customer_limit??'','type="number" min="1" step="1"'));
         field('First order only','first_order_only',`<input type="checkbox" name="first_order_only" value="1" ${Number(item?.first_order_only)?'checked':''}>`);
@@ -720,6 +842,22 @@ function openContentEditor(type,item=null){
     $('#contentId').val(item?.id||'');
     $('#contentAction').val('save_'+type);
     $('#contentFields').html(fields.join(''));
+    if(type==='category'){
+        const $category=$('#contentFields [name="category"]');
+        const $subcategory=$('#contentFields [name="subcategory"]');
+        $category.on('change',function(){
+            const category=String($(this).val()||'');
+            const values=[...new Set(products
+                .filter(product=>product.category===category)
+                .map(product=>String(product.sub||'').trim())
+                .filter(Boolean))].sort();
+            $subcategory
+                .html(`<option value="">${category?'No subcategory (all products)':'Choose a category first'}</option>${optionList(values)}`)
+                .prop('disabled',!category)
+                .val('');
+        });
+    }
+    if(type==='bundle')updateBundlePricing();
     $('#contentMessage').removeClass('err ok').text('');
     $('#saveContent').prop('disabled',false).text('Save changes');
     $('#contentDialog')[0].showModal();
@@ -754,6 +892,16 @@ $('#productPager').on('click','.page-link',function(){
 /* PRODUCT DIALOG */
 $('#addProduct').on('click',function(){
     openProduct(null);
+});
+
+$('#pOnSale').on('change',function(){
+    const enabled=$(this).is(':checked');
+    $('#pSalePrice').prop('disabled',!enabled);
+    if(!enabled)$('#pSalePrice').val('');
+});
+
+$('#pCategory').on('change',function(){
+    populateProductSubcategories(String($(this).val()||''));
 });
 
 $('#closeDialog,#cancelDialog').on('click',function(){
@@ -796,6 +944,8 @@ $('#productRows').on('click','[data-delete]',function(){
 $('#productForm').on('submit',function(e){
     const name=$.trim($('#pName').val());
     const price=Number($('#pPrice').val());
+    const onSale=$('#pOnSale').is(':checked');
+    const salePrice=Number($('#pSalePrice').val());
     const stock=Number($('#pStock').val());
     const image=$('#pImage')[0].files.length>0;
     const sub=$.trim($('#pSub').val());
@@ -807,6 +957,7 @@ $('#productForm').on('submit',function(e){
         !sub||
         !Number.isFinite(price)||
         price<=0||
+        (onSale&&(!Number.isFinite(salePrice)||salePrice<=0||salePrice>=price))||
         !Number.isFinite(stock)||
         stock<0
     ){
@@ -815,7 +966,7 @@ $('#productForm').on('submit',function(e){
         $('#formMsg')
             .removeClass('ok')
             .addClass('err')
-            .text('Please complete the product name, price, stock and subcategory. Choose a main image for new products.');
+            .text('Complete the product details and choose a main image for new products. Sale price must be greater than zero and lower than the regular price.');
 
         return;
     }
@@ -831,13 +982,82 @@ $('#productForm').on('submit',function(e){
 
 /* ORDER STATUS */
 $('#orderRows').on('change','.order-status',function(){
-    const orderId=$(this).closest('tr').data('order-id');
-    const status=$(this).val();
+    const row=$(this).closest('tr');
+    const status=this.value;
+    const cancelFields=row.find('.order-cancel-fields');
+    const save=row.find('.order-save');
+    const message=row.find('.order-status-message');
+    cancelFields.prop('hidden',status!=='Cancelled');
+    save.prop('hidden',status===this.dataset.originalStatus);
+    message.prop('hidden',true).text('');
+    if(status!=='Cancelled'){
+        row.find('.order-cancel-reason').val('');
+        row.find('.order-cancel-details').val('').prop('hidden',true);
+    }
+});
 
-    phpPost('php/update_order_status.php',{
-        id:orderId,
-        status:status
+$('#orderRows').on('change','.order-cancel-reason',function(){
+    const row=$(this).closest('tr');
+    const isOther=this.value==='Other';
+    row.find('.order-cancel-details')
+        .prop('hidden',!isOther)
+        .prop('required',isOther);
+});
+
+$('#orderRows').on('click','.order-save',async function(){
+    const button=$(this);
+    const row=button.closest('tr');
+    const select=row.find('.order-status');
+    const status=select.val();
+    const reason=row.find('.order-cancel-reason').val();
+    const details=row.find('.order-cancel-details').val().trim();
+    const message=row.find('.order-status-message');
+
+    message.prop('hidden',true).text('');
+    if(status==='Cancelled'&&(!reason||(reason==='Other'&&!details))){
+        message.text(reason==='Other'?'Please explain the cancellation reason.':'Please choose a cancellation reason.')
+            .prop('hidden',false);
+        if(!reason)row.find('.order-cancel-reason').trigger('focus');
+        else row.find('.order-cancel-details').trigger('focus');
+        return;
+    }
+
+    button.prop('disabled',true).text('Saving…');
+    const body=new URLSearchParams({
+        id:String(row.data('order-id')),
+        status,
+        reason,
+        details,
+        csrf_token:window.ADMIN_CSRF_TOKEN||''
     });
+    try{
+        const response=await fetch('php/update_order_status.php',{
+            method:'POST',
+            headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8','Accept':'application/json'},
+            body:body.toString()
+        });
+        let result;
+        try{
+            result=await response.json();
+        }catch(error){
+            throw new Error('The server returned an unexpected response. Refresh and try again.');
+        }
+        if(!response.ok||!result.success){
+            throw new Error(result.message||'Unable to update this order status.');
+        }
+        const order=orders.find(item=>Number(item.id)===Number(row.data('order-id')));
+        if(order){
+            order.status=status;
+            if(status==='Cancelled'){
+                order.cancellationReason=reason;
+                order.cancellationDetails=details;
+            }
+        }
+        renderOrders();
+    }catch(error){
+        message.text(error.message||'Unable to update this order status.').prop('hidden',false);
+        button.prop('disabled',false).text('Save');
+    }
 });
 
 $('#refundRows').on('click','[data-refund-status]',function(){
@@ -872,6 +1092,10 @@ $(document).on('click','[data-content-edit]',function(){
 
 $(document).on('click','[data-content-close]',function(){
     $('#contentDialog')[0].close();
+});
+
+$(document).on('change input','.bundle-product-checkbox,.bundle-discount-preset,.bundle-discount-custom',function(){
+    updateBundlePricing();
 });
 
 $(document).on('click','[data-content-delete]',async function(){

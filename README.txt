@@ -45,3 +45,8 @@ STOCK RULES
 0 = Out of Stock
 
 When an order is placed, stock is deducted automatically. Orders are saved to st_orders. Admin can change status from Pending -> Processing -> Shipped -> Delivered. Track Order reads that real status.
+
+PRODUCT SALE AND BESTSELLER LABELS
+- In the PHP admin dashboard, edit a product to toggle Bestseller or On Sale.
+- On Sale requires a sale price lower than the regular price. The sale price is used in the storefront, cart, voucher calculation, and checkout.
+- If your database already exists, apply the products table column updates from php/schema.sql before using these controls.

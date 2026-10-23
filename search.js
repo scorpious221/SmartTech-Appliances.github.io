@@ -163,6 +163,11 @@ function render(){
         .split(/\s+/)
         .filter(Boolean);
 
+    if(!tokens.length){
+        res.innerHTML='';
+        return;
+    }
+
     const list=catalog().filter(p=>{
         const hay=(
             p.name+' '+

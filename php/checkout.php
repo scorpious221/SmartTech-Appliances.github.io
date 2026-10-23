@@ -19,6 +19,8 @@ $phone=trim($_POST["phone"]??"");
 $address=trim($_POST["address"]??"");
 $paymentMethod=trim($_POST["payment_method"]??"");
 $voucherCode=strtoupper(trim($_POST["voucher_code"]??""));
+$rawBundleId=trim((string)($_POST["bundle_id"]??""));
+$bundleId=$rawBundleId===""?0:filter_var($rawBundleId,FILTER_VALIDATE_INT);
 $items=json_decode($_POST["items"]??"[]",true);
 
 function failCheckout($message){
@@ -43,6 +45,14 @@ $allowedPayments=["COD","GCash","Maya","Card"];
 
 if(!in_array($paymentMethod,$allowedPayments,true)){
     failCheckout("Invalid payment method.");
+}
+
+if($bundleId===false||$bundleId<0){
+    failCheckout("Invalid bundle selection.");
+}
+
+if($bundleId>0&&$voucherCode!==""){
+    failCheckout("Voucher codes cannot be combined with a bundle purchase.");
 }
 
 if(!is_array($items)||!count($items)){
@@ -74,12 +84,33 @@ try{
     if(!$userStmt->fetchColumn()){
         throw new Exception("Your account could not be verified. Please sign in again.");
     }
+    $bundle=null;
+    $bundleCodes=[];
+    if($bundleId>0){
+        $bundleStmt=$conn->prepare("SELECT title,product_codes,price FROM home_bundles WHERE id=? AND active=1 FOR UPDATE");
+        $bundleStmt->execute([$bundleId]);
+        $bundle=$bundleStmt->fetch(PDO::FETCH_ASSOC);
+        if(!$bundle){
+            throw new Exception("This bundle is no longer available. Please refresh the shop and try again.");
+        }
+        $decodedCodes=json_decode((string)$bundle["product_codes"],true);
+        if(!is_array($decodedCodes)||!$decodedCodes){
+            throw new Exception("This bundle does not have a valid product list.");
+        }
+        $bundleCodes=array_values(array_unique(array_map("strval",$decodedCodes)));
+        $submittedCodes=array_keys($cleanItems);
+        sort($bundleCodes);
+        sort($submittedCodes);
+        if($bundleCodes!==$submittedCodes){
+            throw new Exception("A bundle purchase must include every product in the bundle and no unrelated items.");
+        }
+    }
     $orderCountStmt=$conn->prepare("SELECT COUNT(*) FROM orders WHERE user_id=?");
     $orderCountStmt->execute([$userId]);
     $firstOrder=(int)$orderCountStmt->fetchColumn()===0;
 
     $productStmt=$conn->prepare("
-        SELECT id,product_code,name,price,image,category,stock
+        SELECT id,product_code,name,COALESCE(sale_price,price) AS price,image,category,stock
         FROM products
         WHERE product_code=?
         FOR UPDATE
@@ -118,6 +149,54 @@ try{
             "quantity"=>$quantity,
             "image"=>$product["image"]
         ];
+    }
+
+    $bundleDiscount=0.0;
+    if($bundle){
+        $bundleQuantity=min(array_map(static function(string $code)use($cleanItems):int{
+            return(int)$cleanItems[$code];
+        },$bundleCodes));
+        if($bundleQuantity<1){
+            throw new Exception("Add at least one of every product in the bundle.");
+        }
+        $regularSubtotal=$subtotal;
+        $regularUnitCents=array_map(static function(array $item):int{
+            return(int)round((float)$item["price"]*100);
+        },$orderItems);
+        $regularUnitTotalCents=array_sum($regularUnitCents);
+        if($regularUnitTotalCents<=0){
+            throw new Exception("The products in this bundle do not have valid prices.");
+        }
+        $bundleUnitCents=min((int)round((float)$bundle["price"]*100),$regularUnitTotalCents);
+        $allocatedCents=0;
+        $pricedBundleItems=[];
+        foreach($orderItems as $index=>$item){
+            $componentCents=$index===count($orderItems)-1
+                ?$bundleUnitCents-$allocatedCents
+                :(int)floor($bundleUnitCents*$regularUnitCents[$index]/$regularUnitTotalCents);
+            $allocatedCents+=$componentCents;
+            $includedQuantity=min((int)$item["quantity"],$bundleQuantity);
+            $pricedBundleItems[]=[
+                "product_id"=>$item["product_id"],
+                "product_code"=>$item["product_code"],
+                "product_name"=>$item["product_name"],
+                "price"=>$componentCents/100,
+                "category"=>$item["category"],
+                "quantity"=>$includedQuantity,
+                "image"=>$item["image"]
+            ];
+            $extraQuantity=(int)$item["quantity"]-$includedQuantity;
+            if($extraQuantity>0){
+                $item["quantity"]=$extraQuantity;
+                $pricedBundleItems[]=$item;
+            }
+        }
+        $orderItems=$pricedBundleItems;
+        $subtotal=0.0;
+        foreach($orderItems as $item){
+            $subtotal+=(float)$item["price"]*(int)$item["quantity"];
+        }
+        $bundleDiscount=round(max(0,$regularSubtotal-$subtotal),2);
     }
 
     $voucherDiscount=0.0;
@@ -222,6 +301,8 @@ try{
         "shippingFee"=>$shippingFee,
         "voucherCode"=>$voucherCode,
         "discountAmount"=>$voucherDiscount,
+        "bundleTitle"=>$bundle?(string)$bundle["title"]:"",
+        "bundleDiscount"=>$bundleDiscount,
         "grandTotal"=>$grandTotal,
         "status"=>"Pending",
         "createdAt"=>date("Y-m-d H:i:s"),

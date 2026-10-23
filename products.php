@@ -1,14 +1,28 @@
 <?php
 require_once "php/database.php";
 
-$stmt=$conn->query("SELECT * FROM products ORDER BY id ASC");
+$stmt=$conn->query("
+    SELECT p.*,COALESCE(r.average_rating,0) AS average_rating,COALESCE(r.review_count,0) AS review_count
+    FROM products p
+    LEFT JOIN (
+        SELECT product_id,AVG(rating) AS average_rating,COUNT(*) AS review_count
+        FROM product_reviews
+        GROUP BY product_id
+    ) r ON r.product_id=p.id
+    ORDER BY p.id ASC
+");
 $products=[];
 
 while($row=$stmt->fetch(PDO::FETCH_ASSOC)){
     $products[]=[
         "id"=>$row["product_code"],
         "name"=>$row["name"],
-        "price"=>(float)$row["price"],
+        "price"=>(float)($row["sale_price"]??$row["price"]),
+        "regularPrice"=>(float)$row["price"],
+        "isSale"=>$row["sale_price"]!==null,
+        "isBestseller"=>(bool)$row["is_bestseller"],
+        "averageRating"=>(float)$row["average_rating"],
+        "reviewCount"=>(int)$row["review_count"],
         "img"=>$row["image"],
         "category"=>$row["category"],
         "sub"=>$row["subcategory"],
@@ -32,8 +46,8 @@ $currentCategory=in_array($requestedCategory,$categories,true)?$requestedCategor
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-<link href="styles.css" rel="stylesheet">
-<link href="shop.css?v=product-actions-2" rel="stylesheet">
+<link href="styles.css?v=product-ratings-2" rel="stylesheet">
+<link href="shop.css?v=product-ratings-2" rel="stylesheet">
 </head>
 
 <body>
@@ -259,8 +273,8 @@ window.INITIAL_CATEGORY=<?php echo json_encode($currentCategory,JSON_UNESCAPED_S
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="products.js?v=dynamic-categories-1"></script>
-<script src="shop.js?v=dynamic-categories-1"></script>
+<script src="products.js?v=product-ratings-2"></script>
+<script src="shop.js?v=product-ratings-2"></script>
 <script src="search.js?v=dynamic-catalog-1"></script>
 <script src="back-to-top.js"></script>
 

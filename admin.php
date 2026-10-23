@@ -19,6 +19,8 @@ while($row=$stmt->fetch(PDO::FETCH_ASSOC)){
         "id"=>$row["product_code"],
         "name"=>$row["name"],
         "price"=>(float)$row["price"],
+        "salePrice"=>$row["sale_price"]!==null?(float)$row["sale_price"]:null,
+        "isBestseller"=>(bool)$row["is_bestseller"],
         "img"=>$row["image"],
         "category"=>$row["category"],
         "sub"=>$row["subcategory"],
@@ -94,6 +96,8 @@ $stmt=$conn->query("
         o.discount_amount,
         o.grand_total,
         o.status,
+        o.cancellation_reason,
+        o.cancellation_details,
         o.created_at,
         COALESCE(SUM(oi.quantity),0) AS total_items
     FROM orders o
@@ -101,7 +105,7 @@ $stmt=$conn->query("
     GROUP BY
         o.id,o.order_number,o.user_id,o.full_name,o.phone,o.address,
         o.payment_method,o.subtotal,o.shipping_fee,o.voucher_code,o.discount_amount,o.grand_total,
-        o.status,o.created_at
+        o.status,o.cancellation_reason,o.cancellation_details,o.created_at
     ORDER BY o.id DESC
 ");
 
@@ -122,6 +126,8 @@ while($row=$stmt->fetch(PDO::FETCH_ASSOC)){
         "discountAmount"=>(float)$row["discount_amount"],
         "grandTotal"=>(float)$row["grand_total"],
         "status"=>$row["status"],
+        "cancellationReason"=>$row["cancellation_reason"],
+        "cancellationDetails"=>$row["cancellation_details"],
         "createdAt"=>$row["created_at"],
         "totalItems"=>(int)$row["total_items"]
     ];
@@ -170,7 +176,7 @@ $dbAppFeedback=$stmt->fetchAll(PDO::FETCH_ASSOC);
 <link href="styles.css" rel="stylesheet">
 <link href="shop.css" rel="stylesheet">
 <link href="pages.css?v=mobile-gutters-2" rel="stylesheet">
-<link href="admin.css?v=homepage-demo-video-1" rel="stylesheet">
+<link href="admin.css?v=bundle-layout-2" rel="stylesheet">
 </head>
 
 <body class="admin-page">
@@ -274,7 +280,7 @@ $dbAppFeedback=$stmt->fetchAll(PDO::FETCH_ASSOC);
 </div>
 </div>
 
-<div class="ad-chart" id="salesChart"></div>
+<div class="ad-chart" id="salesChart" role="group" aria-label="Daily delivered sales for the last seven days"></div>
 
 </section>
 
@@ -541,17 +547,31 @@ Add Product
 
 <label class="field">
 Product name
-<input class="form-control" id="pName" name="name" required>
+<input class="form-control" id="pName" name="name" placeholder="e.g. Smart Air Fryer" required>
 </label>
 
 <label class="field">
 Price
-<input class="form-control" id="pPrice" name="price" type="number" min="0" step="0.01" required>
+<input class="form-control" id="pPrice" name="price" type="number" min="0" step="0.01" placeholder="e.g. 2599.00" required>
+</label>
+
+<label class="field">
+Sale price
+<input class="form-control" id="pSalePrice" name="sale_price" type="number" min="0.01" step="0.01" placeholder="e.g. 2299.00" disabled>
+<small class="ad-note">Leave Sale unchecked for the regular price. Sale price must be lower than the regular price.</small>
+</label>
+
+<label class="field">
+Product labels
+<span class="d-flex flex-wrap gap-3 mt-2">
+<span><input id="pOnSale" name="on_sale" type="checkbox" value="1"> <span>On Sale</span></span>
+<span><input id="pBestseller" name="is_bestseller" type="checkbox" value="1"> <span>Bestseller</span></span>
+</span>
 </label>
 
 <label class="field">
 Stock quantity
-<input class="form-control" id="pStock" name="stock" type="number" min="0" step="1" required>
+<input class="form-control" id="pStock" name="stock" type="number" min="0" step="1" placeholder="e.g. 10" required>
 </label>
 
 <label class="field full">
@@ -570,19 +590,22 @@ Add more images or videos
 
 <label class="field">
 Category
-<input class="form-control" id="pCategory" name="category" list="productCategoryOptions" maxlength="100" required>
-<datalist id="productCategoryOptions"><?php foreach($dbProductCategories as $category): ?><option value="<?php echo htmlspecialchars($category,ENT_QUOTES,"UTF-8"); ?>"><?php endforeach; ?></datalist>
-
+<select class="form-select" id="pCategory" name="category" required>
+<option value="">Choose a product category</option>
+<?php foreach($dbProductCategories as $category): ?><option value="<?php echo htmlspecialchars($category,ENT_QUOTES,"UTF-8"); ?>"><?php echo htmlspecialchars(ucfirst($category),ENT_QUOTES,"UTF-8"); ?></option><?php endforeach; ?>
+</select>
 </label>
 
 <label class="field">
 Subcategory
-<input class="form-control" id="pSub" name="subcategory" required>
+<select class="form-select" id="pSub" name="subcategory" required disabled>
+<option value="">Choose a category first</option>
+</select>
 </label>
 
 <label class="field full">
 Description
-<textarea class="form-control" id="pDesc" name="description" rows="5"></textarea>
+<textarea class="form-control" id="pDesc" name="description" rows="5" placeholder="Describe the product, its key features, and how it helps customers."></textarea>
 </label>
 
 </div>
@@ -635,7 +658,7 @@ window.ADMIN_CSRF_TOKEN=<?php echo json_encode($adminCsrfToken); ?>;
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="admin.js?v=homepage-demo-video-1"></script>
+<script src="admin.js?v=admin-order-cancellation-1"></script>
 
 </body>
 </html>

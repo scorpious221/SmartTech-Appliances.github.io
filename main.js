@@ -36,27 +36,17 @@ const TILES=[
 ];
 
 const FEATURED=[
-{id:'airfryer',s:4.9,c:328,o:2999,b:'Best seller',t:['best']},
+{id:'airfryer',s:4.9,c:328,o:2999,b:'Popular',t:[]},
 {id:'cctv',s:4.8,c:181,o:9900,b:'New',t:['new']},
 {id:'oled',s:4.7,c:96,o:21988,b:'18% off',t:['sale']},
-{id:'doorbell',s:4.8,c:244,o:15500,b:'Hot',t:['best','sale']},
+{id:'doorbell',s:4.8,c:244,o:15500,b:'Hot',t:['sale']},
 {id:'generator',s:4.6,c:137,o:12000,b:'New',t:['new']}
 ];
 
-let CARDS=FEATURED.map(f=>{
-    const b=PRODUCTS.find(p=>p.id===f.id);
-
-    return b?{
-        ...f,
-        n:b.name,
-        p:b.price,
-        i:b.img.replace('images/',''),
-        stock:Number(b.stock||0)
-    }:null;
-}).filter(Boolean);
+let CARDS=[];
 
 const TABS=[
-['all','Best Sellers'],
+['best','Best Sellers'],
 ['new','New'],
 ['sale','On Sale']
 ];
@@ -170,9 +160,10 @@ ${bundle.compare_at_price>bundle.price?`<span class="st-badge">Save ${peso(bundl
 ${bundle.compare_at_price>bundle.price?`<s class="st-old">${peso(bundle.compare_at_price)}</s>`:''}
 </div>
 
-<a href="${esc(bundle.link_url)}" class="btn st-btn st-btn-outline">
-View Bundle
-</a>
+<div class="st-bundle-actions${Number(bundle.id)>0&&Array.isArray(bundle.product_codes)?'':' single-action'}">
+${Number(bundle.id)>0&&Array.isArray(bundle.product_codes)?`<button type="button" class="btn st-btn st-btn-accent" data-buy-bundle="${Number(bundle.id)}" data-product-codes="${esc(JSON.stringify(bundle.product_codes))}">Buy Bundle</button>`:''}
+<a href="${esc(bundle.link_url)}" class="btn st-btn st-btn-outline">View products</a>
+</div>
 </div>
 
 </article>
@@ -181,6 +172,54 @@ View Bundle
 renderBundles(BUNDLES.map(([title,description,price,compare_at_price,image,link_url])=>({
     title,description,price,compare_at_price,image:IMG+image,link_url
 })));
+
+document.querySelector('#bundles')?.addEventListener('click',event=>{
+    const button=event.target.closest('[data-buy-bundle]');
+    if(!button)return;
+    const codes=JSON.parse(button.dataset.productCodes||'[]');
+    const bundleProducts=codes.map(code=>CARDS.find(product=>product.id===code));
+    if(!codes.length||bundleProducts.some(product=>!product)){
+        alert('This bundle is no longer available. Please refresh and try again.');
+        return;
+    }
+    let cart=[];
+    try{
+        cart=JSON.parse(localStorage.getItem('st_cart'))||[];
+    }catch(error){
+        alert('Unable to read your cart. Please check your browser storage and try again.');
+        return;
+    }
+    for(const product of bundleProducts){
+        const existing=cart.find(item=>item.id===product.id);
+        if(Number(existing?.qty||0)>=product.stock){
+            alert(`Only ${product.stock} stock available for ${product.n}.`);
+            return;
+        }
+    }
+    for(const product of bundleProducts){
+        const existing=cart.find(item=>item.id===product.id);
+        if(existing){
+            existing.qty=Number(existing.qty||0)+1;
+        }else{
+            cart.push({
+                id:product.id,
+                name:product.n,
+                price:product.p,
+                qty:1,
+                img:product.i.startsWith('images/')||product.i.startsWith('uploads/')?product.i:IMG+product.i
+            });
+        }
+    }
+    try{
+        localStorage.setItem('st_cart',JSON.stringify(cart));
+        sessionStorage.setItem('st_bundle_purchase',JSON.stringify({id:Number(button.dataset.buyBundle)}));
+        sessionStorage.removeItem('st_buy');
+    }catch(error){
+        alert('Unable to prepare the bundle in your cart. Please check your browser storage and try again.');
+        return;
+    }
+    location.href='cart.php';
+});
 
 set('#brands',BRANDS.map(b=>`<li>${b}</li>`).join(''));
 
@@ -269,6 +308,9 @@ function card(p){
         :out
         ?'Currently unavailable'
         :'';
+    const reviewCount=Number(p.reviewCount||0);
+    const averageRating=Number(p.averageRating||0);
+    const stars=reviewCount?`${'★'.repeat(Math.round(averageRating))}${'☆'.repeat(5-Math.round(averageRating))}`:'★★★★★';
 
     return`
     <article class="st-card${out?' out':''}">
@@ -301,9 +343,10 @@ function card(p){
                 </a>
             </h3>
 
-            <a class="st-rating" href="${href}" aria-label="See product details and reviews">
-                <span>See details &amp; reviews</span>
-            </a>
+            <div class="st-rating" role="img" aria-label="${reviewCount?`${averageRating.toFixed(1)} out of 5 from ${reviewCount} reviews`:'No ratings yet'}">
+                <span class="st-stars${reviewCount?'':' unrated'}" aria-hidden="true">${stars}</span>
+                <span>${reviewCount?`${averageRating.toFixed(1)} (${reviewCount})`:'No ratings yet'}</span>
+            </div>
 
             <p class="st-low"${stockMessage?'':' aria-hidden="true"'}>${stockMessage}</p>
 
@@ -343,11 +386,13 @@ document.addEventListener('click',event=>{
 });
 
 function renderProducts(tab){
-    const list=tab==='all'
-        ?CARDS
-        :CARDS.filter(p=>p.t.includes(tab));
+    const list=tab==='best'
+        ?CARDS.filter(p=>p.isBestseller).sort((a,b)=>b.unitsSold-a.unitsSold)
+        :CARDS.filter(p=>tab==='sale'?p.isSale:p.t.includes(tab));
 
-    set('#rail',list.map(card).join(''));
+    set('#rail',list.length
+        ?list.map(card).join('')
+        :`<p class="ad-empty">${tab==='best'?'No best sellers yet. Products will appear here after completed deliveries.':'No products to show yet.'}</p>`);
     updateRailControls();
 
     if(drawProg){
@@ -497,7 +542,7 @@ $('#railNext')?.addEventListener('click',()=>{
 $('#rail')?.addEventListener('scroll',()=>requestAnimationFrame(updateRailControls),{passive:true});
 window.addEventListener('resize',updateRailControls);
 
-renderProducts('all');
+renderProducts('best');
 
 fetch('php/get_storefront_content.php',{headers:{Accept:'application/json'}})
     .then(response=>{
@@ -515,14 +560,19 @@ fetch('php/get_storefront_content.php',{headers:{Accept:'application/json'}})
                 id:String(product.id),
                 n:product.name,
                 p:Number(product.price),
-                o:featured?featured.o:0,
+                o:Number(product.is_sale?product.regular_price:(featured?.o||0)),
                 i:String(product.img||''),
                 stock:Number(product.stock||0),
-                b:featured?featured.b:'Featured',
-                t:featured?featured.t:[]
+                b:product.is_sale?'Sale':product.is_bestseller?'Best seller':featured&&featured.b!=='Best seller'?featured.b:'Featured',
+                t:featured?featured.t:[],
+                isSale:Boolean(product.is_sale),
+                isBestseller:Boolean(product.is_bestseller),
+                unitsSold:Number(product.units_sold||0),
+                averageRating:Number(product.average_rating||0),
+                reviewCount:Number(product.review_count||0)
             };
         });
-        renderProducts('all');
+        renderProducts('best');
         renderTiles(content.categories.map(category=>({
             ...category,
             image:String(category.image||'')

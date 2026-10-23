@@ -93,17 +93,30 @@ function renderProducts(){
         }else{
             stockText=stock+' in stock';
         }
+        const reviewCount=Number(product.reviewCount||0);
+        const averageRating=Number(product.averageRating||0);
+        const stars=reviewCount?`${'★'.repeat(Math.round(averageRating))}${'☆'.repeat(5-Math.round(averageRating))}`:'★★★★★';
+        const isSale=Boolean(product.isSale);
+        const labels=[
+            isSale?'<span class="card-badge sale">Sale</span>':'',
+            product.isBestseller?'<span class="card-badge bestseller">Bestseller</span>':''
+        ].join('');
 
         $grid.append(`
         <div class="product-card" data-id="${escapeHtml(product.id)}">
             <a class="product-image-link" href="product.php?id=${encodeURIComponent(product.id)}" aria-label="View details for ${escapeHtml(product.name)}">
             <div class="img">
+                ${labels}
                 <img src="${escapeHtml(product.img)}" alt="${escapeHtml(product.name)}" onerror="this.style.display='none'">
             </div>
             </a>
 
             <div class="product-name">${escapeHtml(product.name)}</div>
-            <div class="product-price">₱${product.price.toLocaleString()}</div>
+            <div class="product-rating" role="img" aria-label="${reviewCount?`${averageRating.toFixed(1)} out of 5 from ${reviewCount} reviews`:'No ratings yet'}">
+                <span class="rating-stars${reviewCount?'':' unrated'}" aria-hidden="true">${stars}</span>
+                <span>${reviewCount?`${averageRating.toFixed(1)} (${reviewCount})`:'No ratings yet'}</span>
+            </div>
+            <div class="price-row"><span class="price-group"><span class="product-price">₱${product.price.toLocaleString()}</span>${isSale?`<del class="product-regular-price">₱${Number(product.regularPrice).toLocaleString()}</del>`:''}</span></div>
 
             <div style="color:var(--muted);font-size:13px;margin-bottom:8px">
                 ${escapeHtml(product.sub)}
@@ -121,10 +134,6 @@ function renderProducts(){
                 <button class="btn-buy" data-buy="${escapeHtml(product.id)}" ${stock<=0?'disabled':''}>
                     ${stock<=0?'Unavailable':'Buy Now'}
                 </button>
-
-                <a class="btn-view" href="product.php?id=${encodeURIComponent(product.id)}">
-                    View Details
-                </a>
             </div>
         </div>`);
     });

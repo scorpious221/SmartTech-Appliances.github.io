@@ -112,13 +112,14 @@ Track order
 
 <?php
 $steps=[
-    ["Pending","Order placed","We have received your order."],
-    ["Processing","Processing","Your items are being prepared."],
+    ["Pending","Awaiting seller confirmation","Your order has been received but is not confirmed yet."],
+    ["Processing","Order confirmed","The seller confirmed your order and is preparing your items."],
     ["Shipped","Out for delivery","Your order is on its way."],
     ["Delivered","Delivered","Your order has been delivered."]
 ];
 
 $status=$order["status"]??"Pending";
+$statusLabel=$status==="Pending"?"Awaiting seller confirmation":($status==="Processing"?"Order confirmed":$status);
 $current=0;
 $progressStatus=$status==="Completed"?"Delivered":$status;
 
@@ -142,7 +143,7 @@ $isCancelled=$status==="Cancelled";
 </div>
 
 <span class="tr-status">
-<?php echo e($status); ?>
+<?php echo e($statusLabel); ?>
 </span>
 
 </div>

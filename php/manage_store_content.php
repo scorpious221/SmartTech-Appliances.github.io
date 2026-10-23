@@ -36,7 +36,7 @@ function contentUpload():?array{
 function contentLink(string $key,string $default=""):string{
     $link=trim((string)($_POST[$key]??$default));
     $external=preg_match('/^https?:\/\//i',$link)===1;
-    if($link===""||str_starts_with($link,"//")||preg_match('/[\r\n]/',$link)||(!$external&&preg_match('/^[a-z][a-z0-9+.-]*:/i',$link))){
+    if($link===""||strncmp($link,"//",2)===0||preg_match('/[\r\n]/',$link)||(!$external&&preg_match('/^[a-z][a-z0-9+.-]*:/i',$link))){
         throw new RuntimeException("Enter a valid link for the button.");
     }
     return$link;
@@ -50,7 +50,8 @@ function storedContentImage(PDO $conn,string $table,int $id):?string{
 }
 
 $action=(string)($_POST["action"]??"");
-$id=filter_var($_POST["id"]??0,FILTER_VALIDATE_INT);
+$rawId=trim((string)($_POST["id"]??""));
+$id=$rawId===""?0:filter_var($rawId,FILTER_VALIDATE_INT);
 $oldImage=null;
 $newUpload=null;
 
@@ -60,7 +61,7 @@ try{
     }
     if($id===false||$id<0)throw new RuntimeException("Invalid content ID.");
 
-    if(str_starts_with($action,"save_")&&$id>0){
+    if(strncmp($action,"save_",5)===0&&$id>0){
         $table=["save_promo"=>"home_promos","save_bundle"=>"home_bundles","save_category"=>"home_categories","save_deal"=>"home_deal","save_demo_video"=>"home_demo_video","save_voucher"=>"vouchers"][$action];
         if($action==="save_demo_video"){
             $videoStmt=$conn->prepare("SELECT video_path FROM home_demo_video WHERE id=?");
@@ -120,12 +121,19 @@ try{
         $image=contentImage($newUpload,$oldImage);
         $productCodes=array_values(array_unique(array_filter(array_map("trim",$_POST["product_codes"]??[]))));
         if(!$productCodes)throw new RuntimeException("Select at least one product for the bundle.");
-        $check=$conn->prepare("SELECT COUNT(*) FROM products WHERE product_code IN (".implode(",",array_fill(0,count($productCodes),"?")).")");
+        $check=$conn->prepare("SELECT product_code,price FROM products WHERE product_code IN (".implode(",",array_fill(0,count($productCodes),"?")).")");
         $check->execute($productCodes);
-        if((int)$check->fetchColumn()!==count($productCodes))throw new RuntimeException("One or more bundle products are no longer available.");
-        $price=filter_var($_POST["price"]??null,FILTER_VALIDATE_FLOAT);
-        $compare=filter_var($_POST["compare_at_price"]??0,FILTER_VALIDATE_FLOAT);
-        if($price===false||$price<=0||$compare===false||$compare<0)throw new RuntimeException("Enter valid bundle prices.");
+        $bundleProducts=$check->fetchAll(PDO::FETCH_ASSOC);
+        if(count($bundleProducts)!==count($productCodes))throw new RuntimeException("One or more bundle products are no longer available.");
+        $originalCents=array_reduce($bundleProducts,static function(int $total,array $product):int{
+            return $total+(int)round((float)$product["price"]*100);
+        },0);
+        $discountPercent=filter_var($_POST["discount_percent"]??null,FILTER_VALIDATE_FLOAT);
+        if($discountPercent===false||$discountPercent<0||$discountPercent>=100)throw new RuntimeException("Choose a valid bundle discount percentage.");
+        $priceCents=(int)round($originalCents*(100-$discountPercent)/100);
+        if($originalCents<=0||$priceCents<=0)throw new RuntimeException("The selected products and discount must produce a valid bundle price.");
+        $price=$priceCents/100;
+        $compare=$originalCents/100;
         $data=[
             contentText("title",180),
             contentText("description",500,false),

@@ -6,12 +6,15 @@ requireAdminPost();
 $productCode=trim($_POST["product_code"]??"");
 $name=trim($_POST["name"]??"");
 $price=filter_var($_POST["price"]??null,FILTER_VALIDATE_FLOAT);
+$onSale=($_POST["on_sale"]??"") === "1";
+$salePrice=$onSale?filter_var($_POST["sale_price"]??null,FILTER_VALIDATE_FLOAT):null;
+$isBestseller=($_POST["is_bestseller"]??"") === "1";
 $category=trim($_POST["category"]??"");
 $subcategory=trim($_POST["subcategory"]??"");
 $description=trim($_POST["description"]??"");
 $stock=filter_var($_POST["stock"]??null,FILTER_VALIDATE_INT);
 
-if($productCode===""||strlen($productCode)>100||$name===""||$price===false||$price<=0||$category===""||$subcategory===""||$stock===false||$stock<0){
+if($productCode===""||strlen($productCode)>100||$name===""||$price===false||$price<=0||($onSale&&($salePrice===false||$salePrice<=0||$salePrice>=$price))||$category===""||$subcategory===""||$stock===false||$stock<0){
     http_response_code(400);
     exit("Please provide a valid product name, price, category, subcategory, and stock quantity.");
 }
@@ -42,10 +45,10 @@ foreach($gallery as $media){
 try{
     $conn->beginTransaction();
     $stmt=$conn->prepare("
-        INSERT INTO products(product_code,name,price,image,category,subcategory,description,stock)
-        VALUES(?,?,?,?,?,?,?,?)
+        INSERT INTO products(product_code,name,price,sale_price,is_bestseller,image,category,subcategory,description,stock)
+        VALUES(?,?,?,?,?,?,?,?,?,?)
     ");
-    $stmt->execute([$productCode,$name,$price,$primary["path"],$category,$subcategory,$description,$stock]);
+    $stmt->execute([$productCode,$name,$price,$salePrice,$isBestseller?1:0,$primary["path"],$category,$subcategory,$description,$stock]);
     $productId=(int)$conn->lastInsertId();
     $mediaStmt=$conn->prepare("INSERT INTO product_media(product_id,media_type,file_path,sort_order) VALUES(?,?,?,?)");
     foreach($gallery as $index=>$media){

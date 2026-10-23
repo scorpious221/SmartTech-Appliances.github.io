@@ -14,10 +14,6 @@ const SORTS={
 };
 
 const BADGES={
-    cctv:'Bestseller',
-    doorbell:'Bestseller',
-    airfryer:'Bestseller',
-    ps:'Bestseller',
     nsw2:'New arrival',
     oled:'New arrival'
 };
@@ -94,6 +90,14 @@ function canAdd(id){
 function card(p){
     const on=wish.includes(p.id);
     const out=Number(p.stock)<=0;
+    const badges=[
+        p.isSale?'<span class="card-badge sale">Sale</span>':'',
+        p.isBestseller?'<span class="card-badge bestseller">Bestseller</span>':'',
+        BADGES[p.id]?`<span class="card-badge">${esc(BADGES[p.id])}</span>`:''
+    ].filter(Boolean).join('');
+    const reviewCount=Number(p.reviewCount||0);
+    const averageRating=Number(p.averageRating||0);
+    const stars=reviewCount?`${'★'.repeat(Math.round(averageRating))}${'☆'.repeat(5-Math.round(averageRating))}`:'★★★★★';
 
     const href=DETAILS_PAGE
         ?DETAILS_PAGE+'?id='+encodeURIComponent(p.id)
@@ -104,7 +108,7 @@ function card(p){
 
         <div class="img">
 
-            ${BADGES[p.id]?`<span class="card-badge">${BADGES[p.id]}</span>`:''}
+            ${badges}
 
             <button
                 class="wish-btn"
@@ -123,10 +127,6 @@ function card(p){
                 onerror="this.style.display='none'"
             >
 
-            <span class="view-pill" aria-hidden="true">
-                View details
-                <i class="bi bi-arrow-up-right"></i>
-            </span>
             </a>
         </div>
 
@@ -140,9 +140,15 @@ function card(p){
                 </a>
             </h3>
 
+            <div class="product-rating" role="img" aria-label="${reviewCount?`${averageRating.toFixed(1)} out of 5 from ${reviewCount} reviews`:'No ratings yet'}">
+                <span class="rating-stars${reviewCount?'':' unrated'}" aria-hidden="true">${stars}</span>
+                <span>${reviewCount?`${averageRating.toFixed(1)} (${reviewCount})`:'No ratings yet'}</span>
+            </div>
+
             <div class="price-row">
-                <span class="product-price">
-                    ₱${p.price.toLocaleString()}
+                <span class="price-group">
+                    <span class="product-price">₱${p.price.toLocaleString()}</span>
+                    ${p.isSale?`<del class="product-regular-price">₱${Number(p.regularPrice).toLocaleString()}</del>`:''}
                 </span>
 
                 <i class="bi bi-arrow-up-right"></i>

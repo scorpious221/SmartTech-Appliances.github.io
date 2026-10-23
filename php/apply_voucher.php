@@ -17,10 +17,14 @@ if(!isset($_SESSION["user_id"])||($_SESSION["role"]??"")!=="customer"){
 }
 
 $payload=json_decode(file_get_contents("php://input"),true);
+$action=is_array($payload)?(string)($payload["action"]??"apply"):"apply";
 $code=is_array($payload)?trim((string)($payload["code"]??"")):"";
 $requestedItems=is_array($payload)?($payload["items"]??null):null;
 
-if($code===""||strlen($code)>40||!is_array($requestedItems)||!count($requestedItems)||count($requestedItems)>100){
+if(!in_array($action,["apply","list"],true)){
+    voucherResponse(400,["valid"=>false,"message"=>"Unsupported voucher action."]);
+}
+if(($action==="apply"&&($code===""||strlen($code)>40))||!is_array($requestedItems)||!count($requestedItems)||count($requestedItems)>100){
     voucherResponse(400,["valid"=>false,"message"=>"Enter a voucher code and select cart items."]);
 }
 
@@ -41,7 +45,7 @@ try{
         $cleanItems[$productCode]=($cleanItems[$productCode]??0)+$quantity;
     }
 
-    $stmt=$conn->prepare("SELECT id,product_code,name,price,category,stock FROM products WHERE product_code=?");
+    $stmt=$conn->prepare("SELECT id,product_code,name,COALESCE(sale_price,price) AS price,category,stock FROM products WHERE product_code=?");
     $items=[];
     $subtotal=0.0;
     foreach($cleanItems as $productCode=>$quantity){
@@ -58,6 +62,31 @@ try{
     $stmt=$conn->prepare("SELECT COUNT(*) FROM orders WHERE user_id=?");
     $stmt->execute([(int)$_SESSION["user_id"]]);
     $firstOrder=(int)$stmt->fetchColumn()===0;
+    if($action==="list"){
+        $offers=voucherOffers($conn);
+        $voucherList=[];
+        $bundlePurchase=!empty($payload["bundle_purchase"]);
+        foreach($offers as $offerCode=>$offer){
+            $result=$bundlePurchase
+                ?["valid"=>false,"message"=>"Vouchers cannot be combined with bundle purchases."]
+                :calculateVoucherDiscount($conn,$offerCode,$subtotal,$items,$firstOrder,(int)$_SESSION["user_id"]);
+            $voucherList[]=[
+                "code"=>$offerCode,
+                "label"=>$offer["label"],
+                "terms"=>$offer["terms"],
+                "type"=>$offer["type"],
+                "value"=>$offer["value"],
+                "cap"=>$offer["cap"],
+                "minimum"=>$offer["minimum"],
+                "ends_at"=>$offer["ends_at"],
+                "valid"=>(bool)$result["valid"],
+                "discount"=>(float)($result["discount"]??0),
+                "message"=>(string)($result["message"]??"")
+            ];
+        }
+        voucherResponse(200,["vouchers"=>$voucherList]);
+    }
+
     $result=calculateVoucherDiscount($conn,$code,$subtotal,$items,$firstOrder,(int)$_SESSION["user_id"]);
 
     if(!$result["valid"]){

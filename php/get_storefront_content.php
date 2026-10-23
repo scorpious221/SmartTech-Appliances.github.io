@@ -4,10 +4,46 @@ header("Content-Type: application/json; charset=utf-8");
 header("Cache-Control: no-store, max-age=0");
 
 try{
-    $productsStmt=$conn->query("SELECT product_code AS id,name,price,image AS img,category,subcategory AS sub,description AS description,stock FROM products ORDER BY id ASC");
+    $productsStmt=$conn->query("
+        SELECT p.product_code AS id,p.name,COALESCE(p.sale_price,p.price) AS price,
+               p.price AS regular_price,p.sale_price IS NOT NULL AS is_sale,
+               p.image AS img,p.category,p.subcategory AS sub,p.description AS description,p.stock,
+               COALESCE(r.average_rating,0) AS average_rating,COALESCE(r.review_count,0) AS review_count,
+               COALESCE(s.units_sold,0) AS units_sold
+        FROM products p
+        LEFT JOIN (
+            SELECT product_id,AVG(rating) AS average_rating,COUNT(*) AS review_count
+            FROM product_reviews
+            GROUP BY product_id
+        ) r ON r.product_id=p.id
+        LEFT JOIN (
+            SELECT oi.product_id,SUM(oi.quantity) AS units_sold
+            FROM order_items oi
+            JOIN orders o ON o.id=oi.order_id
+            WHERE o.status IN ('Delivered','Completed')
+            GROUP BY oi.product_id
+        ) s ON s.product_id=p.id
+        ORDER BY p.id ASC
+    ");
     $products=$productsStmt->fetchAll(PDO::FETCH_ASSOC);
+    $bestSellingProducts=$products;
+    usort($bestSellingProducts,static function(array $a,array $b):int{
+        $salesOrder=(int)$b["units_sold"]<=>(int)$a["units_sold"];
+        return $salesOrder!==0?$salesOrder:strcmp((string)$a["name"],(string)$b["name"]);
+    });
+    $bestSellerIds=[];
+    foreach($bestSellingProducts as $product){
+        if((int)$product["units_sold"]<=0||count($bestSellerIds)>=8)break;
+        $bestSellerIds[(string)$product["id"]]=true;
+    }
     foreach($products as &$product){
         $product["price"]=(float)$product["price"];
+        $product["regular_price"]=(float)$product["regular_price"];
+        $product["is_sale"]=(bool)$product["is_sale"];
+        $product["is_bestseller"]=isset($bestSellerIds[(string)$product["id"]]);
+        $product["units_sold"]=(int)$product["units_sold"];
+        $product["average_rating"]=(float)$product["average_rating"];
+        $product["review_count"]=(int)$product["review_count"];
         $product["stock"]=(int)$product["stock"];
     }
     unset($product);
