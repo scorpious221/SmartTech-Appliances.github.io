@@ -14,6 +14,8 @@ const vouchers=Array.isArray(window.DB_VOUCHERS)?window.DB_VOUCHERS:[];
 const productCategories=Array.isArray(window.DB_PRODUCT_CATEGORIES)?window.DB_PRODUCT_CATEGORIES:[];
 const customers=Array.isArray(window.DB_CUSTOMERS)?window.DB_CUSTOMERS:[];
 const orders=Array.isArray(window.DB_ORDERS)?window.DB_ORDERS:[];
+let salesStartDate='';
+let salesEndDate='';
 const refundRequests=Array.isArray(window.DB_REFUND_REQUESTS)?window.DB_REFUND_REQUESTS:[];
 const accountDeletionRequests=Array.isArray(window.DB_ACCOUNT_DELETION_REQUESTS)?window.DB_ACCOUNT_DELETION_REQUESTS:[];
 const appFeedback=Array.isArray(window.DB_APP_FEEDBACK)?window.DB_APP_FEEDBACK:[];
@@ -168,39 +170,32 @@ function renderDashboard(){
     $('#mPending').text(pending.length);
     $('#mLow').text(low.length);
 
-    renderSalesChart(delivered);
+    renderSalesChart(delivered,salesStartDate,salesEndDate);
     renderLowStock();
     renderRecentOrders();
 }
 
-function renderSalesChart(delivered){
+function renderSalesChart(delivered,startDate,endDate){
+    const startTime=Date.parse(`${startDate}T00:00:00Z`);
+    const endTime=Date.parse(`${endDate}T00:00:00Z`);
+    const dailyTotals=new Map();
+    delivered.forEach(order=>{
+        const match=String(order.createdAt||'').match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if(!match)return;
+        const key=`${match[1]}-${match[2]}-${match[3]}`;
+        const time=Date.parse(`${key}T00:00:00Z`);
+        if(time<startTime||time>endTime)return;
+        dailyTotals.set(key,(dailyTotals.get(key)||0)+Number(order.grandTotal||0));
+    });
     const days=[];
-
-    for(let i=6;i>=0;i--){
-        const start=new Date();
-        start.setHours(0,0,0,0);
-        start.setDate(start.getDate()-i);
-
-        const end=new Date(start);
-        end.setHours(23,59,59,999);
-
-        const total=delivered
-            .filter(o=>{
-                const time=new Date(
-                    String(o.createdAt).replace(' ','T')
-                ).getTime();
-
-                return time>=start.getTime()&&time<=end.getTime();
-            })
-            .reduce((sum,o)=>sum+Number(o.grandTotal||0),0);
-
+    for(let time=startTime;time<=endTime;time+=86400000){
+        const key=new Date(time).toISOString().slice(0,10);
         days.push({
-            label:start.toLocaleDateString('en-PH',{weekday:'short'}),
-            total:total
+            label:new Date(time).toLocaleDateString('en-PH',{timeZone:'UTC',month:'short',day:'numeric'}),
+            total:dailyTotals.get(key)||0
         });
     }
-
-    const max=Math.max(1,...days.map(d=>d.total));
+    const max=Math.max(1,...days.map(day=>day.total));
     const compactPeso=value=>Number(value).toLocaleString('en-PH',{
         style:'currency',
         currency:'PHP',
@@ -208,7 +203,14 @@ function renderSalesChart(delivered){
         maximumFractionDigits:1
     });
 
-    $('#salesChart').html(days.map(day=>{
+    const chart=$('#salesChart');
+    chart.attr('aria-label',`Daily delivered sales from ${startDate} through ${endDate}`)
+        .css({
+            'grid-template-columns':`repeat(${days.length},minmax(60px,1fr))`,
+            'min-width':`${Math.max(days.length*70,100)}px`
+        });
+    $('#salesRangeLabel').text(`Delivered sales · ${startDate} to ${endDate}`);
+    chart.html(days.map(day=>{
         const height=day.total>0?Math.max(3,day.total/max*100):0;
 
         return`
@@ -1149,6 +1151,27 @@ $('#contentForm').on('submit',async function(event){
 });
 
 /* START */
+const currentDate=new Date();
+const dateValue=date=>`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+const firstDate=new Date(currentDate.getFullYear(),currentDate.getMonth(),currentDate.getDate()-6);
+salesStartDate=dateValue(firstDate);
+salesEndDate=dateValue(currentDate);
+$('#salesStartDate').val(salesStartDate);
+$('#salesEndDate').val(salesEndDate);
+$('#salesFilter').on('submit',function(event){
+    event.preventDefault();
+    const start=$('#salesStartDate').val();
+    const end=$('#salesEndDate').val();
+    if(!start||!end||start>end){
+        $('#salesFilterMessage').text('Choose a valid range: the start date must be before or equal to the end date.');
+        return;
+    }
+    salesStartDate=start;
+    salesEndDate=end;
+    $('#salesFilterMessage').text('');
+    renderDashboard();
+});
+
 const requestedPage=new URLSearchParams(location.search).get('page');
 
 go(

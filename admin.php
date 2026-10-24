@@ -176,7 +176,7 @@ $dbAppFeedback=$stmt->fetchAll(PDO::FETCH_ASSOC);
 <link href="styles.css?v=mobile-scroll-nav-2" rel="stylesheet">
 <link href="shop.css" rel="stylesheet">
 <link href="pages.css?v=mobile-gutters-2" rel="stylesheet">
-<link href="admin.css?v=bundle-layout-6" rel="stylesheet">
+<link href="admin.css?v=sales-month-filter-1" rel="stylesheet">
 </head>
 
 <body class="admin-page">
@@ -276,11 +276,26 @@ $dbAppFeedback=$stmt->fetchAll(PDO::FETCH_ASSOC);
 <div class="ad-panel-head">
 <div>
 <h2>Sales Analytics</h2>
-<span class="ad-muted">Delivered sales from the last 7 days</span>
+<span class="ad-muted" id="salesRangeLabel">Delivered sales by order date</span>
 </div>
 </div>
 
-<div class="ad-chart" id="salesChart" role="group" aria-label="Daily delivered sales for the last seven days"></div>
+<form class="ad-sales-filter" id="salesFilter">
+<label>
+From date
+<input class="form-control" id="salesStartDate" type="date" required>
+</label>
+<label>
+To date
+<input class="form-control" id="salesEndDate" type="date" required>
+</label>
+<button class="ad-btn sm" type="submit">Apply filter</button>
+<small class="ad-sales-filter-message" id="salesFilterMessage" role="alert" aria-live="polite"></small>
+</form>
+
+<div class="ad-chart-scroll">
+<div class="ad-chart" id="salesChart" role="group" aria-label="Daily delivered sales"></div>
+</div>
 
 </section>
 
@@ -659,7 +674,7 @@ window.ADMIN_CSRF_TOKEN=<?php echo json_encode($adminCsrfToken); ?>;
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="admin.js?v=admin-product-price-limit-1"></script>
+<script src="admin.js?v=sales-date-filter-1"></script>
 <script src="horizontal-scroll-nav.js?v=mobile-scroll-nav-4"></script>
 
 </body>

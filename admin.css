@@ -39,6 +39,12 @@ body.admin-page{background:var(--st-cream);min-height:100vh}
 .ad-muted{color:var(--st-ink-2);font-size:12px}
 
 .ad-chart{height:230px;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));align-items:stretch;gap:10px;border-bottom:1px solid var(--st-sand);padding:8px 8px 0}
+.ad-chart-scroll{max-width:100%;overflow-x:auto}
+.ad-sales-filter{display:flex;align-items:flex-end;flex-wrap:wrap;gap:10px;margin:0 0 16px}
+.ad-sales-filter label{display:grid;gap:5px;min-width:150px;color:var(--st-ink-2);font-size:11px;font-weight:700}
+.ad-sales-filter .form-control{height:40px;border-color:var(--st-sand);font:inherit;color:var(--st-ink)}
+.ad-sales-filter .ad-btn{height:40px}
+.ad-sales-filter-message{flex:1 0 100%;min-height:16px;color:#a3321a;font-size:11px}
 .ad-bar-wrap{display:grid;grid-template-rows:18px minmax(0,1fr) 18px;justify-items:center;align-items:end;gap:5px;min-width:0;height:100%}
 .ad-bar-value,.ad-bar-day{max-width:100%;overflow:hidden;color:var(--st-ink-2);font-size:10px;line-height:18px;text-align:center;text-overflow:ellipsis;white-space:nowrap}
 .ad-bar-track{display:flex;width:min(40px,80%);height:100%;align-items:flex-end;justify-content:center;border-radius:8px 8px 0 0;background:#f7f4ef}
@@ -103,7 +109,7 @@ dialog.ad-dialog{width:min(720px,calc(100% - 30px));max-height:90vh;overflow:aut
 dialog.ad-dialog::backdrop{background:rgba(8,27,23,.62)}
 .ad-dialog-head{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid var(--st-sand)}
 .ad-dialog-head h2{font-size:22px;margin:0}
-.ad-x{width:42px;height:42px;border:0;border-radius:50%;background:var(--st-cream);font-size:20px}
+.ad-x{width:42px;height:42px;flex:none;display:grid;place-items:center;padding:0;border:0;border-radius:50%;background:var(--st-cream);font-family:inherit;font-size:20px;line-height:1;text-align:center}
 
 .ad-form{padding:24px}
 .ad-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
