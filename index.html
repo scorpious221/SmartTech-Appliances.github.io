@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SmartTech — Smarter Homes, Better Living</title>
+<meta name="description" content="Shop smart-home, kitchen, gaming, audio and more. Free delivery over ₱3,000, 1-year warranty, GCash, Maya and COD.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="styles.css?v=mobile-reviews-arrows-1" rel="stylesheet">
+</head>
+<body>
+
+<a class="visually-hidden-focusable st-skip" href="#main">Skip to content</a>
+
+<div class="st-topbar text-center">Free delivery over ₱3,000 • 1-Year Warranty • GCash, Maya, COD</div>
+
+<header class="st-header sticky-top">
+<nav class="navbar navbar-expand-lg navbar-dark container-xxl px-lg-5" aria-label="Primary">
+
+<a class="navbar-brand st-logo order-1 me-auto" href="index.html" aria-label="SmartTech home">
+<span class="st-mark d-lg-none"><i class="bi bi-house"></i></span>
+<img class="d-none d-lg-block" src="images/smarttechappliances.svg" alt="" width="60" height="49">
+<span>SmartTech</span>
+</a>
+
+<div class="d-flex gap-2 order-2 order-lg-3 ms-lg-4">
+<button class="st-icon-btn d-lg-none" type="button" aria-label="Search" onclick="document.querySelector('.stq-btn')?.click()"><i class="bi bi-search"></i></button>
+<a class="st-icon-btn d-none d-lg-inline-grid" href="wishlist.html" aria-label="Wishlist"><i class="bi bi-heart"></i></a>
+<a class="st-icon-btn st-cart-btn" href="cart.php" aria-label="Cart"><i class="bi bi-bag"></i><span class="st-count" id="cart-count">0</span></a>
+<a class="st-icon-btn d-none d-lg-inline-grid" href="login.php" aria-label="Account"><i class="bi bi-person"></i></a>
+</div>
+
+<div class="collapse navbar-collapse order-3 order-lg-2" id="nav">
+<ul class="navbar-nav me-lg-4 gap-lg-3 pt-2 pt-lg-0" id="navList"></ul>
+<form class="st-search ms-lg-auto flex-grow-1 my-3 my-lg-0" role="search" onsubmit="return false">
+<i class="bi bi-search"></i>
+<input type="search" class="form-control" placeholder="Search 5,000+ products" aria-label="Search products" readonly>
+</form>
+</div>
+
+</nav>
+</header>
+
+<span class="st-icons" hidden></span>
+
+<main id="main">
+
+<section class="st-hero" aria-labelledby="heroTitle">
+<div class="container-xxl px-lg-5 row mx-auto align-items-center g-5">
+
+<div class="col-lg-6">
+<p class="st-pill"><span class="st-dot"></span>Technology that fits your life</p>
+
+<h1 id="heroTitle" class="st-gradient-text">
+<span class="d-lg-none">Make Your Home Smarter.</span>
+<span class="d-none d-lg-inline">Smarter Homes,<br>Better Living.</span>
+</h1>
+
+<p class="st-lead">
+<span class="d-none d-lg-inline">“Where Innovation Meets Everyday Living.”</span>
+<span class="d-lg-none">Useful devices and appliances that make routines safer, simpler, and more connected—with local support you can count on.</span>
+</p>
+
+<div class="d-flex flex-wrap gap-3">
+<a href="products.php" class="btn st-btn st-btn-accent"><i class="bi bi-chevron-right d-none d-lg-inline"></i>Shop Now</a>
+<button id="watchDemoButton" class="btn st-btn st-btn-ghost" type="button" aria-haspopup="dialog" aria-controls="demoDialog"><i class="bi bi-play-fill" aria-hidden="true"></i>Watch Demo</button>
+</div>
+
+<p class="st-hero-rating d-lg-none">
+<span class="st-stars">★★★★★</span>
+<b>4.8/5</b>
+<span>(2,400+ reviews)</span>
+</p>
+</div>
+
+<div class="col-lg-6">
+<div class="st-hero-visual">
+
+<img src="images/Living_room.png" alt="Living room with connected smart devices" width="656" height="492" fetchpriority="high">
+
+<span class="st-badge-live">
+<span class="st-dot gold"></span>Your home, connected
+</span>
+
+<a class="st-float st-float-1" href="product.php?id=doorknob" aria-label="View Smart Doorknob">
+<span class="st-icon-box d-none d-lg-grid"><i class="bi bi-door-closed"></i></span>
+<div><b>Smart Doorknob</b><small>₱10,350</small></div>
+</a>
+
+<a class="st-float st-float-2" href="product.php?id=cctv" aria-label="View CCTV Camera">
+<span class="st-icon-box d-none d-lg-grid"><i class="bi bi-camera-video"></i></span>
+<div><b>CCTV Camera</b><small>₱8,900</small></div>
+</a>
+
+</div>
+</div>
+
+</div>
+</section>
+
+<dialog class="st-demo-dialog" id="demoDialog" aria-labelledby="demoDialogTitle">
+<div class="st-demo-dialog-head">
+<h2 id="demoDialogTitle">SmartTech Home Demo</h2>
+<button class="st-demo-dialog-close" type="button" aria-label="Close demo video"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+</div>
+<video controls playsinline preload="metadata" poster="images/Living_room.png" aria-label="SmartTech home demo video">
+<source src="videos/demo-video.mp4" type="video/mp4">
+Your browser does not support video playback.
+</video>
+</dialog>
+
+<section class="st-trust">
+<div class="container-xxl px-lg-5">
+<ul class="row list-unstyled g-4 m-0" id="trustList"></ul>
+</div>
+</section>
+
+<section class="st-section" aria-labelledby="catTitle">
+<div class="container-xxl px-lg-5">
+
+<div class="st-heading">
+<div>
+<p class="st-eyebrow">Shop by <span class="d-none d-lg-inline">room &amp; </span>routine</p>
+<h2 id="catTitle">Find the tech that fits</h2>
+<p><span class="d-none d-lg-inline">Explore practical upgrades</span><span class="d-lg-none">Swipe through upgrades</span> for every part of your day.</p>
+</div>
+
+<a href="products.php" class="st-link">
+View all categories <i class="bi bi-chevron-right"></i>
+</a>
+</div>
+
+<div class="st-mobile-rail-wrap">
+<div class="st-bento" id="bento"></div>
+<button class="st-mobile-rail-arrow st-mobile-rail-prev" type="button" aria-label="Show previous categories" disabled><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+<button class="st-mobile-rail-arrow st-mobile-rail-next" type="button" aria-label="Show more categories"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+</div>
+<p class="st-swipe d-lg-none">Swipe to explore <i class="bi bi-arrow-right"></i></p>
+
+</div>
+</section>
+
+<section class="st-section pt-0" id="products" aria-labelledby="prodTitle">
+<div class="container-xxl px-lg-5">
+
+<div class="st-heading">
+<div>
+<p class="st-eyebrow">Top picks</p>
+<h2 id="prodTitle">Smart choices, loved by thousands</h2>
+<p><span class="d-none d-lg-inline">Our most popular tech, selected for value, reliability, and real-life usefulness.</span><span class="d-lg-none">Popular tech selected for value and reliability.</span></p>
+</div>
+
+<a href="products.php" class="st-link">
+Shop all products <i class="bi bi-chevron-right"></i>
+</a>
+</div>
+
+<div class="st-tabs" role="tablist" id="tabs"></div>
+
+<div class="st-rail-wrap">
+<div class="st-rail" id="rail" role="tabpanel" tabindex="0"></div>
+<button class="st-prev st-mobile-rail-arrow" id="railPrev" type="button" aria-label="Show previous products" disabled><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+<button class="st-next st-mobile-rail-arrow" id="railNext" type="button" aria-label="Show more products"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+</div>
+
+<div class="st-progress d-lg-none" id="railProg"></div>
+
+</div>
+</section>
+
+<section class="st-dark st-deal" id="deal">
+<div class="container-xxl px-lg-5 row mx-auto align-items-center g-5 py-5">
+
+<div class="col-lg-5">
+<div class="st-deal-img">
+<img id="dealImage" src="images/ref.jpg" alt="Samsung Side-by-Side Refrigerator" loading="lazy">
+<span class="st-tag" id="dealTag">SAVE ₱20,000</span>
+</div>
+</div>
+
+<div class="col-lg-7">
+<p class="st-eyebrow light">Deal of the Month</p>
+<h2 class="st-deal-title" id="dealTitle">Samsung Side-by-Side Refrigerator</h2>
+<p class="st-lead sm" id="dealDescription">Spacious No-Frost storage, a built-in water and ice dispenser, and Digital Inverter efficiency—now at our best price this season.</p>
+<p class="d-flex align-items-baseline gap-3">
+<span class="st-deal-price" id="dealPrice">₱96,000</span>
+<s class="st-old light" id="dealCompareAt">₱116,000</s>
+</p>
+
+<div class="st-countdown" id="countdown"></div>
+
+<a href="product.php?id=fridge" id="dealLink" class="btn st-btn st-btn-accent mt-4">
+<i class="bi bi-arrow-right"></i>Grab the Deal
+</a>
+</div>
+
+</div>
+</section>
+
+<section class="st-section">
+<div class="container-xxl px-lg-5">
+
+<div class="st-heading">
+<div>
+<p class="st-eyebrow">Better together</p>
+<h2>Curated bundles, bigger savings</h2>
+<p>Everything you need in one well-matched setup.</p>
+</div>
+
+<a href="products.php" class="st-link">
+See all bundles <i class="bi bi-chevron-right"></i>
+</a>
+</div>
+
+<div class="st-mobile-rail-wrap">
+<div class="row g-4 st-hscroll" id="bundles"></div>
+<button class="st-mobile-rail-arrow st-mobile-rail-prev" type="button" aria-label="Show previous bundles" disabled><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+<button class="st-mobile-rail-arrow st-mobile-rail-next" type="button" aria-label="Show more bundles"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+</div>
+
+</div>
+</section>
+
+<section class="st-brands">
+<div class="container-xxl px-lg-5 text-center">
+<p class="st-eyebrow muted">Authorized retailer of brands you trust</p>
+<ul class="list-unstyled d-flex flex-wrap justify-content-center justify-content-lg-between gap-4 m-0" id="brands"></ul>
+</div>
+</section>
+
+<section class="st-dark st-section st-services">
+<div class="container-xxl px-lg-5">
+
+<div class="st-heading">
+<div>
+<p class="st-eyebrow">SmartTech Care</p>
+<h2>Support beyond the box</h2>
+<p>From setup to long-term protection, we make ownership easier.</p>
+</div>
+</div>
+
+<div class="row g-4" id="services"></div>
+
+</div>
+</section>
+
+<section class="st-section">
+<div class="container-xxl px-lg-5">
+
+<div class="st-heading">
+<div>
+<p class="st-eyebrow">Real homes, real results</p>
+<h2>Why customers choose SmartTech</h2>
+<p>Dependable products and delivery across the Philippines.</p>
+</div>
+</div>
+
+<div class="st-review-sum">
+<b>4.8</b>
+<div>
+<span class="st-stars">★★★★★</span>
+<small>2,400+ verified reviews</small>
+</div>
+</div>
+
+<div class="st-mobile-rail-wrap">
+<div class="row g-4 st-hscroll" id="reviews"></div>
+<button class="st-mobile-rail-arrow st-mobile-rail-prev" type="button" aria-label="Show previous reviews" hidden><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+<button class="st-mobile-rail-arrow st-mobile-rail-next" type="button" aria-label="Show more reviews" hidden><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+</div>
+
+</div>
+</section>
+
+<section class="st-section">
+<div class="container-xxl px-lg-5 row mx-auto g-4" id="promos"></div>
+</section>
+
+<section class="pb-5">
+<div class="container-xxl px-lg-5">
+
+<div class="st-newsletter">
+
+<div>
+<h2>Get 10% off your first order</h2>
+<p>Join SmartTech Insider for offers, product drops, and practical smart-home guides.</p>
+</div>
+
+<form id="nlForm" novalidate class="st-nl-form">
+
+<label for="nlEmail" class="visually-hidden">
+Email address
+</label>
+
+<div class="st-input">
+<i class="bi bi-envelope"></i>
+<input id="nlEmail" name="email" type="email" class="form-control" placeholder="Email address" autocomplete="email">
+</div>
+
+<button class="btn st-btn st-btn-dark" type="submit">
+Get my 10%
+</button>
+
+<p id="nlMsg" class="st-msg"></p>
+
+</form>
+
+</div>
+
+</div>
+</section>
+
+</main>
+
+<footer class="st-footer">
+<div class="container-xxl px-lg-5">
+
+<div class="sf-top">
+
+<div class="sf-info">
+
+<a class="st-logo mb-3" href="index.html">
+<img src="images/smarttechappliances.svg" alt="" width="60" height="49">
+<span>SmartTech</span>
+</a>
+
+<p class="sf-blurb">
+Smarter essentials for Filipino homes. Bringing comfort, convenience and a little more ease to every day.
+</p>
+
+<div class="sf-contact">
+<b>LET’S TALK</b>
+<a href="mailto:hello@smarttech.example"><i class="bi bi-envelope"></i>hello@smarttech.example</a>
+<small>Concept store • illustrative contact only</small>
+</div>
+
+</div>
+
+<div class="sf-cols">
+
+<nav>
+<h3>Explore</h3>
+<ul>
+<li><a href="products.php?cat=household">Household</a></li>
+<li><a href="products.php?cat=entertainment">Entertainment</a></li>
+<li><a href="products.php?cat=kitchen">Kitchen</a></li>
+<li><a href="about.html">About Us</a></li>
+</ul>
+</nav>
+
+<nav>
+<h3>Customer care</h3>
+<ul>
+<li><a href="help.html#delivery">Delivery information</a></li>
+<li><a href="help.html#returns">Returns &amp; warranty</a></li>
+<li><a href="help.html#payment">Payment options</a></li>
+<li><a href="help.html#faq">FAQs</a></li>
+</ul>
+</nav>
+
+<nav>
+<h3>Your SmartTech</h3>
+<ul>
+<li><a href="login.php">My account</a></li>
+<li><a href="track.php">Track my order</a></li>
+<li><a href="wishlist.html">My wishlist</a></li>
+<li><a href="about.html#contact">Contact us</a></li>
+</ul>
+</nav>
+
+</div>
+
+</div>
+
+<div class="sf-bottom">
+
+<div class="sf-legal">
+<small>© 2026 SmartTech Appliances. Concept design.</small>
+<small><a href="#">Privacy policy</a> • <a href="#">Terms &amp; conditions</a></small>
+</div>
+
+<div class="sf-pay">
+<small>PAY YOUR WAY</small>
+<ul>
+<li>GCash</li>
+<li>Maya</li>
+<li>COD</li>
+<li>VISA</li>
+</ul>
+</div>
+
+</div>
+
+</div>
+</footer>
+
+<nav class="st-bottomnav d-lg-none">
+<a href="index.html" class="active"><i class="bi bi-house"></i><span>Home</span></a>
+<a href="products.php"><i class="bi bi-shop"></i><span>Shop</span></a>
+<a href="wishlist.html"><i class="bi bi-heart"></i><span>Wishlist</span></a>
+<a href="cart.php"><i class="bi bi-bag"></i><span>Cart</span></a>
+<a href="login.php"><i class="bi bi-person"></i><span>Account</span></a>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="products-data.js"></script>
+<script src="catalog-store.js?v=product-ratings-2"></script>
+<script src="wishlist-api.js?v=account-wishlist-1"></script>
+<script src="main.js?v=account-wishlist-1"></script>
+<script src="search.js?v=search-inline-4"></script>
+<script src="horizontal-scroll-nav.js?v=mobile-scroll-nav-3"></script>
+<script src="back-to-top.js"></script>
+
+</body>
+</html>
