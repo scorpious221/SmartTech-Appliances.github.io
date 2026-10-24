@@ -46,7 +46,7 @@ $currentCategory=in_array($requestedCategory,$categories,true)?$requestedCategor
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-<link href="styles.css?v=product-ratings-2" rel="stylesheet">
+<link href="styles.css?v=mobile-header-search-2" rel="stylesheet">
 <link href="shop.css?v=product-ratings-2" rel="stylesheet">
 </head>
 
@@ -274,8 +274,9 @@ window.INITIAL_CATEGORY=<?php echo json_encode($currentCategory,JSON_UNESCAPED_S
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="products.js?v=product-ratings-2"></script>
-<script src="shop.js?v=product-ratings-2"></script>
-<script src="search.js?v=dynamic-catalog-1"></script>
+<script src="shop.js?v=product-ratings-3"></script>
+<script src="search.js?v=search-inline-4"></script>
+<script src="horizontal-scroll-nav.js?v=mobile-scroll-nav-3"></script>
 <script src="back-to-top.js"></script>
 
 <script>

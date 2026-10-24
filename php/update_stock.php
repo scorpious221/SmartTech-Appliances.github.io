@@ -1,22 +1,19 @@
 <?php
-
 require_once "database.php";
+require_once "admin_media.php";
+requireAdminPost();
 
-if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-    header("Location: ../admin.php");
-    exit;
-}
+$id = filter_var($_POST["id"] ?? null, FILTER_VALIDATE_INT);
+$amount = filter_var($_POST["amount"] ?? null, FILTER_VALIDATE_INT);
 
-$id = (int) ($_POST["id"] ?? 0);
-$amount = (int) ($_POST["amount"] ?? 0);
-
-if ($id <= 0) {
-    die("Invalid product.");
+if ($id === false || $id <= 0 || $amount === false || !in_array($amount, [-1, 1], true)) {
+    http_response_code(400);
+    exit("Invalid stock update.");
 }
 
 $stmt = $conn->prepare("
     UPDATE products
-    SET stock = GREATEST(0, stock + :amount)
+    SET stock = LEAST(100, GREATEST(0, stock + :amount))
     WHERE id = :id
 ");
 

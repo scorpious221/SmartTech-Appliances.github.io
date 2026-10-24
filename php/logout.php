@@ -19,6 +19,7 @@ session_destroy();
 <script>
 sessionStorage.removeItem('st_admin_session');
 localStorage.removeItem('st_session');
+localStorage.removeItem('st_wishlist');
 location.replace(<?php echo json_encode($redirect); ?>);
 </script>
 

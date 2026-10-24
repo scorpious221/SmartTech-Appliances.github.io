@@ -83,6 +83,7 @@ const savedCatalog=()=>{
 };
 
 let databaseCatalog=null;
+let catalogRequest=0;
 const catalog=()=>{
     if(databaseCatalog)return databaseCatalog;
     if(typeof PRODUCTS!=='undefined')return PRODUCTS;
@@ -90,22 +91,31 @@ const catalog=()=>{
     return savedCatalog()||FALLBACK;
 };
 
+function refreshCatalog(){
+    const request=++catalogRequest;
+    return fetch(new URL('php/get_storefront_content.php',scriptUrl),{headers:{Accept:'application/json'}})
+        .then(response=>{
+            if(!response.ok)throw new Error('Product search catalog request failed: '+response.status);
+            return response.json();
+        })
+        .then(content=>{
+            if(!Array.isArray(content.products))throw new Error('Product search catalog response is invalid.');
+            if(request!==catalogRequest)return;
+            databaseCatalog=content.products;
+            if(form.classList.contains('stq-open')&&input.value.trim())render();
+        })
+        .catch(error=>console.error('Unable to refresh the product search catalog.',error));
+}
+
 const css=`
-.stq-btn{background:none;border:0;color:inherit;padding:0;font-size:1.05rem;line-height:1;cursor:pointer;opacity:.9;display:inline-flex;align-items:center}
-.stq-btn:hover{opacity:1}
-.stq-btn svg{width:1em;height:1em}
-.stq-float{position:fixed;top:calc(16px + env(safe-area-inset-top,0px));right:5%;z-index:1500;color:#fff;background:#101a33;border-radius:50%;width:38px;height:38px;justify-content:center}
-.stq-ov{position:fixed;inset:0;z-index:3000;background:rgba(10,14,26,.6);display:none;align-items:flex-start;justify-content:center;padding:10vh 16px 16px}
-.stq-ov.open{display:flex}
-.stq-box{background:#fff;border-radius:14px;width:100%;max-width:540px;padding:16px;box-shadow:0 20px 50px rgba(0,0,0,.3);font-family:"Plus Jakarta Sans",system-ui,sans-serif;color:#1b2033;max-height:78vh;overflow:auto}
-.stq-in{width:100%;font-size:1.1rem;padding:12px 14px;border:1px solid #d5d8e0;border-radius:10px;margin-bottom:8px;outline:none}
-.stq-in:focus{border-color:#c88f2a}
+.st-search{z-index:20}
+.st-search input{cursor:text}
+.stq-res{position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:3000;display:none;max-height:min(60vh,480px);overflow:auto;padding:8px;background:#fff;border:1px solid #e5e0d5;border-radius:14px;box-shadow:0 12px 32px rgba(0,0,0,.2);font-family:"Plus Jakarta Sans",system-ui,sans-serif;color:#1b2033}
+.st-search.stq-open.stq-has-query .stq-res{display:block}
 .stq-hit{display:flex;gap:12px;align-items:center;padding:8px 10px;border-radius:10px;width:100%;border:0;background:none;text-align:left;cursor:pointer;font:inherit;color:inherit}
 .stq-hit:hover,.stq-hit:focus{background:#f7f5f0;outline:none}
 .stq-hit img{width:46px;height:46px;object-fit:contain;background:#f1f2f6;border-radius:8px;padding:4px;flex-shrink:0}
-.stq-hit .stq-t{flex:1;min-width:0}
-.stq-hit small{display:block;color:#6b7280}
-.stq-hit .stq-p{font-weight:700;color:#c88f2a;white-space:nowrap}
+.stq-hit strong{font-size:14px;font-weight:700}
 .stq-none{text-align:center;color:#6b7280;margin:16px 0}
 `;
 
@@ -113,40 +123,32 @@ const style=document.createElement('style');
 style.textContent=css;
 document.head.appendChild(style);
 
-const overlay=document.createElement('div');
+const form=document.querySelector('.st-search');
+const input=form?.querySelector('input');
+window.addEventListener('load',()=>{
+    const id=new URLSearchParams(location.search).get('product');
 
-overlay.className='stq-ov';
-overlay.setAttribute('role','dialog');
-overlay.setAttribute('aria-label','Search products');
+    if(!id||!onProductsPage())return;
 
-overlay.innerHTML=`
-<div class="stq-box">
-<input
-class="stq-in"
-type="search"
-placeholder="Search products (e.g. air fryer, kitchen, TV)"
-autocomplete="off"
->
-<div class="stq-res"></div>
-</div>
-`;
+    const product=PRODUCTS.find(p=>p.id===id);
 
-document.body.appendChild(overlay);
+    if(product){
+        location.replace(PRODUCTS_PAGE+'?id='+encodeURIComponent(product.id));
+    }
+});
 
-const input=overlay.querySelector('.stq-in');
-const res=overlay.querySelector('.stq-res');
+if(!form||!input)return;
+input.readOnly=false;
+input.placeholder='Search products (e.g. air fryer, kitchen, TV)';
+input.autocomplete='off';
 
-fetch(new URL('php/get_storefront_content.php',scriptUrl),{headers:{Accept:'application/json'}})
-    .then(response=>{
-        if(!response.ok)throw new Error('Product search catalog request failed: '+response.status);
-        return response.json();
-    })
-    .then(content=>{
-        if(!Array.isArray(content.products))throw new Error('Product search catalog response is invalid.');
-        databaseCatalog=content.products;
-        if(overlay.classList.contains('open')&&input.value.trim())render();
-    })
-    .catch(error=>console.error('Unable to refresh the product search catalog.',error));
+const res=document.createElement('div');
+res.className='stq-res';
+res.setAttribute('role','listbox');
+res.setAttribute('aria-label','Search results');
+form.appendChild(res);
+
+refreshCatalog();
 
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({
     '&':'&amp;',
@@ -163,6 +165,7 @@ function render(){
         .split(/\s+/)
         .filter(Boolean);
 
+    form.classList.toggle('stq-has-query',tokens.length>0);
     if(!tokens.length){
         res.innerHTML='';
         return;
@@ -186,46 +189,43 @@ function render(){
 
     res.innerHTML=list.map(p=>`
     <button class="stq-hit" data-id="${esc(p.id)}">
-
         <img
         src="${esc(assetUrl(p.img))}"
         alt=""
         onerror="this.style.visibility='hidden'"
         >
-
-        <span class="stq-t">
-
-            <strong>${esc(p.name)}</strong>
-
-            <small>
-                ${esc(CAT[p.category]||p.category)}
-                ·
-                ${esc(p.sub)}
-                ${p.stock==null?'':' · '+p.stock+' stock'}
-            </small>
-
-        </span>
-
-        <span class="stq-p">
-            ₱${Number(p.price).toLocaleString()}
-        </span>
-
+        <strong>${esc(p.name)}</strong>
     </button>
     `).join('');
 }
 
 function open(){
-    overlay.classList.add('open');
-    input.value='';
+    form.classList.add('stq-open');
+    if(window.matchMedia('(max-width: 991.98px)').matches){
+        form.closest('.st-header')?.classList.add('stq-mobile-search-open');
+    }
     render();
+    refreshCatalog();
 
-    setTimeout(()=>{
-        input.focus();
-    },30);
+    const collapse=form.closest('.navbar-collapse');
+    if(collapse&&!collapse.classList.contains('show')){
+        const instance=window.bootstrap&&window.bootstrap.Collapse
+            ?window.bootstrap.Collapse.getOrCreateInstance(collapse)
+            :null;
+        if(instance){
+            collapse.addEventListener('shown.bs.collapse',()=>input.focus(),{once:true});
+            instance.show();
+            return;
+        }
+        collapse.classList.add('show');
+    }
+    if(document.activeElement!==input)input.focus();
 }
 
 function close(){
-    overlay.classList.remove('open');
+    form.classList.remove('stq-open');
+    form.classList.remove('stq-has-query');
+    form.closest('.st-header')?.classList.remove('stq-mobile-search-open');
 }
 
 function showProduct(product){
@@ -250,10 +250,11 @@ function choose(id){
 
 input.addEventListener('input',render);
 
-document.querySelector('.st-search')?.addEventListener('click',event=>{
+form.addEventListener('click',event=>{
     event.preventDefault();
     open();
 });
+form.addEventListener('submit',event=>event.preventDefault());
 
 input.addEventListener('keydown',e=>{
     if(e.key!=='Enter')return;
@@ -273,28 +274,15 @@ res.addEventListener('click',e=>{
     }
 });
 
-overlay.addEventListener('click',e=>{
-    if(e.target===overlay){
-        close();
-    }
-});
-
 document.addEventListener('keydown',e=>{
     if(e.key==='Escape'){
         close();
     }
 });
-
-window.addEventListener('load',()=>{
-    const id=new URLSearchParams(location.search).get('product');
-
-    if(!id||!onProductsPage())return;
-
-    const product=PRODUCTS.find(p=>p.id===id);
-
-    if(product){
-        location.replace(PRODUCTS_PAGE+'?id='+encodeURIComponent(product.id));
-    }
+document.addEventListener('click',e=>{
+    if(!form.contains(e.target)&&
+        !e.target.closest('.stq-btn')&&
+        !e.target.closest('.st-header button[aria-label="Search"]'))close();
 });
 
 const button=document.createElement('button');

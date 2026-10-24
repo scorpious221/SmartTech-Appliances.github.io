@@ -454,14 +454,5 @@ $(function(){
         $('#toast').removeClass('show');
     });
 
-    const openSearch=()=>{
-        const button=document.querySelector('.stq-btn');
-        if(button)button.click();
-    };
-
-    $('.st-search input').on('click keydown',function(e){
-        if(e.type==='click'||e.key==='Enter')openSearch();
-    });
-
 });
 })();

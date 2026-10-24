@@ -338,7 +338,7 @@ function renderProducts(){
                 <div class="ad-stock-control">
                     <button type="button" data-stock="-1">−</button>
                     <span>${p.stock}</span>
-                    <button type="button" data-stock="1">+</button>
+                    <button type="button" data-stock="1" ${Number(p.stock)>=100?'disabled':''}>+</button>
                 </div>
             </td>
 
@@ -433,6 +433,9 @@ function openProduct(product){
     $('#pOnSale').prop('checked',Boolean(product&&product.salePrice!==null));
     $('#pSalePrice').prop('disabled',!(product&&product.salePrice!==null));
     $('#pBestseller').prop('checked',Boolean(product&&product.isBestseller));
+    $('.ad-label-chip').each(function(){
+        $(this).toggleClass('is-checked',$(this).find('input').is(':checked'));
+    });
     $('#pStock').val(product?product.stock:10);
     $('#pImage').val('');
     $('#pCategory').val(product?product.category:'household');
@@ -896,8 +899,13 @@ $('#addProduct').on('click',function(){
 
 $('#pOnSale').on('change',function(){
     const enabled=$(this).is(':checked');
+    $(this).closest('.ad-label-chip').toggleClass('is-checked',enabled);
     $('#pSalePrice').prop('disabled',!enabled);
     if(!enabled)$('#pSalePrice').val('');
+});
+
+$('#pBestseller').on('change',function(){
+    $(this).closest('.ad-label-chip').toggleClass('is-checked',$(this).is(':checked'));
 });
 
 $('#pCategory').on('change',function(){
@@ -957,16 +965,18 @@ $('#productForm').on('submit',function(e){
         !sub||
         !Number.isFinite(price)||
         price<=0||
-        (onSale&&(!Number.isFinite(salePrice)||salePrice<=0||salePrice>=price))||
+        price>999999||
+        (onSale&&(!Number.isFinite(salePrice)||salePrice<=0||salePrice>999999||salePrice>=price))||
         !Number.isFinite(stock)||
-        stock<0
+        stock<0||
+        stock>100
     ){
         e.preventDefault();
 
         $('#formMsg')
             .removeClass('ok')
             .addClass('err')
-            .text('Complete the product details and choose a main image for new products. Sale price must be greater than zero and lower than the regular price.');
+            .text('Complete the product details and choose a main image for new products. Price must not exceed ₱999,999; stock must be between 0 and 100. Sale price must be greater than zero and lower than the regular price.');
 
         return;
     }

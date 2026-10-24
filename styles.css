@@ -107,6 +107,16 @@ a{color:inherit} img{max-width:100%;height:auto}
 .st-prev,.st-next{position:absolute;top:40%;z-index:2;display:grid;place-items:center;width:56px;height:56px;border-radius:50%;border:0;background:var(--st-cream);box-shadow:0 8px 24px rgba(15,42,36,.2);font-size:22px}
 .st-prev{left:-12px}.st-next{right:-12px}
 .st-prev:disabled,.st-next:disabled{opacity:.45;cursor:default}
+.st-mobile-rail-wrap{position:relative}
+.st-mobile-rail-arrow{position:absolute;top:50%;z-index:3;display:none;place-items:center;width:40px;height:40px;border:0;border-radius:50%;background:var(--st-cream);color:var(--st-ink);box-shadow:0 6px 18px rgba(15,42,36,.22);transform:translateY(-50%)}
+.st-mobile-rail-arrow[hidden]{display:none!important}
+.st-mobile-rail-prev{left:8px}
+.st-mobile-rail-next{right:8px}
+.st-mobile-rail-arrow:disabled{opacity:.45}
+@media(max-width:991.98px){
+  .cat-tabs::after,.subcats::after,.ab-seg::after,.ad-nav:not(.ad-logout)::after{content:"";flex:0 0 var(--scroll-nav-end-space,0px)}
+  .st-mobile-rail-arrow{display:grid}
+}
 
 /* deal */
 .st-deal-img{position:relative;border-radius:20px;overflow:hidden;aspect-ratio:520/430;background:#18403a}.st-deal-img img{width:100%;height:100%;object-fit:cover}
@@ -149,7 +159,7 @@ a{color:inherit} img{max-width:100%;height:auto}
 .st-muted-text{color:var(--st-mist);font-size:13px;line-height:1.6}.st-footer hr{border-color:var(--st-line);opacity:1}
 .st-pay{padding:6px 9px;border:1px solid var(--st-line);border-radius:6px;font-size:9px;font-weight:700}
 
-@media(max-width:991.98px){.st-tile,.st-tile.wide{grid-column:span 6}.st-prev,.st-next{display:none}.st-float-1{top:auto;bottom:110px}.st-newsletter{padding:32px 24px}}
+@media(max-width:991.98px){.st-tile,.st-tile.wide{grid-column:span 6}.st-float-1{top:auto;bottom:110px}.st-newsletter{padding:32px 24px}}
 @media(max-width:575.98px){.st-tile,.st-tile.wide{grid-column:span 12}.st-section{padding:64px 0}.st-cd{width:62px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 
@@ -254,6 +264,11 @@ a{color:inherit} img{max-width:100%;height:auto}
 /* Header sa mobile: walang side padding sa home (nasa shop.css lang ito dati) */
 @media(max-width:991.98px){
   .st-header .navbar{padding-left:14px;padding-right:14px}
+  .st-header .navbar-toggler{display:none}
+  .st-header .navbar-collapse{display:block!important;flex-basis:100%;width:100%}
+  .st-header .navbar-collapse .navbar-nav{display:none!important}
+  .st-header .navbar-collapse .st-search{display:none;width:100%;max-width:none;margin:8px 0!important}
+  .st-header.stq-mobile-search-open .navbar-collapse .st-search{display:block}
   /* Siguraduhing laging nakikita ang bottom nav sa mobile */
   .st-bottomnav{display:flex!important;position:fixed!important;left:0;right:0;bottom:0}
 }

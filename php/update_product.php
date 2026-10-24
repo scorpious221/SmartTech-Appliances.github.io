@@ -14,9 +14,9 @@ $subcategory=trim($_POST["subcategory"]??"");
 $description=trim($_POST["description"]??"");
 $stock=filter_var($_POST["stock"]??null,FILTER_VALIDATE_INT);
 
-if($id===false||$id<=0||$name===""||$price===false||$price<=0||($onSale&&($salePrice===false||$salePrice<=0||$salePrice>=$price))||$category===""||$subcategory===""||$stock===false||$stock<0){
+if($id===false||$id<=0||$name===""||$price===false||$price<=0||$price>999999||($onSale&&($salePrice===false||$salePrice<=0||$salePrice>999999||$salePrice>=$price))||$category===""||$subcategory===""||$stock===false||$stock<0||$stock>100){
     http_response_code(400);
-    exit("Invalid product information.");
+    exit("Invalid product information. Product prices must not exceed 999,999, and stock must be between 0 and 100.");
 }
 
 $stmt=$conn->prepare("SELECT image FROM products WHERE id=?");

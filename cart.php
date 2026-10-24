@@ -50,7 +50,7 @@ if($loggedIn){
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
-<link href="styles.css" rel="stylesheet">
+<link href="styles.css?v=mobile-header-search-2" rel="stylesheet">
 <link href="shop.css" rel="stylesheet">
 <link href="pages.css?v=mobile-gutters-2" rel="stylesheet">
 
@@ -167,7 +167,7 @@ window.DB_ADDRESSES=<?php echo json_encode($savedAddresses,JSON_UNESCAPED_SLASHE
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const peso=n=>'₱'+Number(n||0).toLocaleString('en-PH');
-const FREE=3000,SHIP=150;
+const FREE=3000,SHIP=150,MAX_ITEM_QUANTITY=100;
 const products=Array.isArray(window.DB_PRODUCTS)?window.DB_PRODUCTS:[];
 const bundles=Array.isArray(window.DB_BUNDLES)?window.DB_BUNDLES:[];
 const addressBook=Array.isArray(window.DB_ADDRESSES)?window.DB_ADDRESSES:[];
@@ -194,7 +194,7 @@ cart=cart.map(i=>{
         name:p.name,
         price:p.price,
         img:p.img,
-        qty:Math.min(Math.max(1,Number(i.qty||1)),p.stock)
+        qty:Math.min(MAX_ITEM_QUANTITY,p.stock,Math.max(1,Number(i.qty||1)))
     };
 }).filter(Boolean);
 
@@ -254,6 +254,10 @@ function canFulfill(list){
 
         if(p.stock<=0){
             return{ok:false,reason:item.name+' is out of stock.'};
+        }
+
+        if(item.qty>MAX_ITEM_QUANTITY){
+            return{ok:false,reason:'You can checkout up to '+MAX_ITEM_QUANTITY+' units per product.'};
         }
 
         if(item.qty>p.stock){
@@ -361,6 +365,7 @@ function drawCart(){
     ${cart.map(i=>{
         const p=find(i.id);
         const stock=p?p.stock:0;
+        const maxQty=Math.min(MAX_ITEM_QUANTITY,stock);
 
         return`
         <div class="ct-card ct-row" data-id="${esc(i.id)}">
@@ -379,7 +384,7 @@ function drawCart(){
             <div class="qty-controls" style="width:max-content">
                 <button type="button" data-act="minus">−</button>
                 <span style="min-width:28px;text-align:center">${i.qty}</span>
-                <button type="button" data-act="plus" ${i.qty>=stock?'disabled':''}>+</button>
+                <button type="button" data-act="plus" ${i.qty>=maxQty?'disabled':''}>+</button>
             </div>
 
             <span class="ct-total">${peso(i.price*i.qty)}</span>
@@ -501,8 +506,8 @@ function drawCheck(){
                         <small>${activeBundle?'Bundle item':`${peso(i.price)} each`}</small>
                         <div class="ck-qty" aria-label="Quantity for ${esc(i.name)}">
                             <button type="button" data-check-act="minus" data-id="${esc(i.id)}" aria-label="Decrease ${esc(i.name)} quantity">−</button>
-                            <input class="ck-qty-input" type="number" min="1" max="${product?product.stock:i.qty}" step="1" value="${i.qty}" data-id="${esc(i.id)}" aria-label="Quantity for ${esc(i.name)}">
-                            <button type="button" data-check-act="plus" data-id="${esc(i.id)}" aria-label="Increase ${esc(i.name)} quantity" ${product&&i.qty>=product.stock?'disabled':''}>+</button>
+                            <input class="ck-qty-input" type="number" min="1" max="${product?Math.min(MAX_ITEM_QUANTITY,product.stock):i.qty}" step="1" value="${i.qty}" data-id="${esc(i.id)}" aria-label="Quantity for ${esc(i.name)}">
+                            <button type="button" data-check-act="plus" data-id="${esc(i.id)}" aria-label="Increase ${esc(i.name)} quantity" ${product&&i.qty>=Math.min(MAX_ITEM_QUANTITY,product.stock)?'disabled':''}>+</button>
                         </div>
                     </div>
 
@@ -773,7 +778,7 @@ document.addEventListener('click',e=>{
         const product=item?find(item.id):null;
         if(!item||!product)return;
         if(b.dataset.checkAct==='plus'){
-            if(item.qty>=product.stock)return;
+            if(item.qty>=Math.min(MAX_ITEM_QUANTITY,product.stock))return;
             item.qty++;
         }else if(b.dataset.checkAct==='minus'){
             item.qty=Math.max(1,item.qty-1);
@@ -792,7 +797,7 @@ document.addEventListener('click',e=>{
 
     if(action==='plus'&&item){
         const p=find(id);
-        const max=p?Number(p.stock):0;
+        const max=p?Math.min(MAX_ITEM_QUANTITY,Number(p.stock)):0;
 
         if(item.qty>=max){
             alert(`Only ${max} stock available for ${item.name}.`);
@@ -844,7 +849,7 @@ document.addEventListener('change',e=>{
         const item=cart.find(cartItem=>cartItem.id===t.dataset.id);
         const product=item?find(item.id):null;
         if(!item||!product)return;
-        item.qty=Math.min(product.stock,Math.max(1,Math.floor(Number(t.value)||1)));
+        item.qty=Math.min(MAX_ITEM_QUANTITY,product.stock,Math.max(1,Math.floor(Number(t.value)||1)));
         save();
         refreshCheckoutQuantities();
         return;
@@ -929,8 +934,8 @@ function refreshCheckoutQuantities(){
                     <small>${activeBundle?'Bundle item':`${peso(i.price)} each`}</small>
                     <div class="ck-qty" aria-label="Quantity for ${esc(i.name)}">
                         <button type="button" data-check-act="minus" data-id="${esc(i.id)}" aria-label="Decrease ${esc(i.name)} quantity">−</button>
-                        <input class="ck-qty-input" type="number" min="1" max="${product?product.stock:i.qty}" step="1" value="${i.qty}" data-id="${esc(i.id)}" aria-label="Quantity for ${esc(i.name)}">
-                        <button type="button" data-check-act="plus" data-id="${esc(i.id)}" aria-label="Increase ${esc(i.name)} quantity" ${product&&i.qty>=product.stock?'disabled':''}>+</button>
+                        <input class="ck-qty-input" type="number" min="1" max="${product?Math.min(MAX_ITEM_QUANTITY,product.stock):i.qty}" step="1" value="${i.qty}" data-id="${esc(i.id)}" aria-label="Quantity for ${esc(i.name)}">
+                        <button type="button" data-check-act="plus" data-id="${esc(i.id)}" aria-label="Increase ${esc(i.name)} quantity" ${product&&i.qty>=Math.min(MAX_ITEM_QUANTITY,product.stock)?'disabled':''}>+</button>
                     </div>
                 </div>
                 <span>${activeBundle?'Included':peso(i.price*i.qty)}</span>
@@ -956,7 +961,7 @@ function refreshCheckoutQuantities(){
 })();
 </script>
 
-<script src="search.js?v=dynamic-catalog-1"></script>
+<script src="search.js?v=search-inline-4"></script>
 
 </body>
 </html>

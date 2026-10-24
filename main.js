@@ -1,4 +1,5 @@
 const IMG='images/';
+const MAX_ITEM_QUANTITY=100;
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
@@ -191,8 +192,8 @@ document.querySelector('#bundles')?.addEventListener('click',event=>{
     }
     for(const product of bundleProducts){
         const existing=cart.find(item=>item.id===product.id);
-        if(Number(existing?.qty||0)>=product.stock){
-            alert(`Only ${product.stock} stock available for ${product.n}.`);
+        if(Number(existing?.qty||0)>=Math.min(MAX_ITEM_QUANTITY,product.stock)){
+            alert(`You can add up to ${Math.min(MAX_ITEM_QUANTITY,product.stock)} units of ${product.n}.`);
             return;
         }
     }
@@ -369,13 +370,32 @@ function card(p){
 }
 
 function updateRailControls(){
-    const rail=$('#rail');
-    if(!rail)return;
+    updateCarouselControls($('#rail'),$('#railPrev'),$('#railNext'));
+}
+
+function updateCarouselControls(rail,previous,next){
+    if(!rail||!previous||!next)return;
     const maxScroll=rail.scrollWidth-rail.clientWidth;
-    const previous=$('#railPrev');
-    const next=$('#railNext');
-    if(previous)previous.disabled=rail.scrollLeft<=1;
-    if(next)next.disabled=maxScroll<=1||rail.scrollLeft>=maxScroll-1;
+    const hasOverflow=maxScroll>1;
+    previous.hidden=next.hidden=!hasOverflow;
+    previous.disabled=rail.scrollLeft<=1;
+    next.disabled=!hasOverflow||rail.scrollLeft>=maxScroll-1;
+}
+
+function setupCarouselArrows(rail,previous,next){
+    if(!rail||!previous||!next)return;
+    const update=()=>updateCarouselControls(rail,previous,next);
+    const scroll=direction=>{
+        const first=rail.firstElementChild;
+        const gap=parseFloat(getComputedStyle(rail).columnGap)||14;
+        const amount=first?first.getBoundingClientRect().width+gap:rail.clientWidth*.8;
+        rail.scrollBy({left:direction*amount,behavior:'auto'});
+    };
+    previous.addEventListener('click',()=>scroll(-1));
+    next.addEventListener('click',()=>scroll(1));
+    rail.addEventListener('scroll',()=>requestAnimationFrame(update),{passive:true});
+    new MutationObserver(update).observe(rail,{childList:true});
+    update();
 }
 
 document.addEventListener('click',event=>{
@@ -460,8 +480,8 @@ function cartAdd(id){
     const item=cart.find(x=>x.id===id);
     const qty=item?Number(item.qty||1):0;
 
-    if(qty>=p.stock){
-        alert(`Only ${p.stock} stock available for ${p.n}.`);
+    if(qty>=Math.min(MAX_ITEM_QUANTITY,p.stock)){
+        alert(`You can add up to ${Math.min(MAX_ITEM_QUANTITY,p.stock)} units of ${p.n}.`);
         return false;
     }
 
@@ -533,14 +553,18 @@ $('#rail')?.addEventListener('click',e=>{
 
 cartCount();
 
-$('#railPrev')?.addEventListener('click',()=>{
-    $('#rail')?.scrollBy({left:-306,behavior:'smooth'});
+const bentoRail=$('#bento');
+const bentoRailWrap=bentoRail?.parentElement;
+const bundlesRail=$('#bundles');
+const bundlesRailWrap=bundlesRail?.parentElement;
+setupCarouselArrows(bentoRail,bentoRailWrap?.querySelector('.st-mobile-rail-prev'),bentoRailWrap?.querySelector('.st-mobile-rail-next'));
+setupCarouselArrows(bundlesRail,bundlesRailWrap?.querySelector('.st-mobile-rail-prev'),bundlesRailWrap?.querySelector('.st-mobile-rail-next'));
+setupCarouselArrows($('#rail'),$('#railPrev'),$('#railNext'));
+window.addEventListener('resize',()=>{
+    updateCarouselControls(bentoRail,bentoRailWrap?.querySelector('.st-mobile-rail-prev'),bentoRailWrap?.querySelector('.st-mobile-rail-next'));
+    updateCarouselControls(bundlesRail,bundlesRailWrap?.querySelector('.st-mobile-rail-prev'),bundlesRailWrap?.querySelector('.st-mobile-rail-next'));
+    updateRailControls();
 });
-$('#railNext')?.addEventListener('click',()=>{
-    $('#rail')?.scrollBy({left:306,behavior:'smooth'});
-});
-$('#rail')?.addEventListener('scroll',()=>requestAnimationFrame(updateRailControls),{passive:true});
-window.addEventListener('resize',updateRailControls);
 
 renderProducts('best');
 
@@ -598,10 +622,6 @@ fetch('php/get_storefront_content.php',{headers:{Accept:'application/json'}})
         }
     })
     .catch(error=>console.error('Unable to load the latest storefront content.',error));
-
-document.querySelector('.st-search input')?.addEventListener('click',()=>{
-    document.querySelector('.stq-btn')?.click();
-});
 
 const demoDialog=$('#demoDialog');
 const demoVideo=demoDialog?.querySelector('video');

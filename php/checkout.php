@@ -133,6 +133,10 @@ try{
             throw new Exception($product["name"]." is out of stock.");
         }
 
+        if($quantity>100){
+            throw new Exception("You can checkout up to 100 units per product. Please update the quantity for ".$product["name"].".");
+        }
+
         if($quantity>$stock){
             throw new Exception("Only ".$stock." stock available for ".$product["name"].".");
         }

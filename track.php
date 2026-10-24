@@ -53,7 +53,7 @@ function peso($value){
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
-<link href="styles.css" rel="stylesheet">
+<link href="styles.css?v=mobile-header-search-2" rel="stylesheet">
 <link href="shop.css" rel="stylesheet">
 <link href="pages.css?v=mobile-gutters-2" rel="stylesheet">
 
@@ -223,7 +223,7 @@ Shop now
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="layout.js?v=20261017"></script>
-<script src="search.js?v=dynamic-catalog-1"></script>
+<script src="search.js?v=search-inline-4"></script>
 
 </body>
 </html>

@@ -6,6 +6,7 @@ function needLogin(){
 }
 
 const FREE_SHIP_MIN=3000;
+const MAX_ITEM_QUANTITY=100;
 const shippingFor=subtotal=>subtotal>=FREE_SHIP_MIN?0:150;
 let currentCategory=window.INITIAL_CATEGORY||'household';
 let currentSubcat=null;
@@ -181,8 +182,10 @@ function addToCart(id){
     const index=cart.findIndex(item=>item.id===id);
     const current=index>-1?Number(cart[index].qty||1):0;
 
-    if(current>=stock){
-        alert('Only '+stock+' stock available for '+product.name+'.');
+    const maxQuantity=Math.min(MAX_ITEM_QUANTITY,stock);
+
+    if(current>=maxQuantity){
+        alert('You can add up to '+maxQuantity+' units of '+product.name+'.');
         return false;
     }
 
@@ -233,8 +236,8 @@ function buyNow(id){
         });
 
         saveCart();
-    }else if(Number(existing.qty||1)>stock){
-        existing.qty=stock;
+    }else if(Number(existing.qty||1)>Math.min(MAX_ITEM_QUANTITY,stock)){
+        existing.qty=Math.min(MAX_ITEM_QUANTITY,stock);
         saveCart();
     }
 
@@ -267,8 +270,9 @@ function renderCart(){
         const product=findProduct(item.id);
         const stock=product?Number(product.stock||0):0;
 
-        if(stock>0&&item.qty>stock){
-            item.qty=stock;
+        const maxQuantity=Math.min(MAX_ITEM_QUANTITY,stock);
+        if(stock>0&&item.qty>maxQuantity){
+            item.qty=maxQuantity;
         }
 
         total+=item.price*item.qty;
@@ -296,7 +300,7 @@ function renderCart(){
                         ${item.qty}
                     </span>
 
-                    <button class="qty-plus" data-index="${index}" ${item.qty>=stock?'disabled':''}>
+                    <button class="qty-plus" data-index="${index}" ${item.qty>=Math.min(MAX_ITEM_QUANTITY,stock)?'disabled':''}>
                         +
                     </button>
                 </div>
@@ -332,8 +336,9 @@ function changeQty(index,amount){
     const stock=Number(product.stock||0);
     const next=Math.max(1,Number(item.qty||1)+amount);
 
-    if(next>stock){
-        alert('Only '+stock+' stock available for '+product.name+'.');
+    const maxQuantity=Math.min(MAX_ITEM_QUANTITY,stock);
+    if(next>maxQuantity){
+        alert('You can add up to '+maxQuantity+' units of '+product.name+'.');
         return;
     }
 

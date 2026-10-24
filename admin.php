@@ -173,10 +173,10 @@ $dbAppFeedback=$stmt->fetchAll(PDO::FETCH_ASSOC);
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
-<link href="styles.css" rel="stylesheet">
+<link href="styles.css?v=mobile-scroll-nav-2" rel="stylesheet">
 <link href="shop.css" rel="stylesheet">
 <link href="pages.css?v=mobile-gutters-2" rel="stylesheet">
-<link href="admin.css?v=bundle-layout-2" rel="stylesheet">
+<link href="admin.css?v=bundle-layout-6" rel="stylesheet">
 </head>
 
 <body class="admin-page">
@@ -552,32 +552,33 @@ Product name
 
 <label class="field">
 Price
-<input class="form-control" id="pPrice" name="price" type="number" min="0" step="0.01" placeholder="e.g. 2599.00" required>
+<input class="form-control" id="pPrice" name="price" type="number" min="0.01" max="999999" step="0.01" placeholder="e.g. 2599.00" required>
 </label>
 
 <label class="field">
 Sale price
-<input class="form-control" id="pSalePrice" name="sale_price" type="number" min="0.01" step="0.01" placeholder="e.g. 2299.00" disabled>
-<small class="ad-note">Leave Sale unchecked for the regular price. Sale price must be lower than the regular price.</small>
+<input class="form-control" id="pSalePrice" name="sale_price" type="number" min="0.01" max="999999" step="0.01" placeholder="e.g. 2299.00" disabled>
+<small class="ad-note">Max ₱999,999; must be below regular price.</small>
 </label>
 
-<label class="field">
-Product labels
-<span class="d-flex flex-wrap gap-3 mt-2">
-<span><input id="pOnSale" name="on_sale" type="checkbox" value="1"> <span>On Sale</span></span>
-<span><input id="pBestseller" name="is_bestseller" type="checkbox" value="1"> <span>Bestseller</span></span>
-</span>
-</label>
+<div class="field ad-product-labels">
+<span class="ad-field-heading">Product labels</span>
+<div class="ad-label-options">
+<label class="ad-label-chip" for="pOnSale"><input id="pOnSale" name="on_sale" type="checkbox" value="1"><span>On Sale</span></label>
+<label class="ad-label-chip" for="pBestseller"><input id="pBestseller" name="is_bestseller" type="checkbox" value="1"><span>Bestseller</span></label>
+</div>
+</div>
 
 <label class="field">
 Stock quantity
-<input class="form-control" id="pStock" name="stock" type="number" min="0" step="1" placeholder="e.g. 10" required>
+<input class="form-control" id="pStock" name="stock" type="number" min="0" max="100" step="1" placeholder="e.g. 10" required>
+<small class="ad-note">Maximum 100 units per product.</small>
 </label>
 
-<label class="field full">
+<label class="field">
 Main product image
 <input class="form-control" id="pImage" name="primary_image" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
-<small class="ad-note">Upload JPG, PNG, WebP, or GIF. Images may be up to 8 MB. When editing, leave blank to keep the current main image.</small>
+<small class="ad-note">JPG, PNG, WebP, or GIF · Max 8 MB. Leave blank to keep the current image.</small>
 </label>
 
 <div class="field full" id="existingProductMedia"></div>
@@ -658,7 +659,8 @@ window.ADMIN_CSRF_TOKEN=<?php echo json_encode($adminCsrfToken); ?>;
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="admin.js?v=admin-order-cancellation-1"></script>
+<script src="admin.js?v=admin-product-price-limit-1"></script>
+<script src="horizontal-scroll-nav.js?v=mobile-scroll-nav-4"></script>
 
 </body>
 </html>

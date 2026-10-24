@@ -27,8 +27,4 @@
   window.stCartCount = count; count();
   window.addEventListener('storage', count);
 
-  // Ang search pill ay nagbubukas ng overlay ng search.js
-  const openSearch = () => { const b = document.querySelector('.stq-btn'); if (b) b.click(); };
-  document.addEventListener('click', (e) => { if (e.target.closest('.st-search')) openSearch(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.closest && e.target.closest('.st-search')) openSearch(); });
 })();

@@ -380,7 +380,7 @@ function peso($v){
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
-<link href="../styles.css" rel="stylesheet">
+<link href="../styles.css?v=mobile-header-search-2" rel="stylesheet">
 <link href="../shop.css" rel="stylesheet">
 <link href="../pages.css?v=mobile-gutters-2" rel="stylesheet">
 
@@ -841,15 +841,22 @@ Barangay <?php echo e($savedAddress["barangay"]); ?>, <?php echo e($savedAddress
 <label class="field">House / street / unit
 <input name="address_line" id="addressLine" autocomplete="street-address" required>
 </label>
-<label class="field">Barangay
-<input name="barangay" id="addressBarangay" required>
+<label class="field">Province
+<select name="province" id="addressProvince" required>
+<option value="">Loading provinces...</option>
+</select>
 </label>
 <label class="field">City / municipality
-<input name="city" id="addressCity" required>
+<select name="city" id="addressCity" required disabled>
+<option value="">Select a province first</option>
+</select>
 </label>
-<label class="field">Province
-<input name="province" id="addressProvince" required>
+<label class="field">Barangay
+<select name="barangay" id="addressBarangay" required disabled>
+<option value="">Select a city / municipality first</option>
+</select>
 </label>
+<p class="msg full" id="addressLocationStatus" role="status" aria-live="polite">Loading Philippine locations...</p>
 <label class="field">Postal code
 <input name="postal_code" id="postalCode" inputmode="numeric" autocomplete="postal-code" required>
 </label>
@@ -1129,6 +1136,7 @@ Submitting a request does not delete your account immediately. The team will rev
 </a>
 </nav>
 
+<script src="../address-selector.js?v=ph-address-dropdowns-2"></script>
 <script>
 document.getElementById('profileImageInput').addEventListener('change',function(){
     if(this.files.length){
@@ -1251,16 +1259,14 @@ document.querySelectorAll('.account-cancel').forEach(details=>{
 });
 
 document.querySelectorAll('[data-edit-address]').forEach(button=>{
-    button.addEventListener('click',()=>{
+    button.addEventListener('click',async()=>{
         const address=JSON.parse(button.dataset.editAddress);
         document.getElementById('addressId').value=address.id;
         document.getElementById('addressLabel').value=address.label;
         document.getElementById('recipientName').value=address.recipient_name;
         document.getElementById('addressPhone').value=address.phone;
         document.getElementById('addressLine').value=address.address_line;
-        document.getElementById('addressBarangay').value=address.barangay;
-        document.getElementById('addressCity').value=address.city;
-        document.getElementById('addressProvince').value=address.province;
+        await window.setDeliveryAddressLocation(address);
         document.getElementById('postalCode').value=address.postal_code;
         document.querySelector('#addressForm [name="is_default"]').checked=Number(address.is_default)===1;
         document.getElementById('addressFormTitle').textContent='Edit delivery address';
@@ -1273,13 +1279,14 @@ document.querySelectorAll('[data-edit-address]').forEach(button=>{
 document.getElementById('cancelAddressEdit').addEventListener('click',()=>{
     const form=document.getElementById('addressForm');
     form.reset();
+    window.clearDeliveryAddressLocation();
     document.getElementById('addressId').value='';
     document.getElementById('addressFormTitle').textContent='Add a delivery address';
     form.querySelector('button[type="submit"]').textContent='Save address';
     document.getElementById('cancelAddressEdit').hidden=true;
 });
 </script>
-<script src="../search.js?v=dynamic-catalog-1"></script>
+<script src="../search.js?v=search-inline-4"></script>
 <script src="../back-to-top.js"></script>
 
 </body>

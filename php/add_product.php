@@ -14,9 +14,9 @@ $subcategory=trim($_POST["subcategory"]??"");
 $description=trim($_POST["description"]??"");
 $stock=filter_var($_POST["stock"]??null,FILTER_VALIDATE_INT);
 
-if($productCode===""||strlen($productCode)>100||$name===""||$price===false||$price<=0||($onSale&&($salePrice===false||$salePrice<=0||$salePrice>=$price))||$category===""||$subcategory===""||$stock===false||$stock<0){
+if($productCode===""||strlen($productCode)>100||$name===""||$price===false||$price<=0||$price>999999||($onSale&&($salePrice===false||$salePrice<=0||$salePrice>999999||$salePrice>=$price))||$category===""||$subcategory===""||$stock===false||$stock<0||$stock>100){
     http_response_code(400);
-    exit("Please provide a valid product name, price, category, subcategory, and stock quantity.");
+    exit("Please provide valid product details. Product prices must not exceed 999,999, and stock must be between 0 and 100.");
 }
 
 $primary=saveAdminUpload($_FILES["primary_image"]??[]);

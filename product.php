@@ -186,7 +186,7 @@ $storeCategories=$conn->query("SELECT DISTINCT category FROM products WHERE cate
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-<link href="styles.css" rel="stylesheet">
+<link href="styles.css?v=mobile-header-search-2" rel="stylesheet">
 <link href="shop.css?v=product-ratings-2" rel="stylesheet">
 <style>
 .pd-wrap{max-width:1180px;margin:auto;padding:36px 24px 90px}
@@ -457,6 +457,7 @@ if(cartCount){
 }
 function detailCart(buy){
     if(!PRODUCT)return;
+    const maxQuantity=Math.min(100,Number(PRODUCT.stock)||0);
     let items=[];
     try{
         items=JSON.parse(localStorage.getItem('st_cart')||'[]');
@@ -467,7 +468,7 @@ function detailCart(buy){
     }
     const existing=items.find(item=>item.id===PRODUCT.id);
     if(existing){
-        if(Number(existing.qty||1)>=PRODUCT.stock){alert(`Only ${PRODUCT.stock} stock available.`);return}
+        if(Number(existing.qty||1)>=maxQuantity){alert(`You can add up to ${maxQuantity} units of this product.`);return}
         existing.qty=Number(existing.qty||1)+1;
     }else{
         items.push({id:PRODUCT.id,name:PRODUCT.name,price:PRODUCT.price,img:PRODUCT.img,qty:1});
@@ -490,7 +491,7 @@ function detailCart(buy){
 document.querySelector('[data-detail-add]')?.addEventListener('click',()=>detailCart(false));
 document.querySelector('[data-detail-buy]')?.addEventListener('click',()=>detailCart(true));
 </script>
-<script src="search.js?v=dynamic-catalog-1"></script>
+<script src="search.js?v=search-inline-4"></script>
 <script src="back-to-top.js"></script>
 </body>
 </html>
